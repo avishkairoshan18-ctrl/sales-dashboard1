@@ -107,15 +107,25 @@
       background: #1e293b;
       border: 1px solid var(--border-color);
       color: white;
-      padding: 6px 12px;
+      padding: 8px 12px;
       border-radius: 6px;
       font-size: 0.85rem;
+      outline: none;
+    }
+    .select-box optgroup {
+      background: #1e293b;
+      color: var(--accent-blue);
+      font-weight: bold;
+    }
+    .select-box option {
+      background: #090d16;
+      color: white;
     }
     .logout-btn {
       background: #ef4444;
       color: white;
       border: none;
-      padding: 6px 12px;
+      padding: 8px 14px;
       border-radius: 6px;
       font-weight: 600;
       font-size: 0.85rem;
@@ -224,9 +234,7 @@
     <div class="dashboard-layout">
       <div class="chart-card">
         <div class="chart-header">
-          <div>
-            <div class="chart-title">Hit Rate Trend (%)</div>
-          </div>
+          <div class="chart-title">Hit Rate Trend (%)</div>
         </div>
         <div class="canvas-container">
           <canvas id="trendChart"></canvas>
@@ -234,7 +242,7 @@
       </div>
       <div class="chart-card">
         <div class="chart-header">
-          <div><div class="chart-title">Hit Rate by SE (%)</div></div>
+          <div class="chart-title">Hit Rate by SE (%)</div>
         </div>
         <div class="canvas-container">
           <canvas id="rankChart"></canvas>
@@ -283,12 +291,14 @@
       let globalRawData = [];
       let ehTeamData = null;
       let dateColumns = [];
-      let trendChartInstance = null, rankChartInstance = null, volumeChartInstance = null;
+      let rankChartInstance = null, volumeChartInstance = null;
 
       const loginScreen = document.getElementById('loginScreen');
       const dashboardContent = document.getElementById('dashboardContent');
       const loginForm = document.getElementById('loginForm');
       const logoutBtn = document.getElementById('logoutBtn');
+      const asmFilter = document.getElementById('asmFilter');
+      const seFilter = document.getElementById('seFilter');
 
       function init() {
         if (localStorage.getItem('isLoggedIn') === 'true') {
@@ -318,6 +328,15 @@
         init();
       });
 
+      asmFilter.addEventListener('change', function () {
+        populateSeDropdown();
+        renderUI();
+      });
+
+      seFilter.addEventListener('change', function () {
+        renderUI();
+      });
+
       async function loadData() {
         try {
           const response = await fetch(SHEET_CSV_URL);
@@ -333,13 +352,11 @@
         } catch (err) {
           document.getElementById('syncStatus').innerText = 'OFFLINE MODE';
           document.getElementById('syncStatus').style.background = '#f59e0b';
-          // Fallback static structure so dashboard displays offline
           parseData([
-            ["SE", "Active", "Visited", "01-Aug", "02-Aug"],
-            ["HMD", "120", "90", "70%", "75%"],
-            ["RSD", "100", "80", "60%", "80%"],
-            ["MZR", "110", "95", "80%", "86%"],
-            ["EH", "330", "265", "70%", "80%"]
+            ["SE", "Active", "Visited"],
+            ["HMD", "120", "90"], ["RSD", "100", "80"], ["FZN", "110", "70"],
+            ["RKZ", "95", "65"],  ["RFD", "105", "85"], ["MZR", "115", "95"],
+            ["AMT", "130", "100"], ["DNT", "90", "75"], ["EH", "865", "660"]
           ]);
         }
       }
@@ -354,13 +371,6 @@
         const activeIdx = headers.findIndex(h => h.toLowerCase().includes('active'));
         const visitedIdx = headers.findIndex(h => h.toLowerCase().includes('visited'));
 
-        dateColumns = [];
-        headers.forEach((h, idx) => {
-          if (idx !== seIdx && idx !== activeIdx && idx !== visitedIdx && h !== '') {
-            dateColumns.push({ name: h, idx: idx });
-          }
-        });
-
         globalRawData = [];
         for (let i = headerIdx + 1; i < matrix.length; i++) {
           const row = matrix[i];
@@ -369,44 +379,86 @@
           const active = Number(row[activeIdx]) || 0;
           const visited = Number(row[visitedIdx]) || 0;
 
-          const daily = {};
-          dateColumns.forEach(d => {
-            let val = parseFloat(String(row[d.idx]).replace('%', '')) || 0;
-            if (val <= 1 && val > 0) val = val * 100;
-            daily[d.name] = val;
-          });
-
           const item = {
             se: seName,
             asm: asmMapping[seName] || 'Unassigned',
             active, visited,
-            hitRate: active > 0 ? (visited / active) * 100 : 0,
-            daily
+            hitRate: active > 0 ? (visited / active) * 100 : 0
           };
 
           if (seName === 'EH' || seName.includes('TOTAL')) ehTeamData = item;
           else globalRawData.push(item);
         }
 
+        populateAsmDropdown();
+        populateSeDropdown();
         renderUI();
       }
 
-      function renderUI() {
-        const sorted = [...globalRawData].sort((a, b) => b.hitRate - a.hitRate);
-        let totalActive = 0, totalVisited = 0;
+      function populateAsmDropdown() {
+        const asms = Array.from(new Set(globalRawData.map(d => d.asm)));
+        asmFilter.innerHTML = '<option value="ALL">All Area Managers (ASM)</option>';
+        asms.forEach(asm => {
+          asmFilter.innerHTML += `<option value="${asm}">${asm}</option>`;
+        });
+      }
 
+      function populateSeDropdown() {
+        const selectedASM = asmFilter.value;
+        seFilter.innerHTML = '<option value="ALL">All Sales Executives (Overview)</option>';
+
+        const grouped = {};
         globalRawData.forEach(d => {
+          if (selectedASM === 'ALL' || d.asm === selectedASM) {
+            if (!grouped[d.asm]) grouped[d.asm] = [];
+            grouped[d.asm].push(d);
+          }
+        });
+
+        for (const [asm, ses] of Object.entries(grouped)) {
+          const groupEl = document.createElement('optgroup');
+          groupEl.label = asm;
+          ses.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.se;
+            opt.textContent = `${d.se} (${d.hitRate.toFixed(1)}%)`;
+            groupEl.appendChild(opt);
+          });
+          seFilter.appendChild(groupEl);
+        }
+      }
+
+      function renderUI() {
+        const selectedASM = asmFilter.value;
+        const selectedSE = seFilter.value;
+
+        let filtered = globalRawData;
+        if (selectedASM !== 'ALL') filtered = filtered.filter(d => d.asm === selectedASM);
+        if (selectedSE !== 'ALL') filtered = filtered.filter(d => d.se === selectedSE);
+
+        const sorted = [...filtered].sort((a, b) => b.hitRate - a.hitRate);
+        
+        let totalActive = 0, totalVisited = 0;
+        filtered.forEach(d => {
           totalActive += d.active;
           totalVisited += d.visited;
         });
 
         document.getElementById('kpiActive').innerText = totalActive;
         document.getElementById('kpiVisited').innerText = totalVisited;
-        document.getElementById('kpiRemaining').innerText = (totalActive - totalVisited) + " Remaining";
+        document.getElementById('kpiRemaining').innerText = Math.max(0, totalActive - totalVisited) + " Remaining";
         document.getElementById('kpiHitRate').innerText = (totalActive > 0 ? ((totalVisited / totalActive) * 100).toFixed(1) : 0) + "%";
-        if (sorted.length) document.getElementById('kpiRank').innerText = "#1 " + sorted[0].se;
+        
+        if (selectedSE !== 'ALL') {
+          const rank = globalRawData.sort((a,b)=>b.hitRate-a.hitRate).findIndex(d => d.se === selectedSE) + 1;
+          document.getElementById('kpiRank').innerText = `#${rank} ${selectedSE}`;
+          document.getElementById('kpiRankSub').innerText = `ASM: ${asmMapping[selectedSE] || 'N/A'}`;
+        } else if (sorted.length) {
+          document.getElementById('kpiRank').innerText = "#1 " + sorted[0].se;
+          document.getElementById('kpiRankSub').innerText = "Top Performing Sales Exec";
+        }
 
-        // Populate Leaderboard
+        // Leaderboard
         const tbody = document.getElementById('leaderboardBody');
         tbody.innerHTML = '';
         sorted.forEach((d) => {
@@ -419,7 +471,7 @@
           </tr>`;
         });
 
-        // Charts
+        // Render Charts
         if (window.Chart) {
           const labels = sorted.map(d => d.se);
           const rates = sorted.map(d => d.hitRate.toFixed(1));
