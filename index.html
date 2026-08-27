@@ -176,6 +176,7 @@
 </head>
 <body>
 
+  <!-- LOGIN SCREEN -->
   <div class="login-wrapper" id="loginScreen">
     <div class="login-card">
       <h2>Admin Login</h2>
@@ -193,6 +194,7 @@
     </div>
   </div>
 
+  <!-- DASHBOARD -->
   <div id="dashboardContent" style="display: none;">
     <div class="top-bar">
       <h1>Sales Executive Itinerary Dashboard</h1>
@@ -272,7 +274,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTY64Li808GXtfVwLsPDYaeFoP3IKv2RcNZNF0K9VJ-FCJowxboy0Nf88tFqgfUSg/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQx7G10Kpb1v4LDO_iZxEGxCVQrRen6wWvRNnn9tzAT6AXmGHDddiMg4vqWh8D_Sk/exec';
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 'RSD': 'Mr.Farzaan', 'FZN': 'Mr.Farzaan',
@@ -439,3 +441,95 @@
       }
 
       const tbody = document.getElementById('leaderboardBody');
+      tbody.innerHTML = '';
+      sorted.forEach(d => {
+        tbody.innerHTML += `<tr>
+          <td style="color:#fff;">${d.se}</td>
+          <td style="color:#8e9cb0;">${d.asm}</td>
+          <td>${d.active}</td>
+          <td style="color:#10b981;">${d.visited}</td>
+          <td style="color:#38bdf8;">${d.hitRate.toFixed(1)}%</td>
+        </tr>`;
+      });
+
+      if (window.Chart) {
+        const trendData = dateColumns.map(day => {
+          let dayVisited = 0, dayActive = 0;
+          filtered.forEach(d => { dayVisited += (d.dailyTrend[day] || 0); dayActive += d.active; });
+          return dayActive > 0 ? Number(((dayVisited / dayActive) * 100).toFixed(1)) : 0;
+        });
+
+        if (trendChartInstance) trendChartInstance.destroy();
+        trendChartInstance = new Chart(document.getElementById('trendChart'), {
+          type: 'line',
+          data: {
+            labels: dateColumns,
+            datasets: [{
+              label: 'Hit Rate %',
+              data: trendData,
+              borderColor: '#38bdf8',
+              backgroundColor: 'rgba(56, 189, 248, 0.15)',
+              fill: true,
+              tension: 0.35,
+              borderWidth: 2,
+              pointRadius: 4,
+              pointBackgroundColor: '#38bdf8'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } },
+              y: { ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' }, min: 0, max: 100 }
+            }
+          }
+        });
+
+        const labels = sorted.map(d => d.se);
+        const rates = sorted.map(d => d.hitRate.toFixed(1));
+
+        if (rankChartInstance) rankChartInstance.destroy();
+        rankChartInstance = new Chart(document.getElementById('rankChart'), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{ data: rates, backgroundColor: '#38bdf8', borderRadius: 4 }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } },
+              y: { ticks: { color: '#fff' }, grid: { display: false } }
+            }
+          }
+        });
+
+        if (volumeChartInstance) volumeChartInstance.destroy();
+        volumeChartInstance = new Chart(document.getElementById('volumeChart'), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              { label: 'Visited', data: sorted.map(d => d.visited), backgroundColor: '#10b981' },
+              { label: 'Remaining', data: sorted.map(d => Math.max(0, d.active - d.visited)), backgroundColor: '#1e293b' }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { stacked: true, ticks: { color: '#fff' } },
+              y: { stacked: true, ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } }
+            }
+          }
+        });
+      }
+    }
+  </script>
+</body>
+</html>
