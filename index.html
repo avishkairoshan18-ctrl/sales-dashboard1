@@ -232,18 +232,21 @@
         const headers = rows[0].map(h => String(h || '').trim());
         dateColumns = headers.slice(3).filter(col => col !== '');
 
-        for (let i = 1; i < rows.length; i++) {
+        for (let i = 0; i < rows.length; i++) {
           const r = rows[i];
           if (!r || r[0] === undefined || r[0] === null) continue;
           
           let se = String(r[0]).trim().toUpperCase();
           
-          // Completely ignore row headers or literal text "SE" / empty / header-like identifiers
-          if (!se || se === 'SE' || se === 'EH' || se === 'HEADER' || se === 'NAME' || se === 'SUM') continue;
+          // Strict filter: Exclude table headers, summary rows, or literal codes like 'SE', 'EH', 'UNASSIGNED', etc.
+          if (!se || se === 'SE' || se === 'EH' || se === 'HEADER' || se === 'NAME' || se === 'SUM' || se === 'TOTAL') continue;
 
           const active = Number(r[1]) || 0;
           const visited = Number(r[2]) || 0;
           const asm = asmMapping[se] || 'Unassigned';
+          
+          // Only process records that belong to known valid SE mappings or have actual metrics
+          if (!asmMapping[se]) continue;
           
           let dailyTrend = {};
           dateColumns.forEach((d, idx) => {
@@ -323,7 +326,6 @@
       });
 
       if (window.Chart) {
-        // Aggregate cumulative daily trend values properly across filtered SEs
         const trendData = dateColumns.map(day => {
           let dayVisitedSum = 0, dayActiveSum = 0;
           filtered.forEach(d => { 
