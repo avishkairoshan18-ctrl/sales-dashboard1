@@ -233,7 +233,10 @@
         for (let i = 1; i < rows.length; i++) {
           const r = rows[i];
           if (!r || !r[0]) continue;
-          const se = String(r[0]).trim().toUpperCase();
+          
+          let se = String(r[0]).trim().toUpperCase();
+          if (se === 'SE' || se === 'EH') continue; // Filter out header label rows or totals imported as SE categories
+
           const active = Number(r[1]) || 0;
           const visited = Number(r[2]) || 0;
           const asm = asmMapping[se] || 'Unassigned';
