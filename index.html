@@ -238,7 +238,7 @@
           
           let se = String(r[0]).trim().toUpperCase();
           
-          if (!se || se === 'SE' || se === 'EH' || se === 'HEADER' || se === 'NAME' || se === 'SUM' || se === 'TOTAL') continue;
+          if (!se || se === 'SE' || se === 'HEADER' || se === 'NAME' || se === 'SUM' || se === 'TOTAL') continue;
           if (!asmMapping[se]) continue;
 
           const active = Number(r[1]) || 0;
@@ -324,8 +324,6 @@
       });
 
       if (window.Chart) {
-        // If your sheet columns contain cumulative daily counts instead of percentages, 
-        // we sum both visited and active totals per day column to compute the correct daily hit rate percentage.
         const trendData = dateColumns.map(day => {
           let dayVisitedSum = 0, dayActiveSum = 0;
           filtered.forEach(d => { 
