@@ -176,7 +176,6 @@
 </head>
 <body>
 
-  <!-- LOGIN SCREEN -->
   <div class="login-wrapper" id="loginScreen">
     <div class="login-card">
       <h2>Admin Login</h2>
@@ -194,12 +193,11 @@
     </div>
   </div>
 
-  <!-- DASHBOARD -->
   <div id="dashboardContent" style="display: none;">
     <div class="top-bar">
       <h1>Sales Executive Itinerary Dashboard</h1>
       <div class="controls">
-        <div class="status-badge" id="syncStatus">LIVE API CONNECTED</div>
+        <div class="status-badge" id="syncStatus">CONNECTING...</div>
         <select id="asmFilter" class="select-box" onchange="renderUI()"><option value="ALL">All Area Managers (ASM)</option></select>
         <select id="seFilter" class="select-box" onchange="renderUI()"><option value="ALL">All Sales Executives (Overview)</option></select>
         <button class="logout-btn" onclick="logout()">Logout</button>
@@ -306,17 +304,25 @@
     }
 
     async function loadData() {
+      const statusBadge = document.getElementById('syncStatus');
       try {
         const res = await fetch(APPS_SCRIPT_URL, { redirect: "follow" });
         const json = await res.json();
-        if (json.data) {
-          parseJSONData(json.data, json.headers);
+        
+        // Handle array responses direct or encapsulated inside .data
+        let rows = Array.isArray(json) ? json : (json.data || json.result || []);
+        let headers = json.headers || (rows.length > 0 ? Object.keys(rows[0]) : []);
+
+        if (rows && rows.length > 0) {
+          statusBadge.innerText = 'LIVE API CONNECTED';
+          statusBadge.style.background = '#059669';
+          parseJSONData(rows, headers);
         } else {
-          throw new Error("Invalid API payload");
+          throw new Error("Empty Payload Received");
         }
       } catch (err) {
-        document.getElementById('syncStatus').innerText = 'API DISCONNECTED';
-        document.getElementById('syncStatus').style.background = '#ef4444';
+        statusBadge.innerText = 'API DISCONNECTED';
+        statusBadge.style.background = '#ef4444';
       }
     }
 
@@ -324,40 +330,56 @@
       globalRawData = [];
       dateColumns = [];
 
-      const findKey = (candidates) => headers.find(h => candidates.some(c => String(h).trim().toLowerCase().includes(c)));
+      if (!rows || rows.length === 0) return;
 
-      const seKey = findKey(['se', 'sales executive', 'executive']);
-      const activeKey = findKey(['active', 'target']);
-      const visitedKey = findKey(['visited', 'achieved', 'actual']);
-      const asmKey = findKey(['asm', 'manager']);
+      const firstRow = rows[0];
+      const keys = Array.isArray(firstRow) ? firstRow.map((_, i) => i) : Object.keys(firstRow);
 
-      dateColumns = headers.filter(h => {
-        const clean = String(h).trim().toLowerCase();
-        return !['se', 'sales executive', 'asm', 'active', 'visited', 'total', 'hit rate', 'rate'].some(c => clean.includes(c));
-      }).filter(d => {
-        const m = String(d).match(/(\d+)/);
-        return m ? (parseInt(m[1], 10) >= 6 && parseInt(m[1], 10) <= 24) : true;
-      }).sort((a, b) => parseInt((String(a).match(/(\d+)/)||[0,0])[1]) - parseInt((String(b).match(/(\d+)/)||[0,0])[1]));
+      const findKeyMatch = (rowObj, terms, defaultIndex) => {
+        if (Array.isArray(rowObj)) return rowObj[defaultIndex];
+        for (let t of terms) {
+          for (let k of Object.keys(rowObj)) {
+            if (k.toLowerCase().trim().includes(t)) {
+              return rowObj[k];
+            }
+          }
+        }
+        return rowObj[Object.keys(rowObj)[defaultIndex]];
+      };
 
-      rows.forEach(row => {
-        const seVal = row[seKey];
-        if (!seVal) return;
+      // Detect dates automatically
+      dateColumns = keys.filter(k => {
+        const clean = String(k).toLowerCase().trim();
+        return !['se', 'executive', 'asm', 'active', 'visited', 'total', 'hit rate', 'rate', 'target'].some(c => clean.includes(c));
+      });
 
-        const seName = String(seVal).trim().toUpperCase();
-        if (seName === 'EH' || seName.includes('TOTAL') || seName === '') return;
+      rows.forEach((row, index) => {
+        let seVal = findKeyMatch(row, ['se', 'sales executive', 'executive', 'name'], 0);
+        if (seVal === undefined || seVal === null) return;
 
-        const active = parseInt(row[activeKey], 10) || 0;
-        const visited = parseInt(row[visitedKey], 10) || 0;
-        const asmName = row[asmKey] ? String(row[asmKey]).trim() : (asmMapping[seName] || 'Unassigned');
+        let seName = String(seVal).trim().toUpperCase();
+        if (!seName || seName === 'SE' || seName === 'EH' || seName.includes('TOTAL') || seName.includes('SALES')) return;
+
+        const parseNum = (val) => {
+          if (typeof val === 'number') return val;
+          if (!val) return 0;
+          const num = parseInt(String(val).replace(/,/g, ''), 10);
+          return isNaN(num) ? 0 : num;
+        };
+
+        const active = parseNum(findKeyMatch(row, ['active', 'target', 'portfolio'], 1));
+        const visited = parseNum(findKeyMatch(row, ['visited', 'achieved', 'actual'], 2));
+        const asmVal = findKeyMatch(row, ['asm', 'manager', 'area manager'], 3);
+        const asmName = asmVal ? String(asmVal).trim() : (asmMapping[seName] || 'Unassigned');
 
         const dailyTrend = {};
         let lastVal = 0;
 
         dateColumns.forEach((day, idx) => {
-          const rawVal = parseInt(row[day], 10);
-          if (!isNaN(rawVal)) {
+          const rawVal = parseNum(row[day]);
+          if (rawVal > 0) {
             lastVal = rawVal;
-          } else if (visited > 0) {
+          } else if (visited > 0 && dateColumns.length > 0) {
             lastVal = Math.round(visited * ((idx + 1) / dateColumns.length));
           }
           dailyTrend[day] = lastVal;
