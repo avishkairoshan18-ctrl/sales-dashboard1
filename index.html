@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sales Executive Itinerary Dashboard</title>
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -166,4 +165,277 @@
       border-radius: 12px;
       padding: 20px;
     }
-    .chart-header { display: flex; justify-content: space-between; margin-bottom: 1
+    .chart-header { display: flex; justify-content: space-between; margin-bottom: 16px; }
+    .chart-title { font-size: 1.1rem; font-weight: 700; }
+    .canvas-container { position: relative; height: 300px; width: 100%; }
+
+    .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+    .leaderboard-table th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 0.75rem; border-bottom: 1px solid var(--border-color); }
+    .leaderboard-table td { padding: 12px; border-bottom: 1px solid #1a2333; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="login-wrapper" id="loginScreen">
+    <div class="login-card">
+      <h2>Admin Login</h2>
+      <p>Enter credentials to view dashboard</p>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="userInput" class="form-control" value="admin">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="passInput" class="form-control" value="password123">
+      </div>
+      <button type="button" class="login-btn" onclick="checkAuth()">Login</button>
+      <div class="error-msg" id="errorMsg">Invalid credentials</div>
+    </div>
+  </div>
+
+  <div id="dashboardContent" style="display: none;">
+    <div class="top-bar">
+      <h1>Sales Executive Itinerary Dashboard</h1>
+      <div class="controls">
+        <div class="status-badge" id="syncStatus">LIVE API CONNECTED</div>
+        <select id="asmFilter" class="select-box" onchange="renderUI()"><option value="ALL">All Area Managers (ASM)</option></select>
+        <select id="seFilter" class="select-box" onchange="renderUI()"><option value="ALL">All Sales Executives (Overview)</option></select>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="label">Active Customers</div>
+        <div class="value" id="kpiActive">0</div>
+        <div class="subtext">Total Portfolio</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Visited Customers</div>
+        <div class="value val-green" id="kpiVisited">0</div>
+        <div class="subtext" id="kpiRemaining">0 Remaining</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Current Hit Rate</div>
+        <div class="value val-blue" id="kpiHitRate">0.0%</div>
+        <div class="subtext">Target Pace</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Leader</div>
+        <div class="value val-gold" id="kpiRank">#--</div>
+        <div class="subtext" id="kpiRankSub">Overview Mode</div>
+      </div>
+    </div>
+
+    <div class="dashboard-layout">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Hit Rate Trend (%)</div>
+        </div>
+        <div class="canvas-container">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Hit Rate by SE (%)</div>
+        </div>
+        <div class="canvas-container">
+          <canvas id="rankChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-layout">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Visited vs Remaining</div>
+        </div>
+        <div class="canvas-container">
+          <canvas id="volumeChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Leaderboard</div>
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="leaderboard-table">
+            <thead>
+              <tr><th>SE</th><th>ASM</th><th>ACTIVE</th><th>VISITED</th><th>RATE</th></tr>
+            </thead>
+            <tbody id="leaderboardBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTY64Li808GXtfVwLsPDYaeFoP3IKv2RcNZNF0K9VJ-FCJowxboy0Nf88tFqgfUSg/exec';
+
+    const asmMapping = {
+      'HMD': 'Mr.Farzaan', 'RSD': 'Mr.Farzaan', 'FZN': 'Mr.Farzaan',
+      'RKZ': 'Mr.Hilmy',   'RFD': 'Mr.Hilmy',   'MZR': 'Mr.Hilmy',
+      'AMT': 'Mr.Sabir',   'DNT': 'Mr.Sabir'
+    };
+
+    let globalRawData = [];
+    let dateColumns = [];
+    let trendChartInstance = null, rankChartInstance = null, volumeChartInstance = null;
+
+    function checkAuth() {
+      const u = document.getElementById('userInput').value.trim();
+      const p = document.getElementById('passInput').value.trim();
+
+      if (u === "admin" && p === "password123") {
+        document.getElementById('errorMsg').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboardContent').style.display = 'block';
+        loadData();
+      } else {
+        document.getElementById('errorMsg').style.display = 'block';
+      }
+    }
+
+    function logout() {
+      document.getElementById('dashboardContent').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, { redirect: "follow" });
+        const json = await res.json();
+        if (json.data) {
+          parseJSONData(json.data, json.headers);
+        } else {
+          throw new Error("Invalid API payload");
+        }
+      } catch (err) {
+        document.getElementById('syncStatus').innerText = 'API DISCONNECTED';
+        document.getElementById('syncStatus').style.background = '#ef4444';
+      }
+    }
+
+    function parseJSONData(rows, headers) {
+      globalRawData = [];
+      dateColumns = [];
+
+      const findKey = (candidates) => headers.find(h => candidates.some(c => String(h).trim().toLowerCase().includes(c)));
+
+      const seKey = findKey(['se', 'sales executive', 'executive']);
+      const activeKey = findKey(['active', 'target']);
+      const visitedKey = findKey(['visited', 'achieved', 'actual']);
+      const asmKey = findKey(['asm', 'manager']);
+
+      dateColumns = headers.filter(h => {
+        const clean = String(h).trim().toLowerCase();
+        return !['se', 'sales executive', 'asm', 'active', 'visited', 'total', 'hit rate', 'rate'].some(c => clean.includes(c));
+      }).filter(d => {
+        const m = String(d).match(/(\d+)/);
+        return m ? (parseInt(m[1], 10) >= 6 && parseInt(m[1], 10) <= 24) : true;
+      }).sort((a, b) => parseInt((String(a).match(/(\d+)/)||[0,0])[1]) - parseInt((String(b).match(/(\d+)/)||[0,0])[1]));
+
+      rows.forEach(row => {
+        const seVal = row[seKey];
+        if (!seVal) return;
+
+        const seName = String(seVal).trim().toUpperCase();
+        if (seName === 'EH' || seName.includes('TOTAL') || seName === '') return;
+
+        const active = parseInt(row[activeKey], 10) || 0;
+        const visited = parseInt(row[visitedKey], 10) || 0;
+        const asmName = row[asmKey] ? String(row[asmKey]).trim() : (asmMapping[seName] || 'Unassigned');
+
+        const dailyTrend = {};
+        let lastVal = 0;
+
+        dateColumns.forEach((day, idx) => {
+          const rawVal = parseInt(row[day], 10);
+          if (!isNaN(rawVal)) {
+            lastVal = rawVal;
+          } else if (visited > 0) {
+            lastVal = Math.round(visited * ((idx + 1) / dateColumns.length));
+          }
+          dailyTrend[day] = lastVal;
+        });
+
+        globalRawData.push({
+          se: seName,
+          asm: asmName,
+          active: active,
+          visited: visited,
+          hitRate: active > 0 ? (visited / active) * 100 : 0,
+          dailyTrend: dailyTrend
+        });
+      });
+
+      populateAsmDropdown();
+      populateSeDropdown();
+      renderUI();
+    }
+
+    function populateAsmDropdown() {
+      const asmFilter = document.getElementById('asmFilter');
+      const asms = Array.from(new Set(globalRawData.map(d => d.asm))).filter(Boolean);
+      asmFilter.innerHTML = '<option value="ALL">All Area Managers (ASM)</option>';
+      asms.forEach(asm => { asmFilter.innerHTML += `<option value="${asm}">${asm}</option>`; });
+    }
+
+    function populateSeDropdown() {
+      const asmFilter = document.getElementById('asmFilter');
+      const seFilter = document.getElementById('seFilter');
+      const selectedASM = asmFilter.value;
+      seFilter.innerHTML = '<option value="ALL">All Sales Executives (Overview)</option>';
+
+      const grouped = {};
+      globalRawData.forEach(d => {
+        if (selectedASM === 'ALL' || d.asm === selectedASM) {
+          if (!grouped[d.asm]) grouped[d.asm] = [];
+          grouped[d.asm].push(d);
+        }
+      });
+
+      for (const asm in grouped) {
+        const groupEl = document.createElement('optgroup');
+        groupEl.label = asm;
+        grouped[asm].forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.se;
+          opt.textContent = `${d.se} (${d.hitRate.toFixed(1)}%)`;
+          groupEl.appendChild(opt);
+        });
+        seFilter.appendChild(groupEl);
+      }
+    }
+
+    function renderUI() {
+      const selectedASM = document.getElementById('asmFilter').value;
+      const selectedSE = document.getElementById('seFilter').value;
+
+      let filtered = globalRawData;
+      if (selectedASM !== 'ALL') filtered = filtered.filter(d => d.asm === selectedASM);
+      if (selectedSE !== 'ALL') filtered = filtered.filter(d => d.se === selectedSE);
+
+      const sorted = filtered.slice().sort((a, b) => b.hitRate - a.hitRate);
+      
+      let totalActive = 0, totalVisited = 0;
+      filtered.forEach(d => { totalActive += d.active; totalVisited += d.visited; });
+
+      document.getElementById('kpiActive').innerText = totalActive;
+      document.getElementById('kpiVisited').innerText = totalVisited;
+      document.getElementById('kpiRemaining').innerText = Math.max(0, totalActive - totalVisited) + " Remaining";
+      document.getElementById('kpiHitRate').innerText = (totalActive > 0 ? ((totalVisited / totalActive) * 100).toFixed(1) : 0) + "%";
+      
+      if (selectedSE !== 'ALL') {
+        const allSorted = globalRawData.slice().sort((a, b) => b.hitRate - a.hitRate);
+        const rank = allSorted.findIndex(d => d.se === selectedSE) + 1;
+        document.getElementById('kpiRank').innerText = '#' + rank + ' ' + selectedSE;
+        document.getElementById('kpiRankSub').innerText = 'ASM: ' + (asmMapping[selectedSE] || 'N/A');
+      } else if (sorted.length) {
+        document.getElementById('kpiRank').innerText = "#1 " + sorted[0].se;
+        document.getElementById('kpiRankSub').innerText = "Top Performing Sales Exec";
+      }
+
+      const tbody = document.getElementById('leaderboardBody');
