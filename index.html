@@ -1,99 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sales Executive Itinerary Dashboard</title>
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+const ADMIN_USER = "admin";
+    const ADMIN_PASS = "password123";
 
-  <style>
-    :root {
-      --bg-dark: #090d16;
-      --card-bg: #121929;
-      --border-color: #1e293b;
-      --text-main: #f8fafc;
-      --text-muted: #8e9cb0;
-      --accent-blue: #38bdf8;
-      --accent-green: #10b981;
-      --accent-gold: #f59e0b;
+    function checkAuth() {
+      const loginScreen = document.getElementById('loginScreen');
+      const dashboardContent = document.getElementById('dashboardContent');
+
+      // Make sure elements exist before modifying styles
+      if (!loginScreen || !dashboardContent) return;
+
+      if (localStorage.getItem('isLoggedIn') === 'true') {
+        loginScreen.style.display = 'none';
+        dashboardContent.style.display = 'block';
+        loadCloudSheetData();
+      } else {
+        loginScreen.style.display = 'flex';
+        dashboardContent.style.display = 'none';
+      }
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      padding: 24px;
+    function handleLogin(e) {
+      e.preventDefault();
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      if (user === ADMIN_USER && pass === ADMIN_PASS) {
+        localStorage.setItem('isLoggedIn', 'true');
+        checkAuth();
+      } else {
+        document.getElementById('errorMsg').style.display = 'block';
+      }
     }
 
-    /* Screen State Controls */
-    #dashboardContent {
-      display: none;
+    function logout() {
+      localStorage.removeItem('isLoggedIn');
+      // Force page reload to clear memory state cleanly
+      window.location.reload();
     }
 
-    /* Login Screen Styling */
-    .login-wrapper {
-      min-height: 80vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .login-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 32px;
-      width: 100%;
-      max-width: 380px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    }
-
-    .login-card h2 {
-      font-size: 1.4rem;
-      margin-bottom: 6px;
-      color: #fff;
-      text-align: center;
-    }
-
-    .login-card p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 10px 14px;
-      background: #1e293b;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      color: white;
-      font-size: 0.9rem;
-      outline: none;
-    }
-
-    .form-control:focus {
-      border-color: var(--accent-blue);
-    }
-
-    .login-btn {
-      width: 100%;
-      padding: 12px;
-      background
+    // Run auth check as soon as the DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', checkAuth);
