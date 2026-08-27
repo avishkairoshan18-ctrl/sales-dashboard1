@@ -111,6 +111,7 @@
       border-radius: 6px;
       font-size: 0.85rem;
       outline: none;
+      min-width: 200px;
     }
     .select-box optgroup {
       background: #1e293b;
@@ -234,23 +235,12 @@
     <div class="dashboard-layout">
       <div class="chart-card">
         <div class="chart-header">
-          <div class="chart-title">Hit Rate Trend (%)</div>
-        </div>
-        <div class="canvas-container">
-          <canvas id="trendChart"></canvas>
-        </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header">
           <div class="chart-title">Hit Rate by SE (%)</div>
         </div>
         <div class="canvas-container">
           <canvas id="rankChart"></canvas>
         </div>
       </div>
-    </div>
-
-    <div class="dashboard-layout">
       <div class="chart-card">
         <div class="chart-header">
           <div class="chart-title">Visited vs Remaining</div>
@@ -259,6 +249,9 @@
           <canvas id="volumeChart"></canvas>
         </div>
       </div>
+    </div>
+
+    <div class="dashboard-layout" style="grid-template-columns: 1fr;">
       <div class="chart-card">
         <div class="chart-header">
           <div class="chart-title">Leaderboard</div>
@@ -266,7 +259,7 @@
         <div style="overflow-x: auto;">
           <table class="leaderboard-table">
             <thead>
-              <tr><th>SE</th><th>ASM</th><th>ACTIVE</th><th>VISITED</th><th>RATE</th></tr>
+              <tr><th>SE</th><th>ASM</th><th>ACTIVE</th><th>VISITED</th><th>HIT RATE</th></tr>
             </thead>
             <tbody id="leaderboardBody"></tbody>
           </table>
@@ -280,17 +273,16 @@
       const ADMIN_USER = "admin";
       const ADMIN_PASS = "password123";
 
+      // ASM Mapping Fallback if missing in sheet
       const asmMapping = {
         'HMD': 'Mr.Farzaan', 'RSD': 'Mr.Farzaan', 'FZN': 'Mr.Farzaan',
-        'RKZ': 'Mr.Hilmy', 'RFD': 'Mr.Hilmy', 'MZR': 'Mr.Hilmy',
-        'AMT': 'Mr.Sabir', 'DNT': 'Mr.Sabir'
+        'RKZ': 'Mr.Hilmy',   'RFD': 'Mr.Hilmy',   'MZR': 'Mr.Hilmy',
+        'AMT': 'Mr.Sabir',   'DNT': 'Mr.Sabir'
       };
 
       const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTj3GMbofE6YPBSwjIiyh63JCQ4PdFLisiKOE5ehdzcm63poJ95iOotQRRLkLBZYxrgQg7Y5nK1Ch2H/pub?output=csv';
 
       let globalRawData = [];
-      let ehTeamData = null;
-      let dateColumns = [];
       let rankChartInstance = null, volumeChartInstance = null;
 
       const loginScreen = document.getElementById('loginScreen');
@@ -339,56 +331,61 @@
 
       async function loadData() {
         try {
-          const response = await fetch(SHEET_CSV_URL);
+          const response = await fetch(SHEET_CSV_URL + '&t=' + new Date().getTime());
           if (!response.ok) throw new Error("HTTP error " + response.status);
           const csvText = await response.text();
-          if (window.Papa) {
-            Papa.parse(csvText, {
-              header: false,
-              skipEmptyLines: true,
-              complete: (results) => parseData(results.data)
-            });
-          }
+          
+          Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => parseData(results.data)
+          });
         } catch (err) {
+          console.error(err);
           document.getElementById('syncStatus').innerText = 'OFFLINE MODE';
           document.getElementById('syncStatus').style.background = '#f59e0b';
+          
           parseData([
-            ["SE", "Active", "Visited"],
-            ["HMD", "120", "90"], ["RSD", "100", "80"], ["FZN", "110", "70"],
-            ["RKZ", "95", "65"],  ["RFD", "105", "85"], ["MZR", "115", "95"],
-            ["AMT", "130", "100"], ["DNT", "90", "75"], ["EH", "865", "660"]
+            { SE: "HMD", Active: "120", Visited: "90" },
+            { SE: "RSD", Active: "100", Visited: "80" },
+            { SE: "FZN", Active: "110", Visited: "70" },
+            { SE: "RKZ", Active: "95",  Visited: "65" },
+            { SE: "RFD", Active: "105", Visited: "85" },
+            { SE: "MZR", Active: "115", Visited: "95" },
+            { SE: "AMT", Active: "130", Visited: "100" },
+            { SE: "DNT", Active: "90",  Visited: "75" }
           ]);
         }
       }
 
-      function parseData(matrix) {
-        if (!matrix || !matrix.length) return;
-        let headerIdx = matrix.findIndex(r => r.some(c => String(c).trim().toUpperCase() === 'SE'));
-        if (headerIdx === -1) headerIdx = 0;
-
-        const headers = matrix[headerIdx].map(h => String(h).trim());
-        const seIdx = headers.findIndex(h => h.toUpperCase() === 'SE');
-        const activeIdx = headers.findIndex(h => h.toLowerCase().includes('active'));
-        const visitedIdx = headers.findIndex(h => h.toLowerCase().includes('visited'));
-
+      function parseData(rows) {
         globalRawData = [];
-        for (let i = headerIdx + 1; i < matrix.length; i++) {
-          const row = matrix[i];
-          if (!row || !row[seIdx]) continue;
-          const seName = String(row[seIdx]).trim().toUpperCase();
-          const active = Number(row[activeIdx]) || 0;
-          const visited = Number(row[visitedIdx]) || 0;
 
-          const item = {
+        rows.forEach(row => {
+          // Normalize Keys (case-insensitive key finding)
+          const keys = Object.keys(row);
+          const seKey = keys.find(k => k.trim().toUpperCase() === 'SE');
+          const activeKey = keys.find(k => k.trim().toLowerCase().includes('active'));
+          const visitedKey = keys.find(k => k.trim().toLowerCase().includes('visited'));
+          const asmKey = keys.find(k => k.trim().toUpperCase() === 'ASM');
+
+          if (!seKey || !row[seKey]) return;
+
+          const seName = String(row[seKey]).trim().toUpperCase();
+          if (seName === 'EH' || seName.includes('TOTAL') || seName === '') return;
+
+          const active = parseInt(row[activeKey], 10) || 0;
+          const visited = parseInt(row[visitedKey], 10) || 0;
+          const asmName = row[asmKey] ? String(row[asmKey]).trim() : (asmMapping[seName] || 'Unassigned');
+
+          globalRawData.push({
             se: seName,
-            asm: asmMapping[seName] || 'Unassigned',
-            active, visited,
+            asm: asmName,
+            active: active,
+            visited: visited,
             hitRate: active > 0 ? (visited / active) * 100 : 0
-          };
-
-          if (seName === 'EH' || seName.includes('TOTAL')) ehTeamData = item;
-          else globalRawData.push(item);
-        }
+          });
+        });
 
         populateAsmDropdown();
         populateSeDropdown();
@@ -396,7 +393,7 @@
       }
 
       function populateAsmDropdown() {
-        const asms = Array.from(new Set(globalRawData.map(d => d.asm)));
+        const asms = Array.from(new Set(globalRawData.map(d => d.asm))).filter(Boolean);
         asmFilter.innerHTML = '<option value="ALL">All Area Managers (ASM)</option>';
         asms.forEach(asm => {
           asmFilter.innerHTML += `<option value="${asm}">${asm}</option>`;
