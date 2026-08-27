@@ -238,8 +238,8 @@
           
           let se = String(r[0]).trim().toUpperCase();
           
-          // Completely filter out invalid or summary category headers like SE, EH, empty rows
-          if (!se || se === 'SE' || se === 'EH' || se === 'UNDEFINED' || se === 'NAN') continue;
+          // Completely ignore row headers or literal text "SE" / empty / header-like identifiers
+          if (!se || se === 'SE' || se === 'EH' || se === 'HEADER' || se === 'NAME' || se === 'SUM') continue;
 
           const active = Number(r[1]) || 0;
           const visited = Number(r[2]) || 0;
@@ -323,13 +323,14 @@
       });
 
       if (window.Chart) {
+        // Aggregate cumulative daily trend values properly across filtered SEs
         const trendData = dateColumns.map(day => {
-          let dayVisited = 0, dayActive = 0;
+          let dayVisitedSum = 0, dayActiveSum = 0;
           filtered.forEach(d => { 
-            dayVisited += (d.dailyTrend[day] || 0); 
-            dayActive += d.active; 
+            dayVisitedSum += (d.dailyTrend[day] || 0); 
+            dayActiveSum += d.active; 
           });
-          return dayActive > 0 ? Number(((dayVisited / dayActive) * 100).toFixed(1)) : 0;
+          return dayActiveSum > 0 ? Number(((dayVisitedSum / dayActiveSum) * 100).toFixed(1)) : 0;
         });
 
         if (trendChartInstance) trendChartInstance.destroy();
