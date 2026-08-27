@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sales Executive Itinerary Dashboard</title>
   
-  <!-- External JS Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -25,12 +24,9 @@
     body {
       background-color: var(--bg-dark);
       color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       padding: 24px;
-    }
-
-    #dashboardContent {
-      display: none;
+      min-height: 100vh;
     }
 
     .login-wrapper {
@@ -50,24 +46,10 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
 
-    .login-card h2 {
-      font-size: 1.4rem;
-      margin-bottom: 6px;
-      color: #fff;
-      text-align: center;
-    }
+    .login-card h2 { font-size: 1.4rem; margin-bottom: 6px; text-align: center; }
+    .login-card p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; text-align: center; }
 
-    .login-card p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
+    .form-group { margin-bottom: 16px; }
     .form-group label {
       display: block;
       font-size: 0.75rem;
@@ -88,10 +70,6 @@
       outline: none;
     }
 
-    .form-control:focus {
-      border-color: var(--accent-blue);
-    }
-
     .login-btn {
       width: 100%;
       padding: 12px;
@@ -105,13 +83,7 @@
       margin-top: 10px;
     }
 
-    .error-msg {
-      color: #ef4444;
-      font-size: 0.8rem;
-      margin-top: 10px;
-      text-align: center;
-      display: none;
-    }
+    .error-msg { color: #ef4444; font-size: 0.8rem; margin-top: 10px; text-align: center; display: none; }
 
     .top-bar {
       display: flex;
@@ -121,7 +93,7 @@
       flex-wrap: wrap;
       gap: 16px;
     }
-    .top-bar h1 { font-size: 1.5rem; font-weight: 700; color: #fff; }
+    .top-bar h1 { font-size: 1.5rem; font-weight: 700; }
     .controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     .status-badge {
       background: #059669;
@@ -138,7 +110,6 @@
       padding: 6px 12px;
       border-radius: 6px;
       font-size: 0.85rem;
-      outline: none;
     }
     .logout-btn {
       background: #ef4444;
@@ -162,19 +133,9 @@
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 20px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
     }
-    .kpi-card .label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .kpi-card .value { font-size: 2.2rem; font-weight: 800; line-height: 1.1; }
+    .kpi-card .label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+    .kpi-card .value { font-size: 2.2rem; font-weight: 800; }
     .kpi-card .subtext { font-size: 0.8rem; color: var(--text-muted); margin-top: 8px; }
     .val-blue { color: #38bdf8; }
     .val-green { color: #10b981; }
@@ -186,150 +147,75 @@
       gap: 20px;
       margin-bottom: 20px;
     }
-    @media (max-width: 1024px) {
-      .dashboard-layout { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 1024px) { .dashboard-layout { grid-template-columns: 1fr; } }
 
     .chart-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 20px;
-      display: flex;
-      flex-direction: column;
     }
-    .chart-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
-    }
-    .chart-title { font-size: 1.1rem; font-weight: 700; color: #fff; }
-    .chart-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
-    .date-badge {
-      background: #1e293b;
-      color: #94a3b8;
-      font-size: 0.75rem;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-weight: 600;
-    }
+    .chart-header { display: flex; justify-content: space-between; margin-bottom: 16px; }
+    .chart-title { font-size: 1.1rem; font-weight: 700; }
+    .canvas-container { position: relative; min-height: 300px; }
 
-    .line-toggles {
-      background: #0d1322;
-      border: 1px solid var(--border-color);
-      padding: 10px 14px;
-      border-radius: 8px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 16px;
-      font-size: 0.8rem;
-    }
-    .line-toggles label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      color: #cbd5e1;
-      font-weight: 600;
-    }
-
-    .canvas-container {
-      position: relative;
-      flex-grow: 1;
-      min-height: 320px;
-    }
-
-    .leaderboard-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 0.9rem;
-    }
-    .leaderboard-table th {
-      text-align: left;
-      padding: 12px 16px;
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .leaderboard-table td {
-      padding: 14px 16px;
-      border-bottom: 1px solid #1a2333;
-      font-weight: 600;
-    }
-    .leaderboard-table tr:last-child td {
-      border-bottom: none;
-    }
-    .rank-cell { color: var(--text-muted); font-size: 0.8rem; margin-right: 8px; }
-    .se-cell { color: #fff; font-weight: 700; }
-    .visited-text { color: var(--accent-green); }
-    .hit-rate-text { color: var(--accent-blue); font-weight: 700; }
+    .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+    .leaderboard-table th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 0.75rem; border-bottom: 1px solid var(--border-color); }
+    .leaderboard-table td { padding: 12px; border-bottom: 1px solid #1a2333; font-weight: 600; }
   </style>
 </head>
 <body>
 
   <!-- LOGIN SCREEN -->
-  <div class="login-wrapper" id="loginScreen" style="display: flex;">
+  <div class="login-wrapper" id="loginScreen">
     <div class="login-card">
       <h2>Admin Login</h2>
-      <p>Enter your credentials to access the dashboard</p>
-      <form onsubmit="handleLogin(event)">
+      <p>Enter credentials to view dashboard</p>
+      <form id="loginForm">
         <div class="form-group">
           <label>Username</label>
-          <input type="text" id="username" class="form-control" placeholder="Enter username" required>
+          <input type="text" id="username" class="form-control" value="admin" required>
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+          <input type="password" id="password" class="form-control" value="password123" required>
         </div>
         <button type="submit" class="login-btn">Login</button>
-        <div class="error-msg" id="errorMsg">Invalid username or password!</div>
+        <div class="error-msg" id="errorMsg">Invalid login details.</div>
       </form>
     </div>
   </div>
 
-  <!-- MAIN DASHBOARD CONTENT -->
+  <!-- DASHBOARD -->
   <div id="dashboardContent" style="display: none;">
     <div class="top-bar">
       <h1>Sales Executive Itinerary Dashboard</h1>
       <div class="controls">
         <div class="status-badge" id="syncStatus">LIVE CONNECTED</div>
-        
-        <select id="asmFilter" class="select-box" onchange="onAsmChange()">
-          <option value="ALL">All Area Managers (ASM)</option>
-        </select>
-
-        <select id="seFilter" class="select-box" onchange="updateDashboardView()">
-          <option value="ALL">All Sales Executives (Overview)</option>
-        </select>
-
-        <button class="logout-btn" onclick="logout()">Logout</button>
+        <select id="asmFilter" class="select-box"><option value="ALL">All Area Managers (ASM)</option></select>
+        <select id="seFilter" class="select-box"><option value="ALL">All Sales Executives (Overview)</option></select>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
       </div>
     </div>
 
     <div class="kpi-row">
       <div class="kpi-card">
-        <div class="label">Active Customer List</div>
+        <div class="label">Active Customers</div>
         <div class="value" id="kpiActive">0</div>
-        <div class="subtext">Total Assigned Portfolio</div>
+        <div class="subtext">Total Portfolio</div>
       </div>
       <div class="kpi-card">
         <div class="label">Visited Customers</div>
         <div class="value val-green" id="kpiVisited">0</div>
-        <div class="subtext" id="kpiRemaining">0 Visits Remaining</div>
+        <div class="subtext" id="kpiRemaining">0 Remaining</div>
       </div>
       <div class="kpi-card">
         <div class="label">Current Hit Rate</div>
         <div class="value val-blue" id="kpiHitRate">0.0%</div>
-        <div class="subtext">Target Pace Benchmark</div>
+        <div class="subtext">Target Pace</div>
       </div>
       <div class="kpi-card">
-        <div class="label">Selected SE / ASM Rank</div>
+        <div class="label">Leader</div>
         <div class="value val-gold" id="kpiRank">#--</div>
         <div class="subtext" id="kpiRankSub">Overview Mode</div>
       </div>
@@ -339,26 +225,16 @@
       <div class="chart-card">
         <div class="chart-header">
           <div>
-            <div class="chart-title">Monthly Visited Hit Rate Trend (%)</div>
-            <div class="chart-subtitle" id="trendSubtitle">Tracking Progression</div>
+            <div class="chart-title">Hit Rate Trend (%)</div>
           </div>
-          <div class="date-badge" id="trendBadge">Dates</div>
-        </div>
-        <div class="line-toggles" id="lineTogglesContainer">
-          <span style="color: var(--text-muted); font-weight: 700;">DISPLAY LINES:</span>
         </div>
         <div class="canvas-container">
           <canvas id="trendChart"></canvas>
         </div>
       </div>
-
       <div class="chart-card">
         <div class="chart-header">
-          <div>
-            <div class="chart-title">Hit Rate by SE (%)</div>
-            <div class="chart-subtitle" id="rankSubtitle">Latest Performance</div>
-          </div>
-          <div class="date-badge" id="rankBadge">Latest</div>
+          <div><div class="chart-title">Hit Rate by SE (%)</div></div>
         </div>
         <div class="canvas-container">
           <canvas id="rankChart"></canvas>
@@ -369,33 +245,20 @@
     <div class="dashboard-layout">
       <div class="chart-card">
         <div class="chart-header">
-          <div>
-            <div class="chart-title">Visited vs Remaining Customers</div>
-            <div class="chart-subtitle">Portfolio Breakdown by Sales Executive</div>
-          </div>
+          <div class="chart-title">Visited vs Remaining</div>
         </div>
         <div class="canvas-container">
           <canvas id="volumeChart"></canvas>
         </div>
       </div>
-
       <div class="chart-card">
         <div class="chart-header">
-          <div>
-            <div class="chart-title">Sales Executive Leaderboard</div>
-            <div class="chart-subtitle">Overall Performance Rankings</div>
-          </div>
+          <div class="chart-title">Leaderboard</div>
         </div>
         <div style="overflow-x: auto;">
           <table class="leaderboard-table">
             <thead>
-              <tr>
-                <th>SE</th>
-                <th>ASM</th>
-                <th>ACTIVE</th>
-                <th>VISITED</th>
-                <th>HIT RATE</th>
-              </tr>
+              <tr><th>SE</th><th>ASM</th><th>ACTIVE</th><th>VISITED</th><th>RATE</th></tr>
             </thead>
             <tbody id="leaderboardBody"></tbody>
           </table>
@@ -405,427 +268,205 @@
   </div>
 
   <script>
-    const ADMIN_USER = "admin";
-    const ADMIN_PASS = "password123";
+    document.addEventListener("DOMContentLoaded", function () {
+      const ADMIN_USER = "admin";
+      const ADMIN_PASS = "password123";
 
-    const asmMapping = {
-      'HMD': 'Mr.Farzaan',
-      'RSD': 'Mr.Farzaan',
-      'FZN': 'Mr.Farzaan',
-      'RKZ': 'Mr.Hilmy',
-      'RFD': 'Mr.Hilmy',
-      'MZR': 'Mr.Hilmy',
-      'AMT': 'Mr.Sabir',
-      'DNT': 'Mr.Sabir'
-    };
+      const asmMapping = {
+        'HMD': 'Mr.Farzaan', 'RSD': 'Mr.Farzaan', 'FZN': 'Mr.Farzaan',
+        'RKZ': 'Mr.Hilmy', 'RFD': 'Mr.Hilmy', 'MZR': 'Mr.Hilmy',
+        'AMT': 'Mr.Sabir', 'DNT': 'Mr.Sabir'
+      };
 
-    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTj3GMbofE6YPBSwjIiyh63JCQ4PdFLisiKOE5ehdzcm63poJ95iOotQRRLkLBZYxrgQg7Y5nK1Ch2H/pub?output=csv';
+      const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTj3GMbofE6YPBSwjIiyh63JCQ4PdFLisiKOE5ehdzcm63poJ95iOotQRRLkLBZYxrgQg7Y5nK1Ch2H/pub?output=csv';
 
-    let globalRawData = [];
-    let ehTeamData = null;
-    let dateColumns = [];
-    let trendChartInstance = null;
-    let rankChartInstance = null;
-    let volumeChartInstance = null;
+      let globalRawData = [];
+      let ehTeamData = null;
+      let dateColumns = [];
+      let trendChartInstance = null, rankChartInstance = null, volumeChartInstance = null;
 
-    const seColors = {
-      'Overall Team (EH)': '#38bdf8',
-      'MZR': '#10b981', 'RFD': '#059669', 'DNT': '#14b8a6',
-      'HMD': '#3b82f6', 'RSD': '#2563eb', 'RKZ': '#1d4ed8',
-      'FZN': '#f59e0b', 'AMT': '#f97316'
-    };
-
-    function checkAuth() {
       const loginScreen = document.getElementById('loginScreen');
       const dashboardContent = document.getElementById('dashboardContent');
+      const loginForm = document.getElementById('loginForm');
+      const logoutBtn = document.getElementById('logoutBtn');
 
-      if (localStorage.getItem('isLoggedIn') === 'true') {
-        loginScreen.style.display = 'none';
-        dashboardContent.style.display = 'block';
-        loadCloudSheetData();
-      } else {
-        loginScreen.style.display = 'flex';
-        dashboardContent.style.display = 'none';
-      }
-    }
-
-    function handleLogin(e) {
-      e.preventDefault();
-      const user = document.getElementById('username').value;
-      const pass = document.getElementById('password').value;
-      if (user === ADMIN_USER && pass === ADMIN_PASS) {
-        localStorage.setItem('isLoggedIn', 'true');
-        checkAuth();
-      } else {
-        document.getElementById('errorMsg').style.display = 'block';
-      }
-    }
-
-    function logout() {
-      localStorage.removeItem('isLoggedIn');
-      window.location.reload();
-    }
-
-    async function loadCloudSheetData() {
-      try {
-        const response = await fetch(SHEET_CSV_URL);
-        const csvText = await response.text();
-        Papa.parse(csvText, {
-          header: false,
-          skipEmptyLines: true,
-          complete: (results) => processMatrixData(results.data)
-        });
-      } catch (err) {
-        const statusEl = document.getElementById('syncStatus');
-        if (statusEl) {
-          statusEl.innerText = 'SYNC ERROR';
-          statusEl.style.background = '#ef4444';
-        }
-      }
-    }
-
-    function processMatrixData(matrix) {
-      if (!matrix.length) return;
-      let headerIdx = matrix.findIndex(r => r.some(c => String(c).trim().toUpperCase() === 'SE'));
-      if (headerIdx === -1) headerIdx = 0;
-
-      const headers = matrix[headerIdx].map(h => String(h).trim());
-      const seIdx = headers.findIndex(h => h.toUpperCase() === 'SE');
-      const activeIdx = headers.findIndex(h => h.toLowerCase().includes('active'));
-      const visitedIdx = headers.findIndex(h => h.toLowerCase().includes('visited'));
-
-      const rawDateColumns = [];
-      headers.forEach((h, idx) => {
-        if (idx !== seIdx && idx !== activeIdx && idx !== visitedIdx && h !== '' && !h.startsWith('_EMPTY')) {
-          rawDateColumns.push({ name: h, idx: idx });
-        }
-      });
-
-      dateColumns = rawDateColumns.filter(d => matrix.slice(headerIdx + 1).some(row => row[d.idx] !== undefined && row[d.idx] !== null && String(row[d.idx]).trim() !== ''));
-
-      globalRawData = [];
-      ehTeamData = null;
-
-      for (let i = headerIdx + 1; i < matrix.length; i++) {
-        const row = matrix[i];
-        if (!row || !row[seIdx]) continue;
-        const seName = String(row[seIdx]).trim().toUpperCase();
-        const activeCx = Number(row[activeIdx]) || 0;
-        const visitedCx = Number(row[visitedIdx]) || 0;
-
-        const dailyRates = {};
-        dateColumns.forEach(d => {
-          let rawVal = row[d.idx];
-          if (rawVal === undefined || rawVal === null || String(rawVal).trim() === '') {
-            dailyRates[d.name] = null;
-          } else {
-            let valStr = String(rawVal).replace('%', '').trim();
-            let val = parseFloat(valStr) || 0;
-            if (val <= 1 && val > 0) val = val * 100;
-            dailyRates[d.name] = Math.min(val, 100);
-          }
-        });
-
-        const rowObj = {
-          se: seName,
-          asm: asmMapping[seName] || 'Unassigned',
-          active: activeCx,
-          visited: visitedCx,
-          hitRate: activeCx > 0 ? ((visitedCx / activeCx) * 100) : 0,
-          daily: dailyRates
-        };
-
-        if (seName === 'EH' || seName.includes('TOTAL')) {
-          ehTeamData = rowObj;
+      function init() {
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+          loginScreen.style.display = 'none';
+          dashboardContent.style.display = 'block';
+          loadData();
         } else {
-          globalRawData.push(rowObj);
+          loginScreen.style.display = 'flex';
+          dashboardContent.style.display = 'none';
         }
       }
 
-      populateAsmDropdown();
-      populateControls();
-      updateDashboardView();
-    }
-
-    function populateAsmDropdown() {
-      const asmSelect = document.getElementById('asmFilter');
-      const asmList = Array.from(new Set(Object.values(asmMapping)));
-      
-      asmSelect.innerHTML = '<option value="ALL">All Area Managers (ASM)</option>';
-      asmList.forEach(asm => {
-        asmSelect.innerHTML += `<option value="${asm}">${asm}</option>`;
-      });
-    }
-
-    function onAsmChange() {
-      document.getElementById('seFilter').value = 'ALL';
-      updateDashboardView();
-    }
-
-    function populateControls() {
-      const container = document.getElementById('lineTogglesContainer');
-      container.innerHTML = '<span style="color: var(--text-muted); font-weight: 700;">DISPLAY LINES:</span>';
-      container.innerHTML += `
-        <label>
-          <input type="checkbox" value="Overall Team (EH)" checked onchange="renderTrendChart()">
-          <span style="color: ${seColors['Overall Team (EH)']} ">Overall Team (EH)</span>
-        </label>
-      `;
-
-      globalRawData.forEach((d) => {
-        const color = seColors[d.se] || '#a855f7';
-        container.innerHTML += `
-          <label>
-            <input type="checkbox" value="${d.se}" id="chk_${d.se}" onchange="renderTrendChart()">
-            <span style="color: ${color}">${d.se}</span>
-          </label>
-        `;
-      });
-
-      if (dateColumns.length > 0) {
-        const start = dateColumns[0].name;
-        const end = dateColumns[dateColumns.length - 1].name;
-        document.getElementById('trendSubtitle').innerText = `Tracking Progression from ${start} to ${end}`;
-        document.getElementById('trendBadge').innerText = `${start} - ${end}`;
-        document.getElementById('rankBadge').innerText = `As of ${end}`;
-      }
-    }
-
-    function updateDropdownByRank(sortedData) {
-      const dropdown = document.getElementById('seFilter');
-      const selectedASM = document.getElementById('asmFilter').value;
-      const currentValue = dropdown.value;
-      
-      dropdown.innerHTML = '<option value="ALL">All Sales Executives (Overview)</option>';
-      
-      const filteredSEs = sortedData.filter(d => selectedASM === 'ALL' || d.asm === selectedASM);
-
-      filteredSEs.forEach((d) => {
-        const rank = sortedData.findIndex(item => item.se === d.se) + 1;
-        dropdown.innerHTML += `<option value="${d.se}">#${rank} - ${d.se} (${d.hitRate.toFixed(1)}%)</option>`;
-      });
-
-      if (filteredSEs.some(d => d.se === currentValue)) {
-        dropdown.value = currentValue;
-      } else {
-        dropdown.value = 'ALL';
-      }
-    }
-
-    function updateDashboardView() {
-      const selectedASM = document.getElementById('asmFilter').value;
-      const selectedSE = document.getElementById('seFilter').value;
-      
-      const sorted = [...globalRawData].sort((a, b) => b.hitRate - a.hitRate);
-      updateDropdownByRank(sorted);
-
-      let filteredData = globalRawData;
-      
-      if (selectedASM !== 'ALL') {
-        filteredData = filteredData.filter(d => d.asm === selectedASM);
-      }
-
-      if (selectedSE !== 'ALL') {
-        filteredData = filteredData.filter(d => d.se === selectedSE);
-      }
-
-      let activeVal = 0, visitedVal = 0;
-
-      if (selectedASM === 'ALL' && selectedSE === 'ALL') {
-        if (ehTeamData) {
-          activeVal = ehTeamData.active;
-          visitedVal = ehTeamData.visited;
+      loginForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const u = document.getElementById('username').value;
+        const p = document.getElementById('password').value;
+        if (u === ADMIN_USER && p === ADMIN_PASS) {
+          localStorage.setItem('isLoggedIn', 'true');
+          init();
         } else {
-          globalRawData.forEach(d => { activeVal += d.active; visitedVal += d.visited; });
-        }
-      } else {
-        filteredData.forEach(d => {
-          activeVal += d.active;
-          visitedVal += d.visited;
-        });
-      }
-
-      const hitRateVal = activeVal > 0 ? ((visitedVal / activeVal) * 100).toFixed(1) : '0.0';
-
-      document.getElementById('kpiActive').innerText = activeVal;
-      document.getElementById('kpiVisited').innerText = visitedVal;
-      document.getElementById('kpiRemaining').innerText = `${Math.max(0, activeVal - visitedVal)} Visits Remaining`;
-      document.getElementById('kpiHitRate').innerText = `${hitRateVal}%`;
-
-      if (selectedSE !== 'ALL') {
-        const rank = sorted.findIndex(d => d.se === selectedSE) + 1;
-        document.getElementById('kpiRank').innerText = `#${rank} ${selectedSE}`;
-        document.getElementById('kpiRankSub').innerText = `ASM: ${asmMapping[selectedSE] || 'N/A'}`;
-      } else if (selectedASM !== 'ALL') {
-        document.getElementById('kpiRank').innerText = selectedASM;
-        document.getElementById('kpiRankSub').innerText = `${filteredData.length} SEs Managed`;
-      } else if (sorted.length > 0) {
-        document.getElementById('kpiRank').innerText = `#1 ${sorted[0].se}`;
-        document.getElementById('kpiRankSub').innerText = 'Top Performing Sales Exec';
-      }
-
-      globalRawData.forEach(d => {
-        const chk = document.getElementById(`chk_${d.se}`);
-        if (chk) {
-          if (selectedSE !== 'ALL') {
-            chk.checked = (d.se === selectedSE);
-          } else if (selectedASM !== 'ALL') {
-            chk.checked = (d.asm === selectedASM);
-          } else {
-            chk.checked = false;
-          }
+          document.getElementById('errorMsg').style.display = 'block';
         }
       });
 
-      const displayList = sorted.filter(d => selectedASM === 'ALL' || d.asm === selectedASM);
+      logoutBtn.addEventListener('click', function () {
+        localStorage.removeItem('isLoggedIn');
+        init();
+      });
 
-      renderTrendChart();
-      renderRankChart(displayList);
-      renderVolumeChart(displayList);
-      renderLeaderboardTable(displayList);
-    }
-
-    function renderTrendChart() {
-      const ctx = document.getElementById('trendChart').getContext('2d');
-      const selectedToggles = Array.from(document.querySelectorAll('#lineTogglesContainer input:checked')).map(c => c.value);
-      const labels = dateColumns.map(d => d.name);
-      const datasets = [];
-
-      if (selectedToggles.includes('Overall Team (EH)')) {
-        let teamDailyRates;
-        if (ehTeamData) {
-          teamDailyRates = labels.map(date => (ehTeamData.daily[date] !== null && ehTeamData.daily[date] !== undefined) ? ehTeamData.daily[date].toFixed(1) : null);
-        } else {
-          teamDailyRates = labels.map(date => {
-            let totalVisited = 0, totalActive = 0;
-            globalRawData.forEach(d => {
-              if (d.daily[date] !== null && d.daily[date] !== undefined && d.active > 0) {
-                totalVisited += (d.daily[date] / 100) * d.active;
-                totalActive += d.active;
-              }
+      async function loadData() {
+        try {
+          const response = await fetch(SHEET_CSV_URL);
+          if (!response.ok) throw new Error("HTTP error " + response.status);
+          const csvText = await response.text();
+          if (window.Papa) {
+            Papa.parse(csvText, {
+              header: false,
+              skipEmptyLines: true,
+              complete: (results) => parseData(results.data)
             });
-            return totalActive > 0 ? ((totalVisited / totalActive) * 100).toFixed(1) : null;
-          });
+          }
+        } catch (err) {
+          document.getElementById('syncStatus').innerText = 'OFFLINE MODE';
+          document.getElementById('syncStatus').style.background = '#f59e0b';
+          // Fallback static structure so dashboard displays offline
+          parseData([
+            ["SE", "Active", "Visited", "01-Aug", "02-Aug"],
+            ["HMD", "120", "90", "70%", "75%"],
+            ["RSD", "100", "80", "60%", "80%"],
+            ["MZR", "110", "95", "80%", "86%"],
+            ["EH", "330", "265", "70%", "80%"]
+          ]);
         }
-
-        datasets.push({
-          label: 'Overall Team (EH)',
-          data: teamDailyRates,
-          borderColor: seColors['Overall Team (EH)'],
-          backgroundColor: seColors['Overall Team (EH)'],
-          tension: 0.3,
-          borderWidth: 3,
-          spanGaps: false
-        });
       }
 
-      globalRawData.forEach(d => {
-        if (selectedToggles.includes(d.se)) {
-          const dataPoints = labels.map(date => (d.daily[date] !== null && d.daily[date] !== undefined) ? d.daily[date].toFixed(1) : null);
-          datasets.push({
-            label: d.se,
-            data: dataPoints,
-            borderColor: seColors[d.se] || '#a855f7',
-            backgroundColor: seColors[d.se] || '#a855f7',
-            tension: 0.3,
-            borderWidth: 2,
-            spanGaps: false
+      function parseData(matrix) {
+        if (!matrix || !matrix.length) return;
+        let headerIdx = matrix.findIndex(r => r.some(c => String(c).trim().toUpperCase() === 'SE'));
+        if (headerIdx === -1) headerIdx = 0;
+
+        const headers = matrix[headerIdx].map(h => String(h).trim());
+        const seIdx = headers.findIndex(h => h.toUpperCase() === 'SE');
+        const activeIdx = headers.findIndex(h => h.toLowerCase().includes('active'));
+        const visitedIdx = headers.findIndex(h => h.toLowerCase().includes('visited'));
+
+        dateColumns = [];
+        headers.forEach((h, idx) => {
+          if (idx !== seIdx && idx !== activeIdx && idx !== visitedIdx && h !== '') {
+            dateColumns.push({ name: h, idx: idx });
+          }
+        });
+
+        globalRawData = [];
+        for (let i = headerIdx + 1; i < matrix.length; i++) {
+          const row = matrix[i];
+          if (!row || !row[seIdx]) continue;
+          const seName = String(row[seIdx]).trim().toUpperCase();
+          const active = Number(row[activeIdx]) || 0;
+          const visited = Number(row[visitedIdx]) || 0;
+
+          const daily = {};
+          dateColumns.forEach(d => {
+            let val = parseFloat(String(row[d.idx]).replace('%', '')) || 0;
+            if (val <= 1 && val > 0) val = val * 100;
+            daily[d.name] = val;
+          });
+
+          const item = {
+            se: seName,
+            asm: asmMapping[seName] || 'Unassigned',
+            active, visited,
+            hitRate: active > 0 ? (visited / active) * 100 : 0,
+            daily
+          };
+
+          if (seName === 'EH' || seName.includes('TOTAL')) ehTeamData = item;
+          else globalRawData.push(item);
+        }
+
+        renderUI();
+      }
+
+      function renderUI() {
+        const sorted = [...globalRawData].sort((a, b) => b.hitRate - a.hitRate);
+        let totalActive = 0, totalVisited = 0;
+
+        globalRawData.forEach(d => {
+          totalActive += d.active;
+          totalVisited += d.visited;
+        });
+
+        document.getElementById('kpiActive').innerText = totalActive;
+        document.getElementById('kpiVisited').innerText = totalVisited;
+        document.getElementById('kpiRemaining').innerText = (totalActive - totalVisited) + " Remaining";
+        document.getElementById('kpiHitRate').innerText = (totalActive > 0 ? ((totalVisited / totalActive) * 100).toFixed(1) : 0) + "%";
+        if (sorted.length) document.getElementById('kpiRank').innerText = "#1 " + sorted[0].se;
+
+        // Populate Leaderboard
+        const tbody = document.getElementById('leaderboardBody');
+        tbody.innerHTML = '';
+        sorted.forEach((d) => {
+          tbody.innerHTML += `<tr>
+            <td style="color:#fff;">${d.se}</td>
+            <td style="color:#8e9cb0;">${d.asm}</td>
+            <td>${d.active}</td>
+            <td style="color:#10b981;">${d.visited}</td>
+            <td style="color:#38bdf8;">${d.hitRate.toFixed(1)}%</td>
+          </tr>`;
+        });
+
+        // Charts
+        if (window.Chart) {
+          const labels = sorted.map(d => d.se);
+          const rates = sorted.map(d => d.hitRate.toFixed(1));
+
+          if (rankChartInstance) rankChartInstance.destroy();
+          rankChartInstance = new Chart(document.getElementById('rankChart'), {
+            type: 'bar',
+            data: {
+              labels: labels,
+              datasets: [{ data: rates, backgroundColor: '#38bdf8', borderRadius: 4 }]
+            },
+            options: {
+              indexAxis: 'y',
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } },
+                y: { ticks: { color: '#fff' }, grid: { display: false } }
+              }
+            }
+          });
+
+          if (volumeChartInstance) volumeChartInstance.destroy();
+          volumeChartInstance = new Chart(document.getElementById('volumeChart'), {
+            type: 'bar',
+            data: {
+              labels: labels,
+              datasets: [
+                { label: 'Visited', data: sorted.map(d => d.visited), backgroundColor: '#10b981' },
+                { label: 'Remaining', data: sorted.map(d => Math.max(0, d.active - d.visited)), backgroundColor: '#1e293b' }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: { stacked: true, ticks: { color: '#fff' } },
+                y: { stacked: true, ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } }
+              }
+            }
           });
         }
-      });
+      }
 
-      if (trendChartInstance) trendChartInstance.destroy();
-      trendChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: { labels, datasets },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } },
-            y: { ticks: { color: '#8e9cb0', callback: v => v + '%' }, grid: { color: '#1e293b' }, min: 0, max: 100 }
-          }
-        }
-      });
-    }
-
-    function renderRankChart(sortedData) {
-      const ctx = document.getElementById('rankChart').getContext('2d');
-      const labels = sortedData.map(d => d.se);
-      const dataValues = sortedData.map(d => d.hitRate.toFixed(1));
-      const barColors = sortedData.map(d => {
-        if (d.hitRate >= 70) return '#10b981';
-        if (d.hitRate >= 60) return '#3b82f6';
-        return '#f59e0b';
-      });
-
-      if (rankChartInstance) rankChartInstance.destroy();
-      rankChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{ data: dataValues, backgroundColor: barColors, borderRadius: 4 }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { ticks: { color: '#8e9cb0', callback: v => v + '%' }, grid: { color: '#1e293b' }, min: 0, max: 100 },
-            y: { ticks: { color: '#ffffff', font: { weight: 'bold' } }, grid: { display: false } }
-          }
-        }
-      });
-    }
-
-    function renderVolumeChart(sortedData) {
-      const ctx = document.getElementById('volumeChart').getContext('2d');
-      const labels = sortedData.map(d => d.se);
-      const visitedData = sortedData.map(d => d.visited);
-      const remainingData = sortedData.map(d => Math.max(0, d.active - d.visited));
-
-      if (volumeChartInstance) volumeChartInstance.destroy();
-      volumeChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [
-            { label: 'Visited Customers', data: visitedData, backgroundColor: '#10b981', borderRadius: 4 },
-            { label: 'Remaining Customers', data: remainingData, backgroundColor: '#334155', borderRadius: 4 }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: true, labels: { color: '#8e9cb0' } } },
-          scales: {
-            x: { stacked: true, ticks: { color: '#ffffff' }, grid: { display: false } },
-            y: { stacked: true, ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } }
-          }
-        }
-      });
-    }
-
-    function renderLeaderboardTable(sortedData) {
-      const tbody = document.getElementById('leaderboardBody');
-      tbody.innerHTML = '';
-      sortedData.forEach((d, idx) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><span class="rank-cell">#${idx + 1}</span> <span class="se-cell">${d.se}</span></td>
-          <td style="color: #94a3b8; font-size: 0.85rem;">${d.asm}</td>
-          <td>${d.active}</td>
-          <td class="visited-text">${d.visited}</td>
-          <td class="hit-rate-text">${d.hitRate.toFixed(1)}%</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // Run auth check immediately upon loading
-    checkAuth();
+      init();
+    });
   </script>
 </body>
 </html>
