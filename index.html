@@ -168,7 +168,7 @@
     };
 
     let globalRawData = [];
-    let dateColumns = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'];
+    let dateColumns = [];
     let trendChartInstance = null, rankChartInstance = null, volumeChartInstance = null;
 
     function checkAuth() {
@@ -212,6 +212,7 @@
     }
 
     function loadMockData() {
+      dateColumns = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'];
       globalRawData = [
         { se: 'HMD', asm: 'Mr.Farzaan', active: 100, visited: 85, hitRate: 85.0, dailyTrend: {'Day 1': 20, 'Day 2': 40, 'Day 3': 60, 'Day 4': 75, 'Day 5': 85} },
         { se: 'RSD', asm: 'Mr.Farzaan', active: 90, visited: 70, hitRate: 77.8, dailyTrend: {'Day 1': 15, 'Day 2': 30, 'Day 3': 50, 'Day 4': 60, 'Day 5': 70} },
@@ -229,13 +230,16 @@
 
       if (Array.isArray(rows[0])) {
         const headers = rows[0].map(h => String(h || '').trim());
-        dateColumns = headers.slice(3);
+        dateColumns = headers.slice(3).filter(col => col !== '');
+
         for (let i = 1; i < rows.length; i++) {
           const r = rows[i];
-          if (!r || !r[0]) continue;
+          if (!r || r[0] === undefined || r[0] === null) continue;
           
           let se = String(r[0]).trim().toUpperCase();
-          if (se === 'SE' || se === 'EH') continue; // Filter out header label rows or totals imported as SE categories
+          
+          // Completely filter out invalid or summary category headers like SE, EH, empty rows
+          if (!se || se === 'SE' || se === 'EH' || se === 'UNDEFINED' || se === 'NAN') continue;
 
           const active = Number(r[1]) || 0;
           const visited = Number(r[2]) || 0;
@@ -321,7 +325,10 @@
       if (window.Chart) {
         const trendData = dateColumns.map(day => {
           let dayVisited = 0, dayActive = 0;
-          filtered.forEach(d => { dayVisited += (d.dailyTrend[day] || 0); dayActive += d.active; });
+          filtered.forEach(d => { 
+            dayVisited += (d.dailyTrend[day] || 0); 
+            dayActive += d.active; 
+          });
           return dayActive > 0 ? Number(((dayVisited / dayActive) * 100).toFixed(1)) : 0;
         });
 
