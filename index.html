@@ -338,15 +338,15 @@
 
     function useFallbackData() {
       parseData([
-        { SE: "HMD", Active: "120", Visited: "90" },
-        { SE: "RSD", Active: "100", Visited: "80" },
-        { SE: "FZN", Active: "110", Visited: "70" },
-        { SE: "RKZ", Active: "95",  Visited: "65" },
-        { SE: "RFD", Active: "105", Visited: "85" },
-        { SE: "MZR", Active: "115", Visited: "95" },
-        { SE: "AMT", Active: "130", Visited: "100" },
-        { SE: "DNT", Active: "90",  Visited: "75" }
-      ], ["SE", "Active", "Visited"]);
+        { SE: "HMD", Active: "120", Visited: "90", "25-Aug": "20", "26-Aug": "45", "27-Aug": "90" },
+        { SE: "RSD", Active: "100", Visited: "80", "25-Aug": "15", "26-Aug": "40", "27-Aug": "80" },
+        { SE: "FZN", Active: "110", Visited: "70", "25-Aug": "10", "26-Aug": "35", "27-Aug": "70" },
+        { SE: "RKZ", Active: "95",  Visited: "65", "25-Aug": "15", "26-Aug": "30", "27-Aug": "65" },
+        { SE: "RFD", Active: "105", Visited: "85", "25-Aug": "20", "26-Aug": "50", "27-Aug": "85" },
+        { SE: "MZR", Active: "115", Visited: "95", "25-Aug": "30", "26-Aug": "60", "27-Aug": "95" },
+        { SE: "AMT", Active: "130", Visited: "100", "25-Aug": "25", "26-Aug": "65", "27-Aug": "100" },
+        { SE: "DNT", Active: "90",  Visited: "75", "25-Aug": "20", "26-Aug": "45", "27-Aug": "75" }
+      ], ["SE", "Active", "Visited", "25-Aug", "26-Aug", "27-Aug"]);
     }
 
     function parseData(rows, fields) {
@@ -377,14 +377,10 @@
 
       dateColumns = allKeys.filter(function(k) {
         const clean = k.trim().toLowerCase();
-        return !['se', 'sales executive', 'asm', 'active', 'visited', 'total', 'hit rate', 'hitrate', 'rate'].some(function(c) {
+        return !['se', 'sales executive', 'asm', 'active', 'visited', 'total', 'hit rate', 'hitrate', 'rate', 'itinerary hit'].some(function(c) {
           return clean.includes(c);
         });
       });
-
-      if (dateColumns.length === 0) {
-        dateColumns = ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5"];
-      }
 
       rows.forEach(function(row) {
         const seVal = seKey ? row[seKey] : null;
@@ -398,20 +394,18 @@
         const asmName = (asmKey && row[asmKey]) ? String(row[asmKey]).trim() : (asmMapping[seName] || 'Unassigned');
 
         const dailyTrend = {};
-        let totalExplicitDaily = 0;
+        let cumulative = 0;
 
-        dateColumns.forEach(function(day) {
-          const val = parseInt(row[day], 10) || 0;
-          dailyTrend[day] = val;
-          totalExplicitDaily += val;
-        });
-
-        if (totalExplicitDaily === 0) {
-          dateColumns.forEach(function(day, idx) {
+        dateColumns.forEach(function(day, idx) {
+          const rawVal = parseInt(row[day], 10);
+          if (!isNaN(rawVal)) {
+            cumulative = rawVal;
+          } else {
             const factor = (idx + 1) / dateColumns.length;
-            dailyTrend[day] = Math.round(visited * factor);
-          });
-        }
+            cumulative = Math.round(visited * factor);
+          }
+          dailyTrend[day] = cumulative;
+        });
 
         globalRawData.push({
           se: seName,
