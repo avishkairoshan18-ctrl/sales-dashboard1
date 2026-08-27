@@ -354,27 +354,32 @@
           document.getElementById('syncStatus').style.background = '#f59e0b';
           
           parseData([
-            { SE: "HMD", Active: "120", Visited: "90", "Day 1": "20", "Day 2": "40", "Day 3": "60", "Day 4": "75", "Day 5": "90" },
-            { SE: "RSD", Active: "100", Visited: "80", "Day 1": "15", "Day 2": "35", "Day 3": "50", "Day 4": "65", "Day 5": "80" },
-            { SE: "FZN", Active: "110", Visited: "70", "Day 1": "10", "Day 2": "25", "Day 3": "40", "Day 4": "55", "Day 5": "70" },
-            { SE: "RKZ", Active: "95",  Visited: "65", "Day 1": "12", "Day 2": "28", "Day 3": "42", "Day 4": "54", "Day 5": "65" },
-            { SE: "RFD", Active: "105", Visited: "85", "Day 1": "18", "Day 2": "38", "Day 3": "55", "Day 4": "70", "Day 5": "85" },
-            { SE: "MZR", Active: "115", Visited: "95", "Day 1": "22", "Day 2": "45", "Day 3": "65", "Day 4": "80", "Day 5": "95" },
-            { SE: "AMT", Active: "130", Visited: "100", "Day 1": "25", "Day 2": "50", "Day 3": "70", "Day 4": "85", "Day 5": "100" },
-            { SE: "DNT", Active: "90",  Visited: "75", "Day 1": "15", "Day 2": "30", "Day 3": "48", "Day 4": "62", "Day 5": "75" }
-          ], ["SE", "Active", "Visited", "Day 1", "Day 2", "Day 3", "Day 4", "Day 5"]);
+            { SE: "HMD", Active: "120", Visited: "90" },
+            { SE: "RSD", Active: "100", Visited: "80" },
+            { SE: "FZN", Active: "110", Visited: "70" },
+            { SE: "RKZ", Active: "95",  Visited: "65" },
+            { SE: "RFD", Active: "105", Visited: "85" },
+            { SE: "MZR", Active: "115", Visited: "95" },
+            { SE: "AMT", Active: "130", Visited: "100" },
+            { SE: "DNT", Active: "90",  Visited: "75" }
+          ], ["SE", "Active", "Visited"]);
         }
       }
 
       function parseData(rows, fields) {
         globalRawData = [];
 
+        // Check for specific date or day header columns
         if (fields) {
-          dateColumns = fields.filter(f => {
+          let detected = fields.filter(f => {
             const cleanStr = f.trim().toLowerCase();
-            return cleanStr.includes('day') || cleanStr.includes('/') || cleanStr.includes('-') || !isNaN(Date.parse(f));
+            return cleanStr.includes('day') || cleanStr.includes('/') || cleanStr.includes('-');
           });
-          if (!dateColumns.length) dateColumns = ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5"];
+          if (detected.length > 0) {
+            dateColumns = detected;
+          } else {
+            dateColumns = ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5"];
+          }
         }
 
         rows.forEach(row => {
@@ -394,9 +399,21 @@
           const asmName = row[asmKey] ? String(row[asmKey]).trim() : (asmMapping[seName] || 'Unassigned');
 
           const dailyTrend = {};
+          let totalExplicitDaily = 0;
+
           dateColumns.forEach(day => {
-            dailyTrend[day] = parseInt(row[day], 10) || 0;
+            const val = parseInt(row[day], 10) || 0;
+            dailyTrend[day] = val;
+            totalExplicitDaily += val;
           });
+
+          // Fallback: If no day-by-day columns are present, generate progression steps leading to total visited
+          if (totalExplicitDaily === 0 && visited > 0) {
+            dateColumns.forEach((day, idx) => {
+              const factor = (idx + 1) / dateColumns.length;
+              dailyTrend[day] = Math.round(visited * factor);
+            });
+          }
 
           globalRawData.push({
             se: seName,
@@ -491,7 +508,7 @@
 
         // Render Charts
         if (window.Chart) {
-          // Trend Line Chart Calculation
+          // Trend Line Chart
           const trendData = dateColumns.map(day => {
             let dayVisited = 0;
             let dayActive = 0;
@@ -499,7 +516,7 @@
               dayVisited += (d.dailyTrend[day] || 0);
               dayActive += d.active;
             });
-            return dayActive > 0 ? ((dayVisited / dayActive) * 100).toFixed(1) : 0;
+            return dayActive > 0 ? Number(((dayVisited / dayActive) * 100).toFixed(1)) : 0;
           });
 
           if (trendChartInstance) trendChartInstance.destroy();
@@ -511,10 +528,12 @@
                 label: 'Hit Rate %',
                 data: trendData,
                 borderColor: '#38bdf8',
-                backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                backgroundColor: 'rgba(56, 189, 248, 0.15)',
                 fill: true,
-                tension: 0.3,
-                borderWidth: 2
+                tension: 0.35,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointBackgroundColor: '#38bdf8'
               }]
             },
             options: {
