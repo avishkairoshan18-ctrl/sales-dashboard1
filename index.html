@@ -206,18 +206,25 @@
 
     function cleanNumber(val) {
       if (val === null || val === undefined) return 0;
+      
       if (typeof val === 'number') {
-        // If Google Sheets returns a fraction like 0.30 for 30%, scale it to 30
-        return val <= 1 && val > 0 ? val * 100 : val;
+        return (val <= 1 && val > 0) ? val * 100 : val;
       }
+      
       if (typeof val === 'string') {
         let isPercent = val.includes('%');
         let cleaned = val.replace(/[^0-9.-]/g, '');
         let parsed = parseFloat(cleaned);
+        
         if (isNaN(parsed)) return 0;
-        // Handle "30%" or decimal string conversions
-        return (isPercent && parsed <= 1) ? parsed * 100 : parsed;
+        
+        if (isPercent && parsed <= 1) {
+          return parsed * 100;
+        }
+        
+        return parsed;
       }
+      
       return 0;
     }
 
