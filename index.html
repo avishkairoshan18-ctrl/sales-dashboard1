@@ -161,7 +161,6 @@
   <script>
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQx7G10Kpb1v4LDO_iZxEGxCVQrRen6wWvRNnn9tzAT6AXmGHDddiMg4vqWh8D_Sk/exec';
 
-    // Strict mappings as requested
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
       'RSD': 'Mr.Farzaan', 
@@ -179,3 +178,139 @@
 
     function checkAuth() {
       const u = document.getElementById('userInput').value.trim();
+      const p = document.getElementById('passInput').value.trim();
+      if (u === "admin" && p === "password123") {
+        document.getElementById('errorMsg').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboardContent').style.display = 'block';
+        loadData();
+      } else {
+        document.getElementById('errorMsg').style.display = 'block';
+      }
+    }
+
+    function logout() {
+      document.getElementById('dashboardContent').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+    }
+
+    async function loadData() {
+      const statusBadge = document.getElementById('syncStatus');
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, { redirect: "follow" });
+        const textData = await res.text();
+        const json = JSON.parse(textData);
+        
+        let rows = Array.isArray(json) ? json : (json.data || json.rows || json.result || []);
+        if (rows.length > 0) {
+          statusBadge.innerText = 'LIVE API CONNECTED';
+          processDataPayload(rows);
+          return;
+        }
+        throw new Error("Empty data array");
+      } catch (err) {
+        console.warn("API fetch failed, loading fallback layout structure:", err);
+        statusBadge.innerText = 'OFFLINE MOCK DATA';
+        statusBadge.style.background = '#f59e0b';
+        loadMockData();
+      }
+    }
+
+    function loadMockData() {
+      dateColumns = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'];
+      globalRawData = [
+        { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 50, hitRate: 74.6, dailyTrend: {'Day 1': 10, 'Day 2': 20, 'Day 3': 30, 'Day 4': 40, 'Day 5': 50} },
+        { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 44, hitRate: 78.6, dailyTrend: {'Day 1': 8, 'Day 2': 18, 'Day 3': 28, 'Day 4': 36, 'Day 5': 44} },
+        { se: 'FZN', asm: 'Mr.Farzaan', active: 68, visited: 55, hitRate: 80.9, dailyTrend: {'Day 1': 12, 'Day 2': 22, 'Day 3': 35, 'Day 4': 45, 'Day 5': 55} },
+        { se: 'RKZ', asm: 'Mr.Hilmy', active: 89, visited: 70, hitRate: 78.7, dailyTrend: {'Day 1': 15, 'Day 2': 30, 'Day 3': 45, 'Day 4': 60, 'Day 5': 70} },
+        { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 90, hitRate: 89.1, dailyTrend: {'Day 1': 20, 'Day 2': 40, 'Day 3': 60, 'Day 4': 80, 'Day 5': 90} },
+        { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 50, hitRate: 94.3, dailyTrend: {'Day 1': 10, 'Day 2': 20, 'Day 3': 30, 'Day 4': 40, 'Day 5': 50} },
+        { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 60, hitRate: 92.3, dailyTrend: {'Day 1': 12, 'Day 2': 24, 'Day 3': 36, 'Day 4': 48, 'Day 5': 60} },
+        { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0, dailyTrend: {'Day 1': 8, 'Day 2': 16, 'Day 3': 24, 'Day 4': 32, 'Day 5': 40} }
+      ];
+      populateAsmDropdown();
+      populateSeDropdown();
+      renderUI();
+    }
+
+    function processDataPayload(rows) {
+      globalRawData = [];
+      if (!rows || rows.length === 0) return loadMockData();
+
+      if (Array.isArray(rows[0])) {
+        const headers = rows[0].map(h => String(h || '').trim());
+        dateColumns = headers.slice(3).filter(col => col !== '');
+
+        for (let i = 0; i < rows.length; i++) {
+          const r = rows[i];
+          if (!r || r[0] === undefined || r[0] === null) continue;
+          
+          let se = String(r[0]).trim().toUpperCase();
+          if (!asmMapping[se]) continue;
+
+          const active = Number(r[1]) || 0;
+          const visited = Number(r[2]) || 0;
+          const asm = asmMapping[se];
+          
+          let dailyTrend = {};
+          dateColumns.forEach((d, idx) => {
+            let val = Number(r[3 + idx]);
+            dailyTrend[d] = isNaN(val) ? 0 : val;
+          });
+
+          globalRawData.push({
+            se, asm, active, visited,
+            hitRate: active > 0 ? (visited / active) * 100 : 0,
+            dailyTrend
+          });
+        }
+      }
+
+      if (globalRawData.length === 0) loadMockData();
+      else {
+        populateAsmDropdown();
+        populateSeDropdown();
+        renderUI();
+      }
+    }
+
+    function populateAsmDropdown() {
+      const asmFilter = document.getElementById('asmFilter');
+      const asms = Array.from(new Set(Object.values(asmMapping)));
+      asmFilter.innerHTML = '<option value="ALL">All Area Managers (ASM)</option>';
+      asms.forEach(asm => { 
+        asmFilter.innerHTML += `<option value="${asm}">${asm}</option>`; 
+      });
+    }
+
+    function populateSeDropdown() {
+      const asmFilter = document.getElementById('asmFilter');
+      const seFilter = document.getElementById('seFilter');
+      const selectedASM = asmFilter.value;
+      
+      seFilter.innerHTML = '<option value="ALL">All Sales Executives (Overview)</option>';
+      
+      globalRawData.forEach(d => {
+        if (selectedASM === 'ALL' || d.asm === selectedASM) {
+          seFilter.innerHTML += `<option value="${d.se}">${d.se} (${d.hitRate.toFixed(1)}%)</option>`;
+        }
+      });
+    }
+
+    function onAsmChange() {
+      populateSeDropdown();
+      renderUI();
+    }
+
+    function renderUI() {
+      const selectedASM = document.getElementById('asmFilter').value;
+      const selectedSE = document.getElementById('seFilter').value;
+
+      let filtered = globalRawData;
+      if (selectedASM !== 'ALL') filtered = filtered.filter(d => d.asm === selectedASM);
+      if (selectedSE !== 'ALL') filtered = filtered.filter(d => d.se === selectedSE);
+
+      const sorted = filtered.slice().sort((a, b) => b.hitRate - a.hitRate);
+      
+      let totalActive = 0, totalVisited = 0;
+      filtered.forEach(d => { totalActive += d.active
