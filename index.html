@@ -101,7 +101,7 @@
       <h1>Sales Executive Itinerary Dashboard</h1>
       <div class="controls">
         <div class="status-badge" id="syncStatus">CONNECTED</div>
-        <select id="asmFilter" class="select-box" onchange="renderUI()"><option value="ALL">All Area Managers (ASM)</option></select>
+        <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
         <select id="seFilter" class="select-box" onchange="renderUI()"><option value="ALL">All Sales Executives (Overview)</option></select>
         <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
@@ -277,12 +277,21 @@
       const asmFilter = document.getElementById('asmFilter');
       const seFilter = document.getElementById('seFilter');
       const selectedASM = asmFilter.value;
+      
       seFilter.innerHTML = '<option value="ALL">All Sales Executives (Overview)</option>';
+      
       globalRawData.forEach(d => {
         if (selectedASM === 'ALL' || d.asm === selectedASM) {
           seFilter.innerHTML += `<option value="${d.se}">${d.se} (${d.hitRate.toFixed(1)}%)</option>`;
         }
       });
+    }
+
+    function onAsmChange() {
+      const seFilter = document.getElementById('seFilter');
+      seFilter.value = 'ALL'; // Reset SE selection when ASM changes
+      populateSeDropdown();
+      renderUI();
     }
 
     function renderUI() {
@@ -308,7 +317,10 @@
         document.getElementById('kpiRankSub').innerText = 'ASM: ' + (asmMapping[selectedSE] || 'N/A');
       } else if (sorted.length) {
         document.getElementById('kpiRank').innerText = "#1 " + sorted[0].se;
-        document.getElementById('kpiRankSub').innerText = "Top Performing Sales Exec";
+        document.getElementById('kpiRankSub').innerText = selectedASM !== 'ALL' ? 'Top SE in ' + selectedASM : 'Top Performing Sales Exec';
+      } else {
+        document.getElementById('kpiRank').innerText = "#--";
+        document.getElementById('kpiRankSub').innerText = 'Overview Mode';
       }
 
       const tbody = document.getElementById('leaderboardBody');
