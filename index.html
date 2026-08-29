@@ -143,6 +143,18 @@
       loadData();
     });
 
+    // Helper to safely extract numerical values from strings or numbers
+    function cleanNumber(val) {
+      if (val === null || val === undefined) return 0;
+      if (typeof val === 'number') return isNaN(val) ? 0 : val;
+      if (typeof val === 'string') {
+        let cleaned = val.replace(/[^0-9.-]/g, '');
+        let parsed = parseFloat(cleaned);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+      return 0;
+    }
+
     async function loadData() {
       const statusBadge = document.getElementById('syncStatus');
       try {
@@ -192,16 +204,15 @@
           if (!r || r[0] === undefined || r[0] === null) continue;
           
           let se = String(r[0]).trim().toUpperCase();
-          if (!asmMapping[se]) continue; // Skip unassigned rows (EH, SE)
+          if (!asmMapping[se]) continue;
 
-          const active = Number(r[1]) || 0;
-          const visited = Number(r[2]) || 0;
+          const active = cleanNumber(r[1]);
+          const visited = cleanNumber(r[2]);
           const asm = asmMapping[se];
           
           let dailyTrend = {};
           dateColumns.forEach((d, idx) => {
-            let val = Number(r[3 + idx]);
-            dailyTrend[d] = isNaN(val) ? 0 : val;
+            dailyTrend[d] = cleanNumber(r[3 + idx]);
           });
 
           globalRawData.push({
@@ -291,13 +302,18 @@
 
       if (window.Chart) {
         const trendData = dateColumns.map(day => {
-          let dayVisitedSum = 0, dayActiveSum = 0;
+          let dayVisitedSum = 0;
+          let dayActiveSum = 0;
+
           filtered.forEach(d => { 
-            let dayVal = Number(d.dailyTrend[day]);
-            if (isNaN(dayVal) || dayVal === 0) dayVal = d.visited;
+            let dayVal = cleanNumber(d.dailyTrend[day]);
+            // Fallback to total visited if daily trend points are missing
+            if (dayVal === 0 && d.visited > 0) dayVal = d.visited;
+            
             dayVisitedSum += dayVal; 
-            dayActiveSum += d.active; 
+            dayActiveSum += cleanNumber(d.active); 
           });
+
           return dayActiveSum > 0 ? Number(((dayVisitedSum / dayActiveSum) * 100).toFixed(1)) : 0;
         });
 
