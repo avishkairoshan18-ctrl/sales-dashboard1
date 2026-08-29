@@ -206,11 +206,17 @@
 
     function cleanNumber(val) {
       if (val === null || val === undefined) return 0;
-      if (typeof val === 'number') return isNaN(val) ? 0 : val;
+      if (typeof val === 'number') {
+        // If Google Sheets returns a fraction like 0.30 for 30%, scale it to 30
+        return val <= 1 && val > 0 ? val * 100 : val;
+      }
       if (typeof val === 'string') {
+        let isPercent = val.includes('%');
         let cleaned = val.replace(/[^0-9.-]/g, '');
         let parsed = parseFloat(cleaned);
-        return isNaN(parsed) ? 0 : parsed;
+        if (isNaN(parsed)) return 0;
+        // Handle "30%" or decimal string conversions
+        return (isPercent && parsed <= 1) ? parsed * 100 : parsed;
       }
       return 0;
     }
@@ -235,16 +241,16 @@
     }
 
     function loadMockData() {
-      dateColumns = ['26-Aug', '27-Aug', '28-Aug', '29-Aug', '30-Aug'];
+      dateColumns = ['6', '7', '10', '11', '12', '13'];
       globalRawData = [
-        { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 50, hitRate: 74.6, dailyTrend: {'26-Aug': 10, '27-Aug': 20, '28-Aug': 30, '29-Aug': 40, '30-Aug': 50} },
-        { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 44, hitRate: 78.6, dailyTrend: {'26-Aug': 8, '27-Aug': 18, '28-Aug': 28, '29-Aug': 36, '30-Aug': 44} },
-        { se: 'FZN', asm: 'Mr.Farzaan', active: 68, visited: 55, hitRate: 80.9, dailyTrend: {'26-Aug': 12, '27-Aug': 22, '28-Aug': 35, '29-Aug': 45, '30-Aug': 55} },
-        { se: 'RKZ', asm: 'Mr.Hilmy', active: 89, visited: 70, hitRate: 78.7, dailyTrend: {'26-Aug': 15, '27-Aug': 30, '28-Aug': 45, '29-Aug': 60, '30-Aug': 70} },
-        { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 90, hitRate: 89.1, dailyTrend: {'26-Aug': 20, '27-Aug': 40, '28-Aug': 60, '29-Aug': 80, '30-Aug': 90} },
-        { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 50, hitRate: 94.3, dailyTrend: {'26-Aug': 10, '27-Aug': 20, '28-Aug': 30, '29-Aug': 40, '30-Aug': 50} },
-        { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 60, hitRate: 92.3, dailyTrend: {'26-Aug': 12, '27-Aug': 24, '28-Aug': 36, '29-Aug': 48, '30-Aug': 60} },
-        { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0, dailyTrend: {'26-Aug': 8, '27-Aug': 16, '28-Aug': 24, '29-Aug': 32, '30-Aug': 40} }
+        { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 50, hitRate: 74.6, dailyTrend: {'6': 30, '7': 33, '10': 37, '11': 43, '12': 43, '13': 45} },
+        { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 44, hitRate: 78.6, dailyTrend: {'6': 30, '7': 43, '10': 46, '11': 48, '12': 52, '13': 55} },
+        { se: 'FZN', asm: 'Mr.Farzaan', active: 68, visited: 55, hitRate: 80.9, dailyTrend: {'6': 35, '7': 35, '10': 46, '11': 49, '12': 49, '13': 49} },
+        { se: 'RKZ', asm: 'Mr.Hilmy', active: 89, visited: 70, hitRate: 78.7, dailyTrend: {'6': 9, '7': 11, '10': 17, '11': 29, '12': 36, '13': 37} },
+        { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 90, hitRate: 89.1, dailyTrend: {'6': 17, '7': 22, '10': 25, '11': 31, '12': 40, '13': 50} },
+        { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 50, hitRate: 94.3, dailyTrend: {'6': 13, '7': 28, '10': 28, '11': 42, '12': 62, '13': 83} },
+        { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 60, hitRate: 92.3, dailyTrend: {'6': 17, '7': 25, '10': 29, '11': 31, '12': 34, '13': 35} },
+        { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0, dailyTrend: {'6': 27, '7': 29, '10': 31, '11': 39, '12': 43, '13': 51} }
       ];
       populateAsmDropdown();
       populateSeDropdown();
@@ -361,24 +367,17 @@
       });
 
       if (window.Chart) {
-        let runningVisitedSum = 0;
-        const filteredActiveTotal = filtered.reduce((sum, d) => sum + cleanNumber(d.active), 0);
-
         const trendData = dateColumns.map(day => {
-          let dayVisitedSum = 0;
+          let sumHitRates = 0;
+          let count = 0;
 
-          filtered.forEach(d => { 
-            let dayVal = cleanNumber(d.dailyTrend ? d.dailyTrend[day] : 0);
-            dayVisitedSum += dayVal; 
+          filtered.forEach(d => {
+            let val = d.dailyTrend ? d.dailyTrend[day] : 0;
+            sumHitRates += val;
+            count++;
           });
 
-          runningVisitedSum += dayVisitedSum;
-
-          if (filteredActiveTotal > 0 && runningVisitedSum > 0) {
-            return Number(((runningVisitedSum / filteredActiveTotal) * 100).toFixed(1));
-          } else {
-            return 0;
-          }
+          return count > 0 ? Number((sumHitRates / count).toFixed(1)) : 0;
         });
 
         if (trendChartInstance) trendChartInstance.destroy();
