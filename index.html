@@ -179,15 +179,16 @@
     function checkAuth() {
       const u = document.getElementById('userInput').value.trim();
       const p = document.getElementById('passInput').value.trim();
-      if (u === "admin" && p === "password123") {
-        document.getElementById('errorMsg').style.display = 'none';
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('dashboardContent').style.display = 'block';
-        loadData();
+  
+      if (u.toLowerCase() === "admin" && p === "password123") {
+      document.getElementById('errorMsg').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboardContent').style.display = 'block';
+      loadData();
       } else {
-        document.getElementById('errorMsg').style.display = 'block';
-      }
-    }
+      document.getElementById('errorMsg').style.display = 'block';
+  }
+}
 
     function logout() {
       document.getElementById('dashboardContent').style.display = 'none';
