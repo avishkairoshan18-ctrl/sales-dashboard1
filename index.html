@@ -175,7 +175,8 @@
       'RFD': 'Mr.Hilmy',   
       'MZR': 'Mr.Hilmy',
       'AMT': 'Mr.Sabir',   
-      'DNT': 'Mr.Sabir'
+      'DNT': 'Mr.Sabir',
+      'EH':  'Mr.Sabir'
     };
 
     let globalRawData = [];
@@ -204,28 +205,30 @@
       document.getElementById('loginBox').style.display = 'block';
     }
 
-    function cleanNumber(val) {
-      if (val === null || val === undefined) return 0;
+    // Fixed parser: Converts decimals (0.30 -> 30) or strings ("30%" -> 30) correctly
+    function cleanPercentage(val) {
+      if (val === null || val === undefined || val === '') return 0;
       
+      let num = 0;
       if (typeof val === 'number') {
-        return (val <= 1 && val > 0) ? val * 100 : val;
-      }
-      
-      if (typeof val === 'string') {
-        let isPercent = val.includes('%');
+        num = val;
+      } else if (typeof val === 'string') {
         let cleaned = val.replace(/[^0-9.-]/g, '');
-        let parsed = parseFloat(cleaned);
-        
-        if (isNaN(parsed)) return 0;
-        
-        if (isPercent && parsed <= 1) {
-          return parsed * 100;
-        }
-        
-        return parsed;
+        num = parseFloat(cleaned) || 0;
       }
-      
-      return 0;
+
+      // If value is a decimal returned from Google Sheets (e.g. 0.30 for 30%), scale to 100
+      if (num > 0 && num <= 1.0) {
+        num = num * 100;
+      }
+      return num;
+    }
+
+    function cleanCount(val) {
+      if (val === null || val === undefined) return 0;
+      if (typeof val === 'number') return val;
+      let cleaned = String(val).replace(/[^0-9.-]/g, '');
+      return parseFloat(cleaned) || 0;
     }
 
     async function loadData() {
@@ -266,38 +269,56 @@
 
     function processDataPayload(rows) {
       globalRawData = [];
-      if (!rows || rows.length === 0) return loadMockData();
+      if (!rows || rows.length < 2) return loadMockData();
 
-      if (Array.isArray(rows[0])) {
-        const headers = rows[0].map(h => String(h || '').trim());
-        dateColumns = headers.slice(3).filter(col => col !== '');
-
-        for (let i = 1; i < rows.length; i++) {
-          const r = rows[i];
-          if (!r || r[0] === undefined || r[0] === null) continue;
-          
-          let se = String(r[0]).trim().toUpperCase();
-          if (!asmMapping[se]) continue;
-
-          const active = cleanNumber(r[1]);
-          const visited = cleanNumber(r[2]);
-          const asm = asmMapping[se];
-          
-          let dailyTrend = {};
-          dateColumns.forEach((d, idx) => {
-            dailyTrend[d] = cleanNumber(r[3 + idx]);
-          });
-
-          globalRawData.push({
-            se, asm, active, visited,
-            hitRate: active > 0 ? (visited / active) * 100 : 0,
-            dailyTrend
-          });
+      // Find header row containing SE and date columns
+      let headerRowIndex = 0;
+      for (let i = 0; i < Math.min(5, rows.length); i++) {
+        if (rows[i] && rows[i].some(cell => String(cell).toUpperCase().includes('SE'))) {
+          headerRowIndex = i;
+          break;
         }
       }
 
-      if (globalRawData.length === 0) loadMockData();
-      else {
+      const headers = rows[headerRowIndex].map(h => String(h || '').trim());
+      
+      // Locate date columns starting from index 3 onward (Columns D, E, F...)
+      dateColumns = [];
+      headers.forEach((h, idx) => {
+        if (idx >= 3 && h !== '') {
+          dateColumns.push({ title: h, index: idx });
+        }
+      });
+
+      for (let i = headerRowIndex + 1; i < rows.length; i++) {
+        const r = rows[i];
+        if (!r || r[0] === undefined || r[0] === null) continue;
+        
+        let se = String(r[0]).trim().toUpperCase();
+        if (!se || !asmMapping[se]) continue;
+
+        const active = cleanCount(r[1]);
+        const visited = cleanCount(r[2]);
+        const asm = asmMapping[se];
+        
+        let dailyTrend = {};
+        dateColumns.forEach(col => {
+          dailyTrend[col.title] = cleanPercentage(r[col.index]);
+        });
+
+        globalRawData.push({
+          se, 
+          asm, 
+          active, 
+          visited,
+          hitRate: active > 0 ? (visited / active) * 100 : 0,
+          dailyTrend
+        });
+      }
+
+      if (globalRawData.length === 0) {
+        loadMockData();
+      } else {
         populateAsmDropdown();
         populateSeDropdown();
         renderUI();
@@ -374,14 +395,18 @@
       });
 
       if (window.Chart) {
-        const trendData = dateColumns.map(day => {
+        const xLabels = dateColumns.map(col => col.title || col);
+        
+        const trendData = xLabels.map(dayKey => {
           let sumHitRates = 0;
           let count = 0;
 
           filtered.forEach(d => {
-            let val = d.dailyTrend ? d.dailyTrend[day] : 0;
-            sumHitRates += val;
-            count++;
+            let val = d.dailyTrend ? d.dailyTrend[dayKey] : 0;
+            if (val !== undefined && val !== null) {
+              sumHitRates += val;
+              count++;
+            }
           });
 
           return count > 0 ? Number((sumHitRates / count).toFixed(1)) : 0;
@@ -391,7 +416,7 @@
         trendChartInstance = new Chart(document.getElementById('trendChart'), {
           type: 'line',
           data: {
-            labels: dateColumns.length > 0 ? dateColumns : ['Current Pace'],
+            labels: xLabels.length > 0 ? xLabels : ['Pace'],
             datasets: [{ 
               label: 'Hit Rate %', 
               data: trendData, 
@@ -399,7 +424,8 @@
               backgroundColor: 'rgba(56, 189, 248, 0.15)', 
               fill: true, 
               tension: 0.35,
-              pointRadius: 4,
+              pointRadius: 5,
+              pointHoverRadius: 7,
               pointBackgroundColor: '#38bdf8'
             }]
           },
@@ -411,7 +437,7 @@
               y: { 
                 min: 0, 
                 max: 100,
-                ticks: { color: '#8e9cb0' },
+                ticks: { color: '#8e9cb0', stepSize: 10 },
                 grid: { color: '#1e293b' }
               },
               x: {
