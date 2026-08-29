@@ -25,8 +25,32 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       padding: 24px;
       min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
+    /* LOGIN SCREEN STYLES */
+    .login-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 32px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    .login-container h2 { margin-bottom: 8px; font-size: 1.5rem; }
+    .login-container p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; }
+    .input-group { margin-bottom: 16px; text-align: left; }
+    .input-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
+    .input-group input { width: 100%; background: #1e293b; border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 6px; color: white; outline: none; }
+    .login-btn { width: 100%; background: var(--accent-blue); color: #090d16; font-weight: 700; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-top: 8px; }
+    .error-msg { color: #ef4444; font-size: 0.8rem; margin-top: 12px; display: none; }
+
+    /* DASHBOARD STYLES */
+    #dashboardContent { display: none; width: 100%; max-width: 1400px; }
     .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px; }
     .top-bar h1 { font-size: 1.5rem; font-weight: 700; }
     .controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -59,6 +83,21 @@
   </style>
 </head>
 <body>
+
+  <div class="login-container" id="loginBox">
+    <h2>Admin Login</h2>
+    <p>Enter credentials to view dashboard</p>
+    <div class="input-group">
+      <label>Username</label>
+      <input type="text" id="userInput" placeholder="admin">
+    </div>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="passInput" placeholder="••••••••">
+    </div>
+    <button class="login-btn" onclick="checkAuth()">Login</button>
+    <div class="error-msg" id="errorMsg">Invalid credentials!</div>
+  </div>
 
   <div id="dashboardContent">
     <div class="top-bar">
@@ -139,9 +178,21 @@
     let dateColumns = [];
     let trendChartInstance = null, rankChartInstance = null, volumeChartInstance = null;
 
-    document.addEventListener("DOMContentLoaded", function() {
-      loadData();
-    });
+    // LOGIN LOGIC - Trims extra whitespace and validates properly
+    function checkAuth() {
+      const u = document.getElementById('userInput').value.trim();
+      const p = document.getElementById('passInput').value.trim();
+      const err = document.getElementById('errorMsg');
+
+      if (u === 'admin' && p === 'password123') {
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('dashboardContent').style.display = 'block';
+        document.body.style.display = 'block'; 
+        loadData();
+      } else {
+        err.style.display = 'block';
+      }
+    }
 
     function cleanNumber(val) {
       if (val === null || val === undefined) return 0;
@@ -300,7 +351,6 @@
       });
 
       if (window.Chart) {
-        // Build trend points accurately across date columns
         let runningVisitedSum = 0;
         const trendData = dateColumns.map(day => {
           let dayVisitedSum = 0;
@@ -312,7 +362,6 @@
             dayActiveSum += cleanNumber(d.active); 
           });
 
-          // Fallback to cumulative active hit rate if single-day values are 0
           if (dayVisitedSum > 0) {
             runningVisitedSum += dayVisitedSum;
             return dayActiveSum > 0 ? Number(((runningVisitedSum / dayActiveSum) * 100).toFixed(1)) : 0;
