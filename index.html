@@ -362,21 +362,22 @@
 
       if (window.Chart) {
         let runningVisitedSum = 0;
+        const filteredActiveTotal = filtered.reduce((sum, d) => sum + cleanNumber(d.active), 0);
+
         const trendData = dateColumns.map(day => {
           let dayVisitedSum = 0;
-          let dayActiveSum = 0;
 
           filtered.forEach(d => { 
-            let dayVal = cleanNumber(d.dailyTrend[day]);
+            let dayVal = cleanNumber(d.dailyTrend ? d.dailyTrend[day] : 0);
             dayVisitedSum += dayVal; 
-            dayActiveSum += cleanNumber(d.active); 
           });
 
-          if (dayVisitedSum > 0) {
-            runningVisitedSum += dayVisitedSum;
-            return dayActiveSum > 0 ? Number(((runningVisitedSum / dayActiveSum) * 100).toFixed(1)) : 0;
+          runningVisitedSum += dayVisitedSum;
+
+          if (filteredActiveTotal > 0 && runningVisitedSum > 0) {
+            return Number(((runningVisitedSum / filteredActiveTotal) * 100).toFixed(1));
           } else {
-            return dayActiveSum > 0 ? Number(((totalVisited / totalActive) * 100).toFixed(1)) : 0;
+            return 0;
           }
         });
 
@@ -387,14 +388,32 @@
             labels: dateColumns.length > 0 ? dateColumns : ['Current Pace'],
             datasets: [{ 
               label: 'Hit Rate %', 
-              data: trendData.length > 0 ? trendData : [totalActive > 0 ? Number(((totalVisited / totalActive) * 100).toFixed(1)) : 0], 
+              data: trendData, 
               borderColor: '#38bdf8', 
               backgroundColor: 'rgba(56, 189, 248, 0.15)', 
               fill: true, 
-              tension: 0.35 
+              tension: 0.35,
+              pointRadius: 4,
+              pointBackgroundColor: '#38bdf8'
             }]
           },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
+          options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { legend: { display: false } }, 
+            scales: { 
+              y: { 
+                min: 0, 
+                max: 100,
+                ticks: { color: '#8e9cb0' },
+                grid: { color: '#1e293b' }
+              },
+              x: {
+                ticks: { color: '#8e9cb0' },
+                grid: { color: '#1e293b' }
+              }
+            } 
+          }
         });
 
         if (rankChartInstance) rankChartInstance.destroy();
