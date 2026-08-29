@@ -143,7 +143,6 @@
       loadData();
     });
 
-    // Helper to safely extract numerical values from strings or numbers
     function cleanNumber(val) {
       if (val === null || val === undefined) return 0;
       if (typeof val === 'number') return isNaN(val) ? 0 : val;
@@ -301,20 +300,25 @@
       });
 
       if (window.Chart) {
+        // Build trend points accurately across date columns
+        let runningVisitedSum = 0;
         const trendData = dateColumns.map(day => {
           let dayVisitedSum = 0;
           let dayActiveSum = 0;
 
           filtered.forEach(d => { 
             let dayVal = cleanNumber(d.dailyTrend[day]);
-            // Fallback to total visited if daily trend points are missing
-            if (dayVal === 0 && d.visited > 0) dayVal = d.visited;
-            
             dayVisitedSum += dayVal; 
             dayActiveSum += cleanNumber(d.active); 
           });
 
-          return dayActiveSum > 0 ? Number(((dayVisitedSum / dayActiveSum) * 100).toFixed(1)) : 0;
+          // Fallback to cumulative active hit rate if single-day values are 0
+          if (dayVisitedSum > 0) {
+            runningVisitedSum += dayVisitedSum;
+            return dayActiveSum > 0 ? Number(((runningVisitedSum / dayActiveSum) * 100).toFixed(1)) : 0;
+          } else {
+            return dayActiveSum > 0 ? Number(((totalVisited / totalActive) * 100).toFixed(1)) : 0;
+          }
         });
 
         if (trendChartInstance) trendChartInstance.destroy();
