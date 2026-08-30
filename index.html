@@ -234,7 +234,7 @@
     };
 
     const colorPalette = {
-      'EH': '#38bdf8',  // Blue overall line
+      'EH': '#38bdf8',
       'HMD': '#f59e0b',
       'RSD': '#ec4899',
       'FZN': '#a855f7',
@@ -246,9 +246,9 @@
     };
 
     let globalRawData = [];
-    let overallTeamData = null; // Stores row EH data
-    let dateColumns = [];
-    let selectedLineKeys = new Set(['EH']); // Default display line: Overall Team (EH)
+    let overallTeamData = null;
+    let activeDateColumns = [];
+    let selectedLineKeys = new Set(['EH']);
     let trendChartInstance = null, rankChartInstance = null, volumeChartInstance = null;
 
     function checkAuth() {
@@ -273,19 +273,17 @@
       document.getElementById('loginBox').style.display = 'block';
     }
 
-    // Handles percentages formatted as strings ("30%") or raw decimals (0.30 -> 30)
     function cleanPercentage(val) {
-      if (val === null || val === undefined || val === '') return 0;
+      if (val === null || val === undefined || val === '') return null;
       let num = 0;
       if (typeof val === 'number') {
         num = val;
       } else if (typeof val === 'string') {
         let cleaned = val.replace(/[^0-9.-]/g, '');
-        num = parseFloat(cleaned) || 0;
+        if (cleaned === '') return null;
+        num = parseFloat(cleaned);
       }
-      if (num > 0 && num <= 1.0) {
-        num = num * 100;
-      }
+      if (num > 0 && num <= 1.0) num = num * 100;
       return num;
     }
 
@@ -316,32 +314,40 @@
     }
 
     function loadMockData() {
-      dateColumns = [
+      activeDateColumns = [
         { title: 'Aug 6', index: 3 },
         { title: 'Aug 7', index: 4 },
         { title: 'Aug 10', index: 5 },
         { title: 'Aug 11', index: 6 },
         { title: 'Aug 12', index: 7 },
-        { title: 'Aug 13', index: 8 }
+        { title: 'Aug 13', index: 8 },
+        { title: 'Aug 14', index: 9 },
+        { title: 'Aug 17', index: 10 },
+        { title: 'Aug 18', index: 11 },
+        { title: 'Aug 19', index: 12 },
+        { title: 'Aug 20', index: 13 },
+        { title: 'Aug 21', index: 14 },
+        { title: 'Aug 24', index: 15 }
       ];
 
       overallTeamData = {
-        se: 'EH',
-        active: 545,
-        visited: 459,
-        hitRate: 84.2,
-        dailyTrend: { 'Aug 6': 22, 'Aug 7': 27, 'Aug 10': 31, 'Aug 11': 38, 'Aug 12': 44, 'Aug 13': 49 }
+        se: 'EH', active: 545, visited: 459, hitRate: 84.2,
+        dailyTrend: { 
+          'Aug 6': 22, 'Aug 7': 27, 'Aug 10': 31, 'Aug 11': 38, 'Aug 12': 44, 
+          'Aug 13': 49, 'Aug 14': 52, 'Aug 17': 56, 'Aug 18': 58, 'Aug 19': 64, 
+          'Aug 20': 69, 'Aug 21': 78, 'Aug 24': 84.2 
+        }
       };
 
       globalRawData = [
-        { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 50, hitRate: 74.6, dailyTrend: {'Aug 6': 30, 'Aug 7': 33, 'Aug 10': 37, 'Aug 11': 43, 'Aug 12': 43, 'Aug 13': 45} },
-        { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 44, hitRate: 78.6, dailyTrend: {'Aug 6': 30, 'Aug 7': 43, 'Aug 10': 46, 'Aug 11': 48, 'Aug 12': 52, 'Aug 13': 55} },
-        { se: 'FZN', asm: 'Mr.Farzaan', active: 68, visited: 55, hitRate: 80.9, dailyTrend: {'Aug 6': 35, 'Aug 7': 35, 'Aug 10': 46, 'Aug 11': 49, 'Aug 12': 49, 'Aug 13': 49} },
-        { se: 'RKZ', asm: 'Mr.Hilmy', active: 89, visited: 70, hitRate: 78.7, dailyTrend: {'Aug 6': 9, 'Aug 7': 11, 'Aug 10': 17, 'Aug 11': 29, 'Aug 12': 36, 'Aug 13': 37} },
-        { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 90, hitRate: 89.1, dailyTrend: {'Aug 6': 17, 'Aug 7': 22, 'Aug 10': 25, 'Aug 11': 31, 'Aug 12': 40, 'Aug 13': 50} },
-        { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 50, hitRate: 94.3, dailyTrend: {'Aug 6': 13, 'Aug 7': 28, 'Aug 10': 28, 'Aug 11': 42, 'Aug 12': 62, 'Aug 13': 83} },
-        { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 60, hitRate: 92.3, dailyTrend: {'Aug 6': 17, 'Aug 7': 25, 'Aug 10': 29, 'Aug 11': 31, 'Aug 12': 34, 'Aug 13': 35} },
-        { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0, dailyTrend: {'Aug 6': 27, 'Aug 7': 29, 'Aug 10': 31, 'Aug 11': 39, 'Aug 12': 43, 'Aug 13': 51} }
+        { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 50, hitRate: 74.6, dailyTrend: {'Aug 6': 30, 'Aug 24': 74.6} },
+        { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 44, hitRate: 78.6, dailyTrend: {'Aug 6': 30, 'Aug 24': 78.6} },
+        { se: 'FZN', asm: 'Mr.Farzaan', active: 68, visited: 55, hitRate: 80.9, dailyTrend: {'Aug 6': 35, 'Aug 24': 80.9} },
+        { se: 'RKZ', asm: 'Mr.Hilmy', active: 89, visited: 70, hitRate: 78.7, dailyTrend: {'Aug 6': 9, 'Aug 24': 78.7} },
+        { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 90, hitRate: 89.1, dailyTrend: {'Aug 6': 17, 'Aug 24': 89.1} },
+        { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 50, hitRate: 94.3, dailyTrend: {'Aug 6': 13, 'Aug 24': 94.3} },
+        { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 60, hitRate: 92.3, dailyTrend: {'Aug 6': 17, 'Aug 24': 92.3} },
+        { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0, dailyTrend: {'Aug 6': 27, 'Aug 24': 87.0} }
       ];
 
       populateAsmDropdown();
@@ -356,7 +362,6 @@
 
       if (!rows || rows.length < 2) return loadMockData();
 
-      // Scan rows to find header row containing 'SE' (Row index 1 in Google Sheets)
       let headerRowIndex = -1;
       for (let i = 0; i < Math.min(5, rows.length); i++) {
         if (rows[i] && rows[i].some(cell => String(cell).trim().toUpperCase() === 'SE')) {
@@ -369,15 +374,15 @@
 
       const headers = rows[headerRowIndex].map(h => String(h || '').trim());
       
-      // Dynamic extraction of date columns from index 3 onward
-      dateColumns = [];
+      let allDateCols = [];
       headers.forEach((h, idx) => {
         if (idx >= 3 && h !== '') {
           let formattedHeader = isNaN(h) ? h : 'Aug ' + h;
-          dateColumns.push({ title: formattedHeader, index: idx });
+          allDateCols.push({ title: formattedHeader, index: idx });
         }
       });
 
+      let parsedRows = [];
       for (let i = headerRowIndex + 1; i < rows.length; i++) {
         const r = rows[i];
         if (!r || r[0] === undefined || r[0] === null) continue;
@@ -389,27 +394,44 @@
         const visited = cleanCount(r[2]);
         
         let dailyTrend = {};
-        dateColumns.forEach(col => {
+        allDateCols.forEach(col => {
           dailyTrend[col.title] = cleanPercentage(r[col.index]);
         });
 
-        if (se === 'EH') {
+        parsedRows.push({ se, active, visited, dailyTrend });
+      }
+
+      // Filter date columns to only show dates that have non-null, valid >0 percentage entries
+      let maxValidDateIndex = -1;
+      allDateCols.forEach((col, idx) => {
+        let hasData = parsedRows.some(row => row.dailyTrend[col.title] !== null && row.dailyTrend[col.title] > 0);
+        if (hasData) {
+          maxValidDateIndex = idx;
+        }
+      });
+
+      activeDateColumns = maxValidDateIndex !== -1 ? allDateCols.slice(0, maxValidDateIndex + 1) : allDateCols;
+
+      parsedRows.forEach(item => {
+        if (item.se === 'EH') {
           overallTeamData = {
-            se, active, visited,
-            hitRate: active > 0 ? (visited / active) * 100 : 0,
-            dailyTrend
+            se: item.se,
+            active: item.active,
+            visited: item.visited,
+            hitRate: item.active > 0 ? (item.visited / item.active) * 100 : 0,
+            dailyTrend: item.dailyTrend
           };
-        } else if (asmMapping[se]) {
+        } else if (asmMapping[item.se]) {
           globalRawData.push({
-            se, 
-            asm: asmMapping[se], 
-            active, 
-            visited,
-            hitRate: active > 0 ? (visited / active) * 100 : 0,
-            dailyTrend
+            se: item.se, 
+            asm: asmMapping[item.se], 
+            active: item.active, 
+            visited: item.visited,
+            hitRate: item.active > 0 ? (item.visited / item.active) * 100 : 0,
+            dailyTrend: item.dailyTrend
           });
         }
-      }
+      });
 
       if (globalRawData.length === 0) {
         loadMockData();
@@ -448,9 +470,8 @@
       const selectedASM = document.getElementById('asmFilter').value;
       populateSeDropdown();
       
-      // When ASM is changed, clear previous individual SE selections and show team lines for selected ASM
       selectedLineKeys.clear();
-      selectedLineKeys.add('EH'); // Always show Overall Team baseline
+      selectedLineKeys.add('EH');
       
       globalRawData.forEach(d => {
         if (selectedASM === 'ALL' || d.asm === selectedASM) {
@@ -473,7 +494,6 @@
       renderUI();
     }
 
-    // Dynamic generation of line toggle checkboxes matching target design
     function updateTogglePanel() {
       const selectedASM = document.getElementById('asmFilter').value;
       const container = document.getElementById('lineToggles');
@@ -503,7 +523,7 @@
 
     function toggleLine(key) {
       if (selectedLineKeys.has(key)) {
-        if (selectedLineKeys.size > 1) { // Prevent clearing all lines
+        if (selectedLineKeys.size > 1) {
           selectedLineKeys.delete(key);
         }
       } else {
@@ -541,10 +561,10 @@
         document.getElementById('kpiRankSub').innerText = 'Overview Mode';
       }
 
-      // Update Trend Subtitle text
-      if (dateColumns.length > 0) {
-        const firstDate = dateColumns[0].title;
-        const lastDate = dateColumns[dateColumns.length - 1].title;
+      // Dynamic Subtitle Range (e.g., Aug 6 to Aug 24)
+      if (activeDateColumns.length > 0) {
+        const firstDate = activeDateColumns[0].title;
+        const lastDate = activeDateColumns[activeDateColumns.length - 1].title;
         document.getElementById('trendSubText').innerText = `Tracking Progression from ${firstDate} to ${lastDate}`;
       }
 
@@ -561,11 +581,9 @@
         </tr>`;
       });
 
-      // Render Charts
+      // Chart Rendering
       if (window.Chart) {
-        const xLabels = dateColumns.map(col => col.title);
-
-        // Build Multi-Line Datasets
+        const xLabels = activeDateColumns.map(col => col.title);
         const datasets = [];
 
         selectedLineKeys.forEach(key => {
@@ -574,11 +592,11 @@
           let color = colorPalette[key] || '#38bdf8';
 
           if (key === 'EH' && overallTeamData) {
-            lineData = xLabels.map(day => overallTeamData.dailyTrend[day] || 0);
+            lineData = xLabels.map(day => overallTeamData.dailyTrend[day] ?? null);
           } else {
             const seObj = globalRawData.find(d => d.se === key);
             if (seObj) {
-              lineData = xLabels.map(day => seObj.dailyTrend[day] || 0);
+              lineData = xLabels.map(day => seObj.dailyTrend[day] ?? null);
             }
           }
 
@@ -608,7 +626,7 @@
             responsive: true, 
             maintainAspectRatio: false, 
             plugins: { 
-              legend: { display: false } // Legend handled via HTML toggle panel
+              legend: { display: false } 
             }, 
             scales: { 
               y: { 
