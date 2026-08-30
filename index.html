@@ -75,10 +75,54 @@
     @media (max-width: 1024px) { .dashboard-layout { grid-template-columns: 1fr; } }
 
     .chart-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
-    .chart-header { display: flex; justify-content: space-between; margin-bottom: 16px; }
+    .chart-header { display: flex; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
     .chart-title { font-size: 1.1rem; font-weight: 700; }
+    .chart-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
 
-    .canvas-container { position: relative; height: 300px; width: 100%; }
+    /* MULTI-LINE TOGGLE CONTAINER */
+    .toggle-container {
+      background: #0d1322;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+    .toggle-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .toggle-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      align-items: center;
+    }
+    .toggle-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent-blue);
+      cursor: pointer;
+    }
+    .color-pill {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .canvas-container { position: relative; height: 320px; width: 100%; }
 
     .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
     .leaderboard-table th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 0.75rem; border-bottom: 1px solid var(--border-color); }
@@ -108,7 +152,7 @@
       <div class="controls">
         <div class="status-badge" id="syncStatus">CONNECTING...</div>
         <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
-        <select id="seFilter" class="select-box" onchange="renderUI()"><option value="ALL">All Sales Executives (Overview)</option></select>
+        <select id="seFilter" class="select-box" onchange="onSeChange()"><option value="ALL">All Sales Executives (Overview)</option></select>
         <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
     </div>
@@ -138,7 +182,18 @@
 
     <div class="dashboard-layout">
       <div class="chart-card">
-        <div class="chart-header"><div class="chart-title">Hit Rate Trend (%)</div></div>
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Monthly Visited Hit Rate Trend (%)</div>
+            <div class="chart-subtitle" id="trendSubText">Tracking Progression</div>
+          </div>
+        </div>
+
+        <div class="toggle-container">
+          <div class="toggle-label">Display Lines:</div>
+          <div class="toggle-grid" id="lineToggles"></div>
+        </div>
+
         <div class="canvas-container"><canvas id="trendChart"></canvas></div>
       </div>
       <div class="chart-card">
@@ -175,12 +230,25 @@
       'RFD': 'Mr.Hilmy',   
       'MZR': 'Mr.Hilmy',
       'AMT': 'Mr.Sabir',   
-      'DNT': 'Mr.Sabir',
-      'EH':  'Mr.Sabir'
+      'DNT': 'Mr.Sabir'
+    };
+
+    const colorPalette = {
+      'EH': '#38bdf8',  // Blue overall line
+      'HMD': '#f59e0b',
+      'RSD': '#ec4899',
+      'FZN': '#a855f7',
+      'RKZ': '#ef4444',
+      'RFD': '#10b981',
+      'MZR': '#8b5cf6',
+      'AMT': '#06b6d4',
+      'DNT': '#f97316'
     };
 
     let globalRawData = [];
+    let overallTeamData = null; // Stores row EH data
     let dateColumns = [];
+    let selectedLineKeys = new Set(['EH']); // Default display line: Overall Team (EH)
     let trendChartInstance = null, rankChartInstance = null, volumeChartInstance = null;
 
     function checkAuth() {
@@ -205,10 +273,9 @@
       document.getElementById('loginBox').style.display = 'block';
     }
 
-    // Fixed parser: Converts decimals (0.30 -> 30) or strings ("30%" -> 30) correctly
+    // Handles percentages formatted as strings ("30%") or raw decimals (0.30 -> 30)
     function cleanPercentage(val) {
       if (val === null || val === undefined || val === '') return 0;
-      
       let num = 0;
       if (typeof val === 'number') {
         num = val;
@@ -216,8 +283,6 @@
         let cleaned = val.replace(/[^0-9.-]/g, '');
         num = parseFloat(cleaned) || 0;
       }
-
-      // If value is a decimal returned from Google Sheets (e.g. 0.30 for 30%), scale to 100
       if (num > 0 && num <= 1.0) {
         num = num * 100;
       }
@@ -251,42 +316,65 @@
     }
 
     function loadMockData() {
-      dateColumns = ['6', '7', '10', '11', '12', '13'];
-      globalRawData = [
-        { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 50, hitRate: 74.6, dailyTrend: {'6': 30, '7': 33, '10': 37, '11': 43, '12': 43, '13': 45} },
-        { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 44, hitRate: 78.6, dailyTrend: {'6': 30, '7': 43, '10': 46, '11': 48, '12': 52, '13': 55} },
-        { se: 'FZN', asm: 'Mr.Farzaan', active: 68, visited: 55, hitRate: 80.9, dailyTrend: {'6': 35, '7': 35, '10': 46, '11': 49, '12': 49, '13': 49} },
-        { se: 'RKZ', asm: 'Mr.Hilmy', active: 89, visited: 70, hitRate: 78.7, dailyTrend: {'6': 9, '7': 11, '10': 17, '11': 29, '12': 36, '13': 37} },
-        { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 90, hitRate: 89.1, dailyTrend: {'6': 17, '7': 22, '10': 25, '11': 31, '12': 40, '13': 50} },
-        { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 50, hitRate: 94.3, dailyTrend: {'6': 13, '7': 28, '10': 28, '11': 42, '12': 62, '13': 83} },
-        { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 60, hitRate: 92.3, dailyTrend: {'6': 17, '7': 25, '10': 29, '11': 31, '12': 34, '13': 35} },
-        { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0, dailyTrend: {'6': 27, '7': 29, '10': 31, '11': 39, '12': 43, '13': 51} }
+      dateColumns = [
+        { title: 'Aug 6', index: 3 },
+        { title: 'Aug 7', index: 4 },
+        { title: 'Aug 10', index: 5 },
+        { title: 'Aug 11', index: 6 },
+        { title: 'Aug 12', index: 7 },
+        { title: 'Aug 13', index: 8 }
       ];
+
+      overallTeamData = {
+        se: 'EH',
+        active: 545,
+        visited: 459,
+        hitRate: 84.2,
+        dailyTrend: { 'Aug 6': 22, 'Aug 7': 27, 'Aug 10': 31, 'Aug 11': 38, 'Aug 12': 44, 'Aug 13': 49 }
+      };
+
+      globalRawData = [
+        { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 50, hitRate: 74.6, dailyTrend: {'Aug 6': 30, 'Aug 7': 33, 'Aug 10': 37, 'Aug 11': 43, 'Aug 12': 43, 'Aug 13': 45} },
+        { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 44, hitRate: 78.6, dailyTrend: {'Aug 6': 30, 'Aug 7': 43, 'Aug 10': 46, 'Aug 11': 48, 'Aug 12': 52, 'Aug 13': 55} },
+        { se: 'FZN', asm: 'Mr.Farzaan', active: 68, visited: 55, hitRate: 80.9, dailyTrend: {'Aug 6': 35, 'Aug 7': 35, 'Aug 10': 46, 'Aug 11': 49, 'Aug 12': 49, 'Aug 13': 49} },
+        { se: 'RKZ', asm: 'Mr.Hilmy', active: 89, visited: 70, hitRate: 78.7, dailyTrend: {'Aug 6': 9, 'Aug 7': 11, 'Aug 10': 17, 'Aug 11': 29, 'Aug 12': 36, 'Aug 13': 37} },
+        { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 90, hitRate: 89.1, dailyTrend: {'Aug 6': 17, 'Aug 7': 22, 'Aug 10': 25, 'Aug 11': 31, 'Aug 12': 40, 'Aug 13': 50} },
+        { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 50, hitRate: 94.3, dailyTrend: {'Aug 6': 13, 'Aug 7': 28, 'Aug 10': 28, 'Aug 11': 42, 'Aug 12': 62, 'Aug 13': 83} },
+        { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 60, hitRate: 92.3, dailyTrend: {'Aug 6': 17, 'Aug 7': 25, 'Aug 10': 29, 'Aug 11': 31, 'Aug 12': 34, 'Aug 13': 35} },
+        { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0, dailyTrend: {'Aug 6': 27, 'Aug 7': 29, 'Aug 10': 31, 'Aug 11': 39, 'Aug 12': 43, 'Aug 13': 51} }
+      ];
+
       populateAsmDropdown();
       populateSeDropdown();
+      updateTogglePanel();
       renderUI();
     }
 
     function processDataPayload(rows) {
       globalRawData = [];
+      overallTeamData = null;
+
       if (!rows || rows.length < 2) return loadMockData();
 
-      // Find header row containing SE and date columns
-      let headerRowIndex = 0;
+      // Scan rows to find header row containing 'SE' (Row index 1 in Google Sheets)
+      let headerRowIndex = -1;
       for (let i = 0; i < Math.min(5, rows.length); i++) {
-        if (rows[i] && rows[i].some(cell => String(cell).toUpperCase().includes('SE'))) {
+        if (rows[i] && rows[i].some(cell => String(cell).trim().toUpperCase() === 'SE')) {
           headerRowIndex = i;
           break;
         }
       }
 
+      if (headerRowIndex === -1) headerRowIndex = 1;
+
       const headers = rows[headerRowIndex].map(h => String(h || '').trim());
       
-      // Locate date columns starting from index 3 onward (Columns D, E, F...)
+      // Dynamic extraction of date columns from index 3 onward
       dateColumns = [];
       headers.forEach((h, idx) => {
         if (idx >= 3 && h !== '') {
-          dateColumns.push({ title: h, index: idx });
+          let formattedHeader = isNaN(h) ? h : 'Aug ' + h;
+          dateColumns.push({ title: formattedHeader, index: idx });
         }
       });
 
@@ -295,25 +383,32 @@
         if (!r || r[0] === undefined || r[0] === null) continue;
         
         let se = String(r[0]).trim().toUpperCase();
-        if (!se || !asmMapping[se]) continue;
+        if (!se) continue;
 
         const active = cleanCount(r[1]);
         const visited = cleanCount(r[2]);
-        const asm = asmMapping[se];
         
         let dailyTrend = {};
         dateColumns.forEach(col => {
           dailyTrend[col.title] = cleanPercentage(r[col.index]);
         });
 
-        globalRawData.push({
-          se, 
-          asm, 
-          active, 
-          visited,
-          hitRate: active > 0 ? (visited / active) * 100 : 0,
-          dailyTrend
-        });
+        if (se === 'EH') {
+          overallTeamData = {
+            se, active, visited,
+            hitRate: active > 0 ? (visited / active) * 100 : 0,
+            dailyTrend
+          };
+        } else if (asmMapping[se]) {
+          globalRawData.push({
+            se, 
+            asm: asmMapping[se], 
+            active, 
+            visited,
+            hitRate: active > 0 ? (visited / active) * 100 : 0,
+            dailyTrend
+          });
+        }
       }
 
       if (globalRawData.length === 0) {
@@ -321,6 +416,7 @@
       } else {
         populateAsmDropdown();
         populateSeDropdown();
+        updateTogglePanel();
         renderUI();
       }
     }
@@ -349,7 +445,70 @@
     }
 
     function onAsmChange() {
+      const selectedASM = document.getElementById('asmFilter').value;
       populateSeDropdown();
+      
+      // When ASM is changed, clear previous individual SE selections and show team lines for selected ASM
+      selectedLineKeys.clear();
+      selectedLineKeys.add('EH'); // Always show Overall Team baseline
+      
+      globalRawData.forEach(d => {
+        if (selectedASM === 'ALL' || d.asm === selectedASM) {
+          selectedLineKeys.add(d.se);
+        }
+      });
+
+      updateTogglePanel();
+      renderUI();
+    }
+
+    function onSeChange() {
+      const selectedSE = document.getElementById('seFilter').value;
+      if (selectedSE !== 'ALL') {
+        selectedLineKeys.clear();
+        selectedLineKeys.add('EH');
+        selectedLineKeys.add(selectedSE);
+      }
+      updateTogglePanel();
+      renderUI();
+    }
+
+    // Dynamic generation of line toggle checkboxes matching target design
+    function updateTogglePanel() {
+      const selectedASM = document.getElementById('asmFilter').value;
+      const container = document.getElementById('lineToggles');
+      container.innerHTML = '';
+
+      let availableReps = [{ key: 'EH', label: 'Overall Team (EH)' }];
+      
+      globalRawData.forEach(d => {
+        if (selectedASM === 'ALL' || d.asm === selectedASM) {
+          availableReps.push({ key: d.se, label: d.se });
+        }
+      });
+
+      availableReps.forEach(item => {
+        const isChecked = selectedLineKeys.has(item.key) ? 'checked' : '';
+        const color = colorPalette[item.key] || '#38bdf8';
+
+        container.innerHTML += `
+          <label class="toggle-item">
+            <input type="checkbox" value="${item.key}" ${isChecked} onchange="toggleLine('${item.key}')">
+            <span class="color-pill" style="background:${color};"></span>
+            ${item.label}
+          </label>
+        `;
+      });
+    }
+
+    function toggleLine(key) {
+      if (selectedLineKeys.has(key)) {
+        if (selectedLineKeys.size > 1) { // Prevent clearing all lines
+          selectedLineKeys.delete(key);
+        }
+      } else {
+        selectedLineKeys.add(key);
+      }
       renderUI();
     }
 
@@ -382,6 +541,14 @@
         document.getElementById('kpiRankSub').innerText = 'Overview Mode';
       }
 
+      // Update Trend Subtitle text
+      if (dateColumns.length > 0) {
+        const firstDate = dateColumns[0].title;
+        const lastDate = dateColumns[dateColumns.length - 1].title;
+        document.getElementById('trendSubText').innerText = `Tracking Progression from ${firstDate} to ${lastDate}`;
+      }
+
+      // Leaderboard Population
       const tbody = document.getElementById('leaderboardBody');
       tbody.innerHTML = '';
       sorted.forEach(d => {
@@ -394,22 +561,40 @@
         </tr>`;
       });
 
+      // Render Charts
       if (window.Chart) {
-        const xLabels = dateColumns.map(col => col.title || col);
-        
-        const trendData = xLabels.map(dayKey => {
-          let sumHitRates = 0;
-          let count = 0;
+        const xLabels = dateColumns.map(col => col.title);
 
-          filtered.forEach(d => {
-            let val = d.dailyTrend ? d.dailyTrend[dayKey] : 0;
-            if (val !== undefined && val !== null) {
-              sumHitRates += val;
-              count++;
+        // Build Multi-Line Datasets
+        const datasets = [];
+
+        selectedLineKeys.forEach(key => {
+          let lineData = [];
+          let label = key === 'EH' ? 'Overall Team (EH)' : key;
+          let color = colorPalette[key] || '#38bdf8';
+
+          if (key === 'EH' && overallTeamData) {
+            lineData = xLabels.map(day => overallTeamData.dailyTrend[day] || 0);
+          } else {
+            const seObj = globalRawData.find(d => d.se === key);
+            if (seObj) {
+              lineData = xLabels.map(day => seObj.dailyTrend[day] || 0);
             }
-          });
+          }
 
-          return count > 0 ? Number((sumHitRates / count).toFixed(1)) : 0;
+          if (lineData.length > 0) {
+            datasets.push({
+              label: label,
+              data: lineData,
+              borderColor: color,
+              backgroundColor: key === 'EH' ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
+              fill: key === 'EH',
+              tension: 0.35,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointBackgroundColor: color
+            });
+          }
         });
 
         if (trendChartInstance) trendChartInstance.destroy();
@@ -417,27 +602,23 @@
           type: 'line',
           data: {
             labels: xLabels.length > 0 ? xLabels : ['Pace'],
-            datasets: [{ 
-              label: 'Hit Rate %', 
-              data: trendData, 
-              borderColor: '#38bdf8', 
-              backgroundColor: 'rgba(56, 189, 248, 0.15)', 
-              fill: true, 
-              tension: 0.35,
-              pointRadius: 5,
-              pointHoverRadius: 7,
-              pointBackgroundColor: '#38bdf8'
-            }]
+            datasets: datasets
           },
           options: { 
             responsive: true, 
             maintainAspectRatio: false, 
-            plugins: { legend: { display: false } }, 
+            plugins: { 
+              legend: { display: false } // Legend handled via HTML toggle panel
+            }, 
             scales: { 
               y: { 
                 min: 0, 
                 max: 100,
-                ticks: { color: '#8e9cb0', stepSize: 10 },
+                ticks: { 
+                  color: '#8e9cb0', 
+                  stepSize: 10,
+                  callback: function(val) { return val + '%'; }
+                },
                 grid: { color: '#1e293b' }
               },
               x: {
