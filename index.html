@@ -36,7 +36,7 @@
     @keyframes fadeInUp {
       from {
         opacity: 0;
-        transform: translateY(24px);
+        transform: translateY(20px);
       }
       to {
         opacity: 1;
@@ -45,113 +45,12 @@
     }
 
     @keyframes pulseGlow {
-      0%, 100% {
-        box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
-      }
-      50% {
-        box-shadow: 0 0 30px rgba(56, 189, 248, 0.5);
-      }
-    }
-
-    /* WELCOME DASHBOARD STYLES */
-    .welcome-container {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 40px;
-      width: 100%;
-      max-width: 550px;
-      text-align: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-      animation: fadeInUp 0.8s ease-out forwards;
-    }
-
-    .welcome-badge {
-      display: inline-block;
-      background: rgba(56, 189, 248, 0.1);
-      color: var(--accent-blue);
-      border: 1px solid var(--accent-blue);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
-
-    .welcome-title {
-      font-size: 2rem;
-      font-weight: 800;
-      margin-bottom: 12px;
-      background: linear-gradient(135deg, #ffffff 0%, var(--accent-blue) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .welcome-subtitle {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.5;
-      margin-bottom: 32px;
-    }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 32px;
-    }
-
-    .feature-card {
-      background: #1e293b;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 16px 8px;
-      text-align: center;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-
-    .feature-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--accent-blue);
-    }
-
-    .feature-icon {
-      font-size: 1.4rem;
-      margin-bottom: 6px;
-    }
-
-    .feature-label {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .enter-btn {
-      width: 100%;
-      background: var(--accent-blue);
-      color: #090d16;
-      font-weight: 800;
-      border: none;
-      padding: 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      transition: transform 0.2s, background 0.2s;
-      animation: pulseGlow 3s infinite;
-    }
-
-    .enter-btn:hover {
-      background: #7dd3fc;
-      transform: scale(1.02);
+      0%, 100% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
+      50% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.5); }
     }
 
     /* LOGIN SCREEN STYLES */
     .login-container {
-      display: none;
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
@@ -179,6 +78,84 @@
     .logout-btn { background: #1e293b; border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: background 0.2s; }
     .logout-btn:hover { background: var(--accent-red); color: white; border-color: var(--accent-red); }
     .error-msg { color: var(--accent-red); font-size: 0.8rem; margin-top: 12px; display: none; }
+
+    /* AFTER-LOGIN WELCOME DASHBOARD STYLES */
+    .welcome-container {
+      display: none;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .welcome-badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent-blue);
+      border: 1px solid var(--accent-blue);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .welcome-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #ffffff 0%, var(--accent-blue) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .welcome-subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
+
+    .user-info-card {
+      background: #1e293b;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 28px;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .user-info-card div .info-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+    .user-info-card div .info-val { font-size: 1.2rem; font-weight: 800; color: #fff; margin-top: 4px; }
+
+    .enter-btn {
+      width: 100%;
+      background: var(--accent-blue);
+      color: #090d16;
+      font-weight: 800;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: transform 0.2s, background 0.2s;
+      animation: pulseGlow 3s infinite;
+      margin-bottom: 12px;
+    }
+
+    .enter-btn:hover { background: #7dd3fc; transform: scale(1.02); }
 
     /* DASHBOARD STYLES */
     #dashboardContent { display: none; width: 100%; max-width: 1400px; animation: fadeInUp 0.6s ease-out forwards; }
@@ -259,29 +236,6 @@
 </head>
 <body>
 
-  <div class="welcome-container" id="welcomeBox">
-    <div class="welcome-badge">Performance Intelligence</div>
-    <h1 class="welcome-title">Sales Executive Dashboard</h1>
-    <p class="welcome-subtitle">Real-time itinerary tracking, hit-rate analytics, and performance leaderboards for sales management.</p>
-    
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="feature-icon">📊</div>
-        <div class="feature-label">Hit Rate Trends</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🏆</div>
-        <div class="feature-label">SE Rankings</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">⚡</div>
-        <div class="feature-label">Live API Data</div>
-      </div>
-    </div>
-
-    <button class="enter-btn" onclick="openLogin()">Proceed to Portal</button>
-  </div>
-
   <div class="login-container" id="loginBox">
     <h2>Dashboard Login</h2>
     <p>Select role & enter credentials</p>
@@ -305,6 +259,30 @@
     </div>
     <button class="login-btn" onclick="checkAuth()">Login</button>
     <div class="error-msg" id="errorMsg">Invalid Credentials!</div>
+  </div>
+
+  <div class="welcome-container" id="welcomeBox">
+    <div class="welcome-badge" id="wBadge">Authenticated Session</div>
+    <h1 class="welcome-title" id="wTitle">Welcome Back!</h1>
+    <p class="welcome-subtitle" id="wSub">Your performance tracking session has been initialized.</p>
+    
+    <div class="user-info-card">
+      <div>
+        <div class="info-label">User / Account</div>
+        <div class="info-val" id="wUser">---</div>
+      </div>
+      <div>
+        <div class="info-label">Assigned Role</div>
+        <div class="info-val" id="wRole" style="color: var(--accent-blue);">---</div>
+      </div>
+      <div>
+        <div class="info-label">Territory / ASM</div>
+        <div class="info-val" id="wAsm">---</div>
+      </div>
+    </div>
+
+    <button class="enter-btn" onclick="proceedToDashboard()">Go to Main Dashboard</button>
+    <button class="logout-btn" style="width: 100%;" onclick="logout()">Logout</button>
   </div>
 
   <div id="dashboardContent">
@@ -415,11 +393,6 @@
     let loggedRole = 'ADMIN';
     let loggedUser = '';
 
-    function openLogin() {
-      document.getElementById('welcomeBox').style.display = 'none';
-      document.getElementById('loginBox').style.display = 'block';
-    }
-
     function checkAuth() {
       const role = document.getElementById('roleSelect').value;
       const u = document.getElementById('userInput').value.trim();
@@ -443,12 +416,43 @@
         loggedRole = role;
         loggedUser = role === 'SE' ? u.toUpperCase() : u;
         document.getElementById('loginBox').style.display = 'none';
-        document.getElementById('dashboardContent').style.display = 'block';
-        loadData();
+
+        if (loggedRole === 'SE' || loggedRole === 'ASM') {
+          showWelcomeDashboard();
+        } else {
+          document.getElementById('dashboardContent').style.display = 'block';
+          loadData();
+        }
       } else {
         err.innerText = "Invalid credentials for " + role + "!";
         err.style.display = 'block';
       }
+    }
+
+    function showWelcomeDashboard() {
+      const welcomeBox = document.getElementById('welcomeBox');
+      document.getElementById('wUser').innerText = loggedUser;
+      document.getElementById('wRole').innerText = loggedRole === 'SE' ? 'Sales Executive' : 'Area Manager';
+      
+      if (loggedRole === 'SE') {
+        document.getElementById('wTitle').innerText = 'Welcome, ' + loggedUser + '!';
+        document.getElementById('wSub').innerText = 'Ready to review your itinerary, hit rate, and performance metrics?';
+        document.getElementById('wBadge').innerText = 'Sales Executive Portal';
+        document.getElementById('wAsm').innerText = asmMapping[loggedUser] || 'N/A';
+      } else {
+        document.getElementById('wTitle').innerText = 'Welcome, ' + loggedUser + '!';
+        document.getElementById('wSub').innerText = 'Area Manager overview portal initialized for team monitoring.';
+        document.getElementById('wBadge').innerText = 'Area Manager Portal';
+        document.getElementById('wAsm').innerText = loggedUser;
+      }
+
+      welcomeBox.style.display = 'block';
+    }
+
+    function proceedToDashboard() {
+      document.getElementById('welcomeBox').style.display = 'none';
+      document.getElementById('dashboardContent').style.display = 'block';
+      loadData();
     }
 
     function applyUserRoleFilters() {
@@ -478,7 +482,8 @@
       document.getElementById('passInput').value = '';
       document.getElementById('errorMsg').style.display = 'none';
       document.getElementById('dashboardContent').style.display = 'none';
-      document.getElementById('welcomeBox').style.display = 'block';
+      document.getElementById('welcomeBox').style.display = 'none';
+      document.getElementById('loginBox').style.display = 'block';
     }
 
     function cleanPercentage(val) {
