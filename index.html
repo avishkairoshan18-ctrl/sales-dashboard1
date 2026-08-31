@@ -16,6 +16,7 @@
       --accent-green: #10b981;
       --accent-gold: #f59e0b;
       --accent-red: #ef4444;
+      --accent-purple: #a855f7;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,20 +34,20 @@
     }
 
     /* KEYFRAME ANIMATIONS */
-    @keyframes fadeInUp {
+    @keyframes zoomInFade {
       from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: scale(0.92) translateY(10px);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: scale(1) translateY(0);
       }
     }
 
-    @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
-      50% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.5); }
+    @keyframes floatIcon {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
     }
 
     /* LOGIN SCREEN STYLES */
@@ -59,7 +60,7 @@
       max-width: 400px;
       text-align: center;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      animation: fadeInUp 0.5s ease-out forwards;
+      animation: zoomInFade 0.4s ease-out forwards;
     }
     .login-container h2 { margin-bottom: 8px; font-size: 1.5rem; }
     .login-container p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; }
@@ -79,86 +80,98 @@
     .logout-btn:hover { background: var(--accent-red); color: white; border-color: var(--accent-red); }
     .error-msg { color: var(--accent-red); font-size: 0.8rem; margin-top: 12px; display: none; }
 
-    /* AFTER-LOGIN WELCOME DASHBOARD STYLES */
+    /* AFTER-LOGIN WELCOME DASHBOARD STYLES (VARIANT 2) */
     .welcome-container {
       display: none;
-      background: var(--card-bg);
+      background: linear-gradient(180deg, #151d30 0%, #0d1322 100%);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 40px;
+      border-radius: 20px;
+      padding: 36px;
       width: 100%;
-      max-width: 600px;
+      max-width: 650px;
       text-align: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-      animation: fadeInUp 0.6s ease-out forwards;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      animation: zoomInFade 0.5s ease-out forwards;
     }
 
-    .welcome-badge {
-      display: inline-block;
-      background: rgba(56, 189, 248, 0.1);
-      color: var(--accent-blue);
-      border: 1px solid var(--accent-blue);
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 16px;
+    .avatar-badge {
+      width: 64px;
+      height: 64px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 2px solid var(--accent-blue);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px auto;
+      font-size: 1.8rem;
+      animation: floatIcon 3s ease-in-out infinite;
     }
 
     .welcome-title {
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 800;
-      margin-bottom: 8px;
-      background: linear-gradient(135deg, #ffffff 0%, var(--accent-blue) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+      color: #ffffff;
     }
 
     .welcome-subtitle {
       color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.5;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
       margin-bottom: 28px;
     }
 
-    .user-info-card {
+    .preview-card {
       background: #1e293b;
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 28px;
-      text-align: left;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 16px 12px;
+      text-align: center;
     }
 
-    .user-info-card div .info-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
-    .user-info-card div .info-val { font-size: 1.2rem; font-weight: 800; color: #fff; margin-top: 4px; }
+    .preview-card .p-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .preview-card .p-val {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-top: 4px;
+    }
 
     .enter-btn {
       width: 100%;
-      background: var(--accent-blue);
-      color: #090d16;
+      background: linear-gradient(135deg, var(--accent-blue) 0%, #0284c7 100%);
+      color: #ffffff;
       font-weight: 800;
       border: none;
       padding: 14px;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
-      font-size: 1rem;
+      font-size: 0.95rem;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      transition: transform 0.2s, background 0.2s;
-      animation: pulseGlow 3s infinite;
+      transition: transform 0.2s, box-shadow 0.2s;
       margin-bottom: 12px;
     }
 
-    .enter-btn:hover { background: #7dd3fc; transform: scale(1.02); }
+    .enter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
+    }
 
     /* DASHBOARD STYLES */
-    #dashboardContent { display: none; width: 100%; max-width: 1400px; animation: fadeInUp 0.6s ease-out forwards; }
+    #dashboardContent { display: none; width: 100%; max-width: 1400px; animation: zoomInFade 0.5s ease-out forwards; }
     .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px; }
     .top-bar h1 { font-size: 1.5rem; font-weight: 700; }
     .controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -236,6 +249,7 @@
 </head>
 <body>
 
+  <!-- LOGIN CONTAINER -->
   <div class="login-container" id="loginBox">
     <h2>Dashboard Login</h2>
     <p>Select role & enter credentials</p>
@@ -261,30 +275,32 @@
     <div class="error-msg" id="errorMsg">Invalid Credentials!</div>
   </div>
 
+  <!-- AFTER-LOGIN WELCOME CONTAINER (VARIANT 2) -->
   <div class="welcome-container" id="welcomeBox">
-    <div class="welcome-badge" id="wBadge">Authenticated Session</div>
-    <h1 class="welcome-title" id="wTitle">Welcome Back!</h1>
-    <p class="welcome-subtitle" id="wSub">Your performance tracking session has been initialized.</p>
+    <div class="avatar-badge" id="wAvatar">👤</div>
+    <h1 class="welcome-title" id="wTitle">Welcome Back</h1>
+    <p class="welcome-subtitle" id="wSub">Authenticated session active for field itinerary management.</p>
     
-    <div class="user-info-card">
-      <div>
-        <div class="info-label">User / Account</div>
-        <div class="info-val" id="wUser">---</div>
+    <div class="preview-grid">
+      <div class="preview-card">
+        <div class="p-label">Account</div>
+        <div class="p-val" id="wUser" style="color: var(--accent-blue);">---</div>
       </div>
-      <div>
-        <div class="info-label">Assigned Role</div>
-        <div class="info-val" id="wRole" style="color: var(--accent-blue);">---</div>
+      <div class="preview-card">
+        <div class="p-label">Role</div>
+        <div class="p-val" id="wRole" style="color: #fff;">---</div>
       </div>
-      <div>
-        <div class="info-label">Territory / ASM</div>
-        <div class="info-val" id="wAsm">---</div>
+      <div class="preview-card">
+        <div class="p-label">ASM Territory</div>
+        <div class="p-val" id="wAsm" style="color: var(--accent-gold);">---</div>
       </div>
     </div>
 
-    <button class="enter-btn" onclick="proceedToDashboard()">Go to Main Dashboard</button>
-    <button class="logout-btn" style="width: 100%;" onclick="logout()">Logout</button>
+    <button class="enter-btn" onclick="proceedToDashboard()">Launch Performance Analytics</button>
+    <button class="logout-btn" style="width: 100%;" onclick="logout()">Sign Out</button>
   </div>
 
+  <!-- DASHBOARD CONTAINER -->
   <div id="dashboardContent">
     <div class="top-bar">
       <h1>Sales Executive Itinerary Dashboard</h1>
@@ -432,17 +448,17 @@
     function showWelcomeDashboard() {
       const welcomeBox = document.getElementById('welcomeBox');
       document.getElementById('wUser').innerText = loggedUser;
-      document.getElementById('wRole').innerText = loggedRole === 'SE' ? 'Sales Executive' : 'Area Manager';
+      document.getElementById('wRole').innerText = loggedRole;
       
       if (loggedRole === 'SE') {
-        document.getElementById('wTitle').innerText = 'Welcome, ' + loggedUser + '!';
-        document.getElementById('wSub').innerText = 'Ready to review your itinerary, hit rate, and performance metrics?';
-        document.getElementById('wBadge').innerText = 'Sales Executive Portal';
+        document.getElementById('wAvatar').innerText = '📈';
+        document.getElementById('wTitle').innerText = 'Hello, ' + loggedUser;
+        document.getElementById('wSub').innerText = 'Sales Executive workspace ready. View your active itinerary & hit rates.';
         document.getElementById('wAsm').innerText = asmMapping[loggedUser] || 'N/A';
       } else {
-        document.getElementById('wTitle').innerText = 'Welcome, ' + loggedUser + '!';
-        document.getElementById('wSub').innerText = 'Area Manager overview portal initialized for team monitoring.';
-        document.getElementById('wBadge').innerText = 'Area Manager Portal';
+        document.getElementById('wAvatar').innerText = '👔';
+        document.getElementById('wTitle').innerText = 'Welcome, ' + loggedUser;
+        document.getElementById('wSub').innerText = 'Area Manager workspace ready. Monitor your territory team metrics.';
         document.getElementById('wAsm').innerText = loggedUser;
       }
 
