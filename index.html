@@ -33,22 +33,33 @@
       overflow-x: hidden;
     }
 
-    @keyframes zoomInFade {
+    /* KEYFRAME TRANSITIONS */
+    @keyframes fadeInUp {
       from {
         opacity: 0;
-        transform: scale(0.98) translateY(10px);
+        transform: translateY(15px);
       }
       to {
         opacity: 1;
-        transform: scale(1) translateY(0);
+        transform: translateY(0);
       }
     }
 
-    /* DASHBOARD STYLES */
+    @keyframes fadeOutUp {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-15px);
+      }
+    }
+
     #dashboardContent { 
       width: 100%; 
       max-width: 1400px; 
-      animation: zoomInFade 0.4s ease-out forwards; 
+      animation: fadeInUp 0.4s ease-out forwards; 
     }
     
     .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px; }
@@ -57,6 +68,114 @@
 
     .status-badge { background: #059669; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; }
     .select-box { background: #1e293b; border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; outline: none; min-width: 200px; }
+
+    /* IN-DASHBOARD WELCOME TRANSITION BANNER */
+    .dashboard-welcome-banner {
+      background: linear-gradient(135deg, #131b2e 0%, #1a253d 50%, #0d1322 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 40px 32px;
+      margin-bottom: 24px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dashboard-welcome-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .welcome-text-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .welcome-text-subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .transition-action-btn {
+      background: linear-gradient(135deg, var(--accent-blue) 0%, #0284c7 100%);
+      color: #ffffff;
+      font-weight: 700;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .transition-action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5);
+    }
+
+    /* COLLAPSED BANNER STATE AFTER TRANSITION */
+    .dashboard-welcome-banner.collapsed {
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+      background: var(--card-bg);
+      margin-bottom: 20px;
+    }
+
+    .dashboard-welcome-banner.collapsed .welcome-text-title {
+      font-size: 1.1rem;
+      margin-bottom: 0;
+    }
+
+    .dashboard-welcome-banner.collapsed .welcome-text-subtitle,
+    .dashboard-welcome-banner.collapsed .transition-action-btn {
+      display: none;
+    }
+
+    .dashboard-welcome-banner.collapsed .reopen-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .reopen-tag { display: none; }
+
+    /* DASHBOARD CONTENT AREA */
+    .dashboard-body-content {
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .dashboard-body-content.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
 
     .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
     .kpi-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
@@ -76,7 +195,6 @@
     .chart-title { font-size: 1.1rem; font-weight: 700; }
     .chart-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
 
-    /* MULTI-LINE TOGGLE CONTAINER */
     .toggle-container {
       background: #0d1322;
       border: 1px solid var(--border-color);
@@ -128,7 +246,6 @@
 </head>
 <body>
 
-  <!-- DIRECT MAIN DASHBOARD CONTAINER -->
   <div id="dashboardContent">
     <div class="top-bar">
       <h1>Sales Executive Itinerary Dashboard</h1>
@@ -139,63 +256,74 @@
       </div>
     </div>
 
-    <div class="kpi-row">
-      <div class="kpi-card">
-        <div class="label">Active Customers</div>
-        <div class="value" id="kpiActive">0</div>
-        <div class="subtext">Total Portfolio</div>
+    <div class="dashboard-welcome-banner" id="welcomeBanner">
+      <div>
+        <div class="welcome-text-title" id="bannerTitle">Welcome to Itinerary Analytics</div>
+        <div class="welcome-text-subtitle" id="bannerSub">Real-time performance tracking for Sales Executives and Area Managers. Click below to expand full metrics.</div>
       </div>
-      <div class="kpi-card">
-        <div class="label">Visited Customers</div>
-        <div class="value val-green" id="kpiVisited">0</div>
-        <div class="subtext" id="kpiRemaining">0 Remaining</div>
-      </div>
-      <div class="kpi-card">
-        <div class="label">Current Hit Rate</div>
-        <div class="value val-blue" id="kpiHitRate">0.0%</div>
-        <div class="subtext">Target Pace</div>
-      </div>
-      <div class="kpi-card">
-        <div class="label">Leader</div>
-        <div class="value val-gold" id="kpiRank">#--</div>
-        <div class="subtext" id="kpiRankSub">Overview Mode</div>
-      </div>
+      <button class="transition-action-btn" id="transitionBtn" onclick="triggerInDashboardTransition()">Explore Dashboard Analytics</button>
+      <span class="reopen-tag">Active View Mode</span>
     </div>
 
-    <div class="dashboard-layout">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Monthly Visited Hit Rate Trend (%)</div>
-            <div class="chart-subtitle" id="trendSubText">Tracking Progression</div>
+    <div class="dashboard-body-content" id="dashboardBody">
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="label">Active Customers</div>
+          <div class="value" id="kpiActive">0</div>
+          <div class="subtext">Total Portfolio</div>
+        </div>
+        <div class="kpi-card">
+          <div class="label">Visited Customers</div>
+          <div class="value val-green" id="kpiVisited">0</div>
+          <div class="subtext" id="kpiRemaining">0 Remaining</div>
+        </div>
+        <div class="kpi-card">
+          <div class="label">Current Hit Rate</div>
+          <div class="value val-blue" id="kpiHitRate">0.0%</div>
+          <div class="subtext">Target Pace</div>
+        </div>
+        <div class="kpi-card">
+          <div class="label">Leader</div>
+          <div class="value val-gold" id="kpiRank">#--</div>
+          <div class="subtext" id="kpiRankSub">Overview Mode</div>
+        </div>
+      </div>
+
+      <div class="dashboard-layout">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Monthly Visited Hit Rate Trend (%)</div>
+              <div class="chart-subtitle" id="trendSubText">Tracking Progression</div>
+            </div>
           </div>
+
+          <div class="toggle-container">
+            <div class="toggle-label">Display Lines:</div>
+            <div class="toggle-grid" id="lineToggles"></div>
+          </div>
+
+          <div class="canvas-container"><canvas id="trendChart"></canvas></div>
         </div>
-
-        <div class="toggle-container">
-          <div class="toggle-label">Display Lines:</div>
-          <div class="toggle-grid" id="lineToggles"></div>
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Hit Rate by SE (%)</div></div>
+          <div class="canvas-container"><canvas id="rankChart"></canvas></div>
         </div>
+      </div>
 
-        <div class="canvas-container"><canvas id="trendChart"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header"><div class="chart-title">Hit Rate by SE (%)</div></div>
-        <div class="canvas-container"><canvas id="rankChart"></canvas></div>
-      </div>
-    </div>
-
-    <div class="dashboard-layout">
-      <div class="chart-card">
-        <div class="chart-header"><div class="chart-title">Visited vs Remaining</div></div>
-        <div class="canvas-container"><canvas id="volumeChart"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header"><div class="chart-title">Leaderboard</div></div>
-        <div style="overflow-x: auto;">
-          <table class="leaderboard-table">
-            <thead><tr><th>SE</th><th>ASM</th><th>ACTIVE</th><th>VISITED</th><th>RATE</th></tr></thead>
-            <tbody id="leaderboardBody"></tbody>
-          </table>
+      <div class="dashboard-layout">
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Visited vs Remaining</div></div>
+          <div class="canvas-container"><canvas id="volumeChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Leaderboard</div></div>
+          <div style="overflow-x: auto;">
+            <table class="leaderboard-table">
+              <thead><tr><th>SE</th><th>ASM</th><th>ACTIVE</th><th>VISITED</th><th>RATE</th></tr></thead>
+              <tbody id="leaderboardBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -236,6 +364,22 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadData();
     });
+
+    function triggerInDashboardTransition() {
+      const banner = document.getElementById('welcomeBanner');
+      const body = document.getElementById('dashboardBody');
+      const title = document.getElementById('bannerTitle');
+
+      banner.classList.add('collapsed');
+      title.innerText = 'Sales Executive Itinerary Analytics';
+      body.classList.add('visible');
+
+      setTimeout(() => {
+        if (trendChartInstance) trendChartInstance.resize();
+        if (rankChartInstance) rankChartInstance.resize();
+        if (volumeChartInstance) volumeChartInstance.resize();
+      }, 300);
+    }
 
     function cleanPercentage(val) {
       if (val === null || val === undefined || val === '') return null;
