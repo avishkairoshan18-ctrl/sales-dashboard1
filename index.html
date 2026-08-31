@@ -546,27 +546,41 @@
 
     function onSeChange() {
       const selectedSE = document.getElementById('seFilter').value;
+      selectedLineKeys.clear();
+      selectedLineKeys.add('EH');
+      
       if (selectedSE !== 'ALL') {
-        selectedLineKeys.clear();
-        selectedLineKeys.add('EH');
         selectedLineKeys.add(selectedSE);
+      } else {
+        const selectedASM = document.getElementById('asmFilter').value;
+        globalRawData.forEach(d => {
+          if (selectedASM === 'ALL' || d.asm === selectedASM) {
+            selectedLineKeys.add(d.se);
+          }
+        });
       }
+      
       updateTogglePanel();
       renderUI();
     }
 
     function updateTogglePanel() {
       const selectedASM = document.getElementById('asmFilter').value;
+      const selectedSE = document.getElementById('seFilter').value;
       const container = document.getElementById('lineToggles');
       container.innerHTML = '';
 
       let availableReps = [{ key: 'EH', label: 'Overall Team (EH)' }];
       
-      globalRawData.forEach(d => {
-        if (selectedASM === 'ALL' || d.asm === selectedASM) {
-          availableReps.push({ key: d.se, label: d.se });
-        }
-      });
+      if (selectedSE !== 'ALL') {
+        availableReps.push({ key: selectedSE, label: selectedSE });
+      } else {
+        globalRawData.forEach(d => {
+          if (selectedASM === 'ALL' || d.asm === selectedASM) {
+            availableReps.push({ key: d.se, label: d.se });
+          }
+        });
+      }
 
       availableReps.forEach(item => {
         const isChecked = selectedLineKeys.has(item.key) ? 'checked' : '';
