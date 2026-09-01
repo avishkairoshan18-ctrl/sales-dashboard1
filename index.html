@@ -31,6 +31,71 @@
       justify-content: center;
       align-items: flex-start;
       overflow-x: hidden;
+      position: relative;
+    }
+
+    /* SIMPLE WELCOME OVERLAY TRANSITION */
+    #welcomeOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-dark);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      opacity: 1;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    #welcomeOverlay.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .welcome-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .welcome-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .welcome-sub {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .enter-btn {
+      background: var(--accent-blue);
+      color: #000;
+      font-weight: 700;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+
+    .enter-btn:hover {
+      transform: translateY(-2px);
+      background-color: #7dd3fc;
     }
 
     @keyframes zoomInFade {
@@ -128,7 +193,14 @@
 </head>
 <body>
 
-  <!-- DIRECT MAIN DASHBOARD CONTAINER -->
+  <div id="welcomeOverlay">
+    <div class="welcome-card">
+      <div class="welcome-title">Welcome Back</div>
+      <div class="welcome-sub">Sales Executive Itinerary & Performance Dashboard</div>
+      <button class="enter-btn" onclick="dismissWelcome()">Enter Dashboard</button>
+    </div>
+  </div>
+
   <div id="dashboardContent">
     <div class="top-bar">
       <h1>Sales Executive Itinerary Dashboard</h1>
@@ -232,6 +304,16 @@
     let activeDateColumns = [];
     let selectedLineKeys = new Set(['EH']);
     let trendChartInstance = null, rankChartInstance = null, volumeChartInstance = null;
+
+    function dismissWelcome() {
+      const overlay = document.getElementById('welcomeOverlay');
+      overlay.classList.add('fade-out');
+      setTimeout(() => {
+        if (trendChartInstance) trendChartInstance.resize();
+        if (rankChartInstance) rankChartInstance.resize();
+        if (volumeChartInstance) volumeChartInstance.resize();
+      }, 500);
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
       loadData();
@@ -599,9 +681,7 @@
           options: { 
             responsive: true, 
             maintainAspectRatio: false, 
-            plugins: { 
-              legend: { display: false } 
-            }, 
+            plugins: { legend: { display: false } }, 
             scales: { 
               y: { 
                 min: 0, 
@@ -613,10 +693,7 @@
                 },
                 grid: { color: '#1e293b' }
               },
-              x: {
-                ticks: { color: '#8e9cb0' },
-                grid: { color: '#1e293b' }
-              }
+              x: { ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } }
             } 
           }
         });
