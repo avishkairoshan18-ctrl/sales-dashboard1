@@ -29,110 +29,91 @@
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       overflow-x: hidden;
+      position: relative;
     }
 
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* SIMPLE WELCOME OVERLAY TRANSITION */
+    #welcomeOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-dark);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      opacity: 1;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
     }
 
-    @keyframes fadeOut {
-      from { opacity: 1; transform: scale(1); }
-      to { opacity: 0; transform: scale(0.95); }
+    #welcomeOverlay.fade-out {
+      opacity: 0;
+      visibility: hidden;
     }
 
-    .hidden { display: none !important; }
-
-    /* --- LOGIN & PANEL SELECTION VIEW --- */
-    .auth-container {
-      width: 100%;
-      max-width: 480px;
+    .welcome-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 16px;
-      padding: 36px 28px;
+      padding: 40px;
       text-align: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-      animation: fadeInUp 0.4s ease-out forwards;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
-    .auth-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
-    .auth-subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; }
-
-    .role-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px; }
-
-    .role-btn {
-      background: #1e293b;
-      border: 1px solid var(--border-color);
+    .welcome-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
       color: var(--text-main);
-      padding: 14px 18px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: all 0.2s ease;
     }
 
-    .role-btn:hover {
-      border-color: var(--accent-blue);
-      background: #27354d;
-      transform: translateY(-2px);
+    .welcome-sub {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
     }
 
-    /* --- WELCOME LANDING VIEW --- */
-    .welcome-container {
-      width: 100%;
-      max-width: 700px;
-      background: linear-gradient(135deg, #131b2e 0%, #1a253d 100%);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 48px 36px;
-      text-align: center;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.6);
-      animation: fadeInUp 0.5s ease-out forwards;
-    }
-
-    .welcome-badge {
-      display: inline-block;
-      background: rgba(56, 189, 248, 0.1);
-      color: var(--accent-blue);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
-
-    .welcome-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 12px; }
-    .welcome-desc { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 32px; }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent-blue) 0%, #0284c7 100%);
-      color: #fff;
+    .enter-btn {
+      background: var(--accent-blue);
+      color: #000;
       font-weight: 700;
       border: none;
-      padding: 14px 32px;
-      border-radius: 10px;
+      padding: 12px 28px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 0.95rem;
-      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
-      transition: all 0.2s;
+      transition: transform 0.2s, background-color 0.2s;
     }
 
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5); }
+    .enter-btn:hover {
+      transform: translateY(-2px);
+      background-color: #7dd3fc;
+    }
 
-    /* --- MAIN DASHBOARD VIEW --- */
+    @keyframes zoomInFade {
+      from {
+        opacity: 0;
+        transform: scale(0.98) translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    /* DASHBOARD STYLES */
     #dashboardContent { 
       width: 100%; 
       max-width: 1400px; 
-      animation: fadeInUp 0.4s ease-out forwards; 
+      animation: zoomInFade 0.4s ease-out forwards; 
     }
     
     .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px; }
@@ -141,7 +122,6 @@
 
     .status-badge { background: #059669; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; }
     .select-box { background: #1e293b; border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; outline: none; min-width: 200px; }
-    .logout-btn { background: #dc2626; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
 
     .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
     .kpi-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
@@ -161,6 +141,7 @@
     .chart-title { font-size: 1.1rem; font-weight: 700; }
     .chart-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
 
+    /* MULTI-LINE TOGGLE CONTAINER */
     .toggle-container {
       background: #0d1322;
       border: 1px solid var(--border-color);
@@ -168,11 +149,40 @@
       padding: 12px 16px;
       margin-bottom: 16px;
     }
-    .toggle-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; }
-    .toggle-grid { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; }
-    .toggle-item { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; user-select: none; }
-    .toggle-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent-blue); cursor: pointer; }
-    .color-pill { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+    .toggle-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .toggle-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      align-items: center;
+    }
+    .toggle-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent-blue);
+      cursor: pointer;
+    }
+    .color-pill {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
 
     .canvas-container { position: relative; height: 320px; width: 100%; }
 
@@ -183,39 +193,21 @@
 </head>
 <body>
 
-  <div class="auth-container" id="loginView">
-    <div class="auth-title">System Portal Access</div>
-    <div class="auth-subtitle">Select your role or panel to proceed</div>
-    <div class="role-grid">
-      <button class="role-btn" onclick="selectRole('ADMIN')">
-        <span>Admin Dashboard</span> <span>→</span>
-      </button>
-      <button class="role-btn" onclick="selectRole('ASM')">
-        <span>Area Sales Manager (ASM)</span> <span>→</span>
-      </button>
-      <button class="role-btn" onclick="selectRole('SE')">
-        <span>Sales Executive (SE)</span> <span>→</span>
-      </button>
+  <div id="welcomeOverlay">
+    <div class="welcome-card">
+      <div class="welcome-title">Welcome Back</div>
+      <div class="welcome-sub">Sales Executive Itinerary & Performance Dashboard</div>
+      <button class="enter-btn" onclick="dismissWelcome()">Enter Dashboard</button>
     </div>
   </div>
 
-  <div class="welcome-container hidden" id="welcomeView">
-    <div class="welcome-badge" id="welcomeRoleBadge">AUTHENTICATED USER</div>
-    <div class="welcome-title">Itinerary Analytics Portal</div>
-    <div class="welcome-desc">
-      Access real-time sales progression, active customer portfolio metrics, and daily hit rate trends across all operational zones.
-    </div>
-    <button class="btn-primary" onclick="transitionToDashboard()">Enter Dashboard Analytics</button>
-  </div>
-
-  <div id="dashboardContent" class="hidden">
+  <div id="dashboardContent">
     <div class="top-bar">
       <h1>Sales Executive Itinerary Dashboard</h1>
       <div class="controls">
         <div class="status-badge" id="syncStatus">CONNECTING...</div>
         <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
         <select id="seFilter" class="select-box" onchange="onSeChange()"><option value="ALL">All Sales Executives (Overview)</option></select>
-        <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
     </div>
 
@@ -311,37 +303,21 @@
     let overallTeamData = null;
     let activeDateColumns = [];
     let selectedLineKeys = new Set(['EH']);
-    let currentRole = 'ADMIN';
     let trendChartInstance = null, rankChartInstance = null, volumeChartInstance = null;
 
-    function selectRole(role) {
-      currentRole = role;
-      document.getElementById('loginView').classList.add('hidden');
-      document.getElementById('welcomeView').classList.remove('hidden');
-      document.getElementById('welcomeRoleBadge').innerText = role + ' ACCESS MODE';
+    function dismissWelcome() {
+      const overlay = document.getElementById('welcomeOverlay');
+      overlay.classList.add('fade-out');
+      setTimeout(() => {
+        if (trendChartInstance) trendChartInstance.resize();
+        if (rankChartInstance) rankChartInstance.resize();
+        if (volumeChartInstance) volumeChartInstance.resize();
+      }, 500);
     }
 
-    function transitionToDashboard() {
-      document.getElementById('welcomeView').classList.add('hidden');
-      document.getElementById('dashboardContent').classList.remove('hidden');
-      
-      // Auto-restrict options based on selected role
-      if (currentRole === 'ASM') {
-        document.getElementById('asmFilter').value = 'Mr.Farzaan';
-        onAsmChange();
-      } else if (currentRole === 'SE') {
-        document.getElementById('seFilter').value = 'FZN';
-        onSeChange();
-      }
-      
+    window.addEventListener('DOMContentLoaded', () => {
       loadData();
-    }
-
-    function logout() {
-      document.getElementById('dashboardContent').classList.add('hidden');
-      document.getElementById('welcomeView').classList.add('hidden');
-      document.getElementById('loginView').classList.remove('hidden');
-    }
+    });
 
     function cleanPercentage(val) {
       if (val === null || val === undefined || val === '') return null;
