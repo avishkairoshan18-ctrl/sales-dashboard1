@@ -25,27 +25,72 @@
       background-color: var(--bg-dark);
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      padding: 24px;
+      padding: 16px;
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
+      align-items: center;
       overflow-x: hidden;
     }
 
     @keyframes zoomInFade {
-      from {
-        opacity: 0;
-        transform: scale(0.98) translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
+      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* LOGIN SCREEN STYLES */
+    .login-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      animation: zoomInFade 0.4s ease-out forwards;
+    }
+    .login-container h2 { margin-bottom: 8px; font-size: 1.35rem; }
+    .login-container p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; }
+    .input-group { margin-bottom: 16px; text-align: left; }
+    .input-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
+    .input-group input, .input-group select { 
+      width: 100%; background: #1e293b; border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; color: white; outline: none; font-size: 0.95rem;
+    }
+    .login-btn { width: 100%; background: var(--accent-blue); color: #090d16; font-weight: 700; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-top: 8px; }
+    .logout-btn { background: #1e293b; border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: background 0.2s; }
+    .logout-btn:hover { background: var(--accent-red); color: white; border-color: var(--accent-red); }
+    .error-msg { color: var(--accent-red); font-size: 0.8rem; margin-top: 12px; display: none; }
+
+    /* WELCOME SCREEN STYLES */
+    .welcome-container {
+      display: none;
+      background: linear-gradient(180deg, #151d30 0%, #0d1322 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 650px;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      animation: zoomInFade 0.5s ease-out forwards;
+    }
+    .avatar-badge {
+      width: 56px; height: 56px; background: rgba(56, 189, 248, 0.15); border: 2px solid var(--accent-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; font-size: 1.5rem;
+    }
+    .welcome-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; color: #ffffff; }
+    .welcome-subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; }
+    .preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
+    .preview-card { background: #1e293b; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 8px; text-align: center; }
+    .preview-card .p-label { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .preview-card .p-val { font-size: 1.1rem; font-weight: 800; margin-top: 4px; word-break: break-word; }
+    .enter-btn {
+      width: 100%; background: linear-gradient(135deg, var(--accent-blue) 0%, #0284c7 100%); color: #ffffff; font-weight: 800; border: none; padding: 14px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
     }
 
     /* DASHBOARD STYLES */
     #dashboardContent { 
+      display: none; 
       width: 100%; 
       max-width: 1400px; 
       animation: zoomInFade 0.4s ease-out forwards; 
@@ -56,7 +101,7 @@
     .controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
     .status-badge { background: #059669; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; }
-    .select-box { background: #1e293b; border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; outline: none; min-width: 200px; }
+    .select-box { background: #1e293b; border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; outline: none; min-width: 180px; }
 
     .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
     .kpi-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
@@ -76,7 +121,6 @@
     .chart-title { font-size: 1.1rem; font-weight: 700; }
     .chart-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
 
-    /* MULTI-LINE TOGGLE CONTAINER */
     .toggle-container {
       background: #0d1322;
       border: 1px solid var(--border-color);
@@ -128,7 +172,55 @@
 </head>
 <body>
 
-  <!-- DIRECT MAIN DASHBOARD CONTAINER -->
+  <div class="login-container" id="loginBox">
+    <h2>Dashboard Login</h2>
+    <p>Select role & enter credentials</p>
+    
+    <div class="input-group">
+      <label>User Role</label>
+      <select id="roleSelect">
+        <option value="ADMIN">Admin / Overview</option>
+        <option value="ASM">Area Manager (ASM)</option>
+        <option value="SE">Sales Executive (SE)</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Username / Code</label>
+      <input type="text" id="userInput" placeholder="admin / Mr.Farzaan / FZN">
+    </div>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="passInput" placeholder="••••••••">
+    </div>
+    <button class="login-btn" onclick="checkAuth()">Login</button>
+    <div class="error-msg" id="errorMsg">Invalid Credentials!</div>
+  </div>
+
+  <div class="welcome-container" id="welcomeBox">
+    <div class="avatar-badge" id="wAvatar">👤</div>
+    <h1 class="welcome-title" id="wTitle">Welcome Back</h1>
+    <p class="welcome-subtitle" id="wSub">Authenticated session active for field itinerary management.</p>
+    
+    <div class="preview-grid">
+      <div class="preview-card">
+        <div class="p-label">Account</div>
+        <div class="p-val" id="wUser" style="color: var(--accent-blue);">---</div>
+      </div>
+      <div class="preview-card">
+        <div class="p-label">Role</div>
+        <div class="p-val" id="wRole" style="color: #fff;">---</div>
+      </div>
+      <div class="preview-card">
+        <div class="p-label">ASM Territory</div>
+        <div class="p-val" id="wAsm" style="color: var(--accent-gold);">---</div>
+      </div>
+    </div>
+
+    <button class="enter-btn" onclick="proceedToDashboard()">Launch Performance Analytics</button>
+    <button class="logout-btn" style="width: 100%;" onclick="logout()">Sign Out</button>
+  </div>
+
   <div id="dashboardContent">
     <div class="top-bar">
       <h1>Sales Executive Itinerary Dashboard</h1>
@@ -136,6 +228,7 @@
         <div class="status-badge" id="syncStatus">CONNECTING...</div>
         <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
         <select id="seFilter" class="select-box" onchange="onSeChange()"><option value="ALL">All Sales Executives (Overview)</option></select>
+        <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
     </div>
 
@@ -233,9 +326,97 @@
     let selectedLineKeys = new Set(['EH']);
     let trendChartInstance = null, rankChartInstance = null, volumeChartInstance = null;
 
-    window.addEventListener('DOMContentLoaded', () => {
+    let loggedRole = 'ADMIN';
+    let loggedUser = '';
+
+    function checkAuth() {
+      const role = document.getElementById('roleSelect').value;
+      const u = document.getElementById('userInput').value.trim();
+      const p = document.getElementById('passInput').value.trim();
+      const err = document.getElementById('errorMsg');
+
+      const asms = Array.from(new Set(Object.values(asmMapping)));
+      const ses = Object.keys(asmMapping);
+
+      let isValid = false;
+
+      if (role === 'ADMIN' && u === 'admin' && p === 'password123') isValid = true;
+      else if (role === 'ASM' && asms.includes(u) && p === 'password123') isValid = true;
+      else if (role === 'SE' && ses.includes(u.toUpperCase()) && p === 'password123') isValid = true;
+
+      if (isValid) {
+        loggedRole = role;
+        loggedUser = role === 'SE' ? u.toUpperCase() : u;
+        document.getElementById('loginBox').style.display = 'none';
+
+        if (loggedRole === 'SE' || loggedRole === 'ASM') {
+          showWelcomeDashboard();
+        } else {
+          document.getElementById('dashboardContent').style.display = 'block';
+          loadData();
+        }
+      } else {
+        err.innerText = "Invalid credentials for " + role + "!";
+        err.style.display = 'block';
+      }
+    }
+
+    function showWelcomeDashboard() {
+      const welcomeBox = document.getElementById('welcomeBox');
+      document.getElementById('wUser').innerText = loggedUser;
+      document.getElementById('wRole').innerText = loggedRole;
+      
+      if (loggedRole === 'SE') {
+        document.getElementById('wAvatar').innerText = '📈';
+        document.getElementById('wTitle').innerText = 'Hello, ' + loggedUser;
+        document.getElementById('wSub').innerText = 'Sales Executive workspace active. Track your itinerary hit rate.';
+        document.getElementById('wAsm').innerText = asmMapping[loggedUser] || 'N/A';
+      } else {
+        document.getElementById('wAvatar').innerText = '👔';
+        document.getElementById('wTitle').innerText = 'Welcome, ' + loggedUser;
+        document.getElementById('wSub').innerText = 'Area Manager workspace active. Review territory itinerary hits.';
+        document.getElementById('wAsm').innerText = loggedUser;
+      }
+
+      welcomeBox.style.display = 'block';
+    }
+
+    function proceedToDashboard() {
+      document.getElementById('welcomeBox').style.display = 'none';
+      document.getElementById('dashboardContent').style.display = 'block';
       loadData();
-    });
+    }
+
+    function applyUserRoleFilters() {
+      const asmFilter = document.getElementById('asmFilter');
+      const seFilter = document.getElementById('seFilter');
+
+      if (loggedRole === 'ASM') {
+        asmFilter.value = loggedUser;
+        asmFilter.disabled = true;
+        onAsmChange();
+      } else if (loggedRole === 'SE') {
+        const userAsm = asmMapping[loggedUser];
+        if (userAsm) asmFilter.value = userAsm;
+        asmFilter.disabled = true;
+        populateSeDropdown();
+        seFilter.value = loggedUser;
+        seFilter.disabled = true;
+        onSeChange();
+      } else {
+        asmFilter.disabled = false;
+        seFilter.disabled = false;
+      }
+    }
+
+    function logout() {
+      document.getElementById('userInput').value = '';
+      document.getElementById('passInput').value = '';
+      document.getElementById('errorMsg').style.display = 'none';
+      document.getElementById('dashboardContent').style.display = 'none';
+      document.getElementById('welcomeBox').style.display = 'none';
+      document.getElementById('loginBox').style.display = 'block';
+    }
 
     function cleanPercentage(val) {
       if (val === null || val === undefined || val === '') return null;
@@ -316,6 +497,7 @@
 
       populateAsmDropdown();
       populateSeDropdown();
+      applyUserRoleFilters();
       updateTogglePanel();
       renderUI();
     }
@@ -401,6 +583,7 @@
       } else {
         populateAsmDropdown();
         populateSeDropdown();
+        applyUserRoleFilters();
         updateTogglePanel();
         renderUI();
       }
