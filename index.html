@@ -304,7 +304,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQx7G10Kpb1v4LDO_iZxEGxCVQrRen6wWvRNnn9tzAT6AXmGHDddiMg4vqWh8D_Sk/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwSTP0dD8x3PKoqp-MAXeca1A-zDlfs8SoiJP4uhB6RbyMNvuMg2eJxwbeRqdk4iP0/exec';
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
@@ -775,8 +775,8 @@
             maintainAspectRatio: false, 
             plugins: { legend: { display: false } },
             scales: {
-              x: { ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } },
-              y: { ticks: { color: '#8e9cb0' }, grid: { display: false } }
+              x: { min: 0, max: 100, ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } },
+              y: { ticks: { color: '#f8fafc' }, grid: { display: false } }
             }
           }
         });
@@ -788,16 +788,17 @@
             labels: sorted.map(d => d.se),
             datasets: [
               { label: 'Visited', data: sorted.map(d => d.visited), backgroundColor: '#10b981' },
-              { label: 'Remaining', data: sorted.map(d => Math.max(0, d.active - d.visited)), backgroundColor: '#1e293b' }
+              { label: 'Remaining', data: sorted.map(d => Math.max(0, d.active - d.visited)), backgroundColor: '#ef4444' }
             ]
           },
-          options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            scales: { 
-              x: { stacked: true, ticks: { color: '#8e9cb0' }, grid: { display: false } }, 
-              y: { stacked: true, ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } } 
-            } 
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { stacked: true, ticks: { color: '#8e9cb0' }, grid: { display: false } },
+              y: { stacked: true, ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } }
+            },
+            plugins: { legend: { labels: { color: '#8e9cb0' } } }
           }
         });
       }
