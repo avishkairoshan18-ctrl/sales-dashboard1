@@ -38,7 +38,6 @@
       to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
-    /* LOGIN SCREEN STYLES */
     .login-container {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -55,21 +54,13 @@
     .input-group { margin-bottom: 16px; text-align: left; }
     .input-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
     .input-group input, .input-group select { 
-      width: 100%; 
-      background: #1e293b; 
-      border: 1px solid var(--border-color); 
-      padding: 12px; 
-      border-radius: 6px; 
-      color: white; 
-      outline: none; 
-      font-size: 0.95rem;
+      width: 100%; background: #1e293b; border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; color: white; outline: none; font-size: 0.95rem;
     }
     .login-btn { width: 100%; background: var(--accent-blue); color: #090d16; font-weight: 700; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-top: 8px; }
     .logout-btn { background: #1e293b; border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: background 0.2s; }
     .logout-btn:hover { background: var(--accent-red); color: white; border-color: var(--accent-red); }
     .error-msg { color: var(--accent-red); font-size: 0.8rem; margin-top: 12px; display: none; }
 
-    /* WELCOME DASHBOARD */
     .welcome-container {
       display: none;
       background: linear-gradient(180deg, #151d30 0%, #0d1322 100%);
@@ -83,12 +74,7 @@
       animation: zoomInFade 0.5s ease-out forwards;
     }
     .avatar-badge {
-      width: 56px; height: 56px;
-      background: rgba(56, 189, 248, 0.15);
-      border: 2px solid var(--accent-blue);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 16px auto; font-size: 1.5rem;
+      width: 56px; height: 56px; background: rgba(56, 189, 248, 0.15); border: 2px solid var(--accent-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; font-size: 1.5rem;
     }
     .welcome-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; color: #ffffff; }
     .welcome-subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; }
@@ -97,14 +83,9 @@
     .preview-card .p-label { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
     .preview-card .p-val { font-size: 1.1rem; font-weight: 800; margin-top: 4px; word-break: break-word; }
     .enter-btn {
-      width: 100%;
-      background: linear-gradient(135deg, var(--accent-blue) 0%, #0284c7 100%);
-      color: #ffffff; font-weight: 800; border: none; padding: 14px;
-      border-radius: 10px; cursor: pointer; font-size: 0.9rem;
-      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
+      width: 100%; background: linear-gradient(135deg, var(--accent-blue) 0%, #0284c7 100%); color: #ffffff; font-weight: 800; border: none; padding: 14px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
     }
 
-    /* MAIN DASHBOARD STYLES */
     #dashboardContent { display: none; width: 100%; max-width: 1400px; animation: zoomInFade 0.5s ease-out forwards; }
     .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
     .top-bar h1 { font-size: 1.3rem; font-weight: 700; }
@@ -142,11 +123,7 @@
     .leaderboard-table th { text-align: left; padding: 10px 8px; color: var(--text-muted); font-size: 0.7rem; border-bottom: 1px solid var(--border-color); }
     .leaderboard-table td { padding: 10px 8px; border-bottom: 1px solid #1a2333; font-weight: 600; }
 
-    /* MOBILE & TABLET RESPONSIVE */
-    @media (max-width: 1024px) {
-      .dashboard-layout { grid-template-columns: 1fr; }
-    }
-
+    @media (max-width: 1024px) { .dashboard-layout { grid-template-columns: 1fr; } }
     @media (min-width: 768px) {
       body { padding: 24px; }
       .top-bar h1 { font-size: 1.5rem; }
@@ -164,7 +141,6 @@
       .preview-card { padding: 16px 12px; }
       .preview-card .p-val { font-size: 1.4rem; }
     }
-
     @media (max-width: 480px) {
       .preview-grid { grid-template-columns: 1fr; }
       .kpi-row { grid-template-columns: 1fr 1fr; }
@@ -253,9 +229,9 @@
         <div class="subtext" id="kpiRemaining">0 Remaining</div>
       </div>
       <div class="kpi-card">
-        <div class="label">Current Hit Rate</div>
-        <div class="value val-blue" id="kpiHitRate">0.0%</div>
-        <div class="subtext">Target Pace</div>
+        <div class="label">Itinerary Hit Rate</div>
+        <div class="value val-blue" id="kpiItineraryHit">0.0%</div>
+        <div class="subtext">Actual vs Target</div>
       </div>
       <div class="kpi-card">
         <div class="label">Leader</div>
@@ -268,8 +244,8 @@
       <div class="chart-card">
         <div class="chart-header">
           <div>
-            <div class="chart-title">Monthly Visited Hit Rate Trend (%)</div>
-            <div class="chart-subtitle" id="trendSubText">Tracking Monthly Progression</div>
+            <div class="chart-title">Itinerary Hit Rate Trend (%)</div>
+            <div class="chart-subtitle" id="trendSubText">Tracking Progression</div>
           </div>
         </div>
 
@@ -281,7 +257,7 @@
         <div class="canvas-container"><canvas id="trendChart"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-header"><div class="chart-title">Hit Rate by SE (%)</div></div>
+        <div class="chart-header"><div class="chart-title">Itinerary Hit % by SE</div></div>
         <div class="canvas-container"><canvas id="rankChart"></canvas></div>
       </div>
     </div>
@@ -295,7 +271,7 @@
         <div class="chart-header"><div class="chart-title">Leaderboard</div></div>
         <div style="overflow-x: auto;">
           <table class="leaderboard-table">
-            <thead><tr><th>SE</th><th>ASM</th><th>ACTIVE</th><th>VISITED</th><th>RATE</th></tr></thead>
+            <thead><tr><th>SE</th><th>ASM</th><th>ACTIVE</th><th>VISITED</th><th>ITINERARY HIT</th></tr></thead>
             <tbody id="leaderboardBody"></tbody>
           </table>
         </div>
@@ -304,35 +280,22 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw82MLgUYowZeiSmG2WBp5HWf7H9cVlN2_z57Imw3id_nWXF5BK-R1SMszrqStn_mM/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwSTP0dD8x3PKoqp-MAXeca1A-zDlfs8SoiJP4uhB6RbyMNvuMg2eJxwbeRqdk4iP0/exec';
 
     const asmMapping = {
-      'HMD': 'Mr.Farzaan', 
-      'RSD': 'Mr.Farzaan', 
-      'FZN': 'Mr.Farzaan',
-      'RKZ': 'Mr.Hilmy',   
-      'RFD': 'Mr.Hilmy',   
-      'MZR': 'Mr.Hilmy',
-      'AMT': 'Mr.Sabir',   
-      'DNT': 'Mr.Sabir'
+      'HMD': 'Mr.Farzaan', 'RSD': 'Mr.Farzaan', 'FZN': 'Mr.Farzaan',
+      'RKZ': 'Mr.Hilmy',   'RFD': 'Mr.Hilmy',   'MZR': 'Mr.Hilmy',
+      'AMT': 'Mr.Sabir',   'DNT': 'Mr.Sabir'
     };
 
     const colorPalette = {
-      'EH': '#38bdf8',
-      'HMD': '#f59e0b',
-      'RSD': '#ec4899',
-      'FZN': '#a855f7',
-      'RKZ': '#ef4444',
-      'RFD': '#10b981',
-      'MZR': '#8b5cf6',
-      'AMT': '#06b6d4',
-      'DNT': '#f97316'
+      'EH': '#38bdf8', 'HMD': '#f59e0b', 'RSD': '#ec4899', 'FZN': '#a855f7',
+      'RKZ': '#ef4444', 'RFD': '#10b981', 'MZR': '#8b5cf6', 'AMT': '#06b6d4', 'DNT': '#f97316'
     };
 
     let monthlyDataset = {};
     let globalRawData = [];
     let overallTeamData = null;
-    let activeDateColumns = [];
     let selectedLineKeys = new Set(['EH']);
     let trendChartInstance = null, rankChartInstance = null, volumeChartInstance = null;
     
@@ -350,13 +313,9 @@
 
       let isValid = false;
 
-      if (role === 'ADMIN' && u === 'admin' && p === 'password123') {
-        isValid = true;
-      } else if (role === 'ASM' && asms.includes(u) && p === 'password123') {
-        isValid = true;
-      } else if (role === 'SE' && ses.includes(u.toUpperCase()) && p === 'password123') {
-        isValid = true;
-      }
+      if (role === 'ADMIN' && u === 'admin' && p === 'password123') isValid = true;
+      else if (role === 'ASM' && asms.includes(u) && p === 'password123') isValid = true;
+      else if (role === 'SE' && ses.includes(u.toUpperCase()) && p === 'password123') isValid = true;
 
       if (isValid) {
         loggedRole = role;
@@ -383,12 +342,12 @@
       if (loggedRole === 'SE') {
         document.getElementById('wAvatar').innerText = '📈';
         document.getElementById('wTitle').innerText = 'Hello, ' + loggedUser;
-        document.getElementById('wSub').innerText = 'Sales Executive workspace ready. View your active itinerary & hit rates.';
+        document.getElementById('wSub').innerText = 'Sales Executive workspace active. Track your itinerary hit rate.';
         document.getElementById('wAsm').innerText = asmMapping[loggedUser] || 'N/A';
       } else {
         document.getElementById('wAvatar').innerText = '👔';
         document.getElementById('wTitle').innerText = 'Welcome, ' + loggedUser;
-        document.getElementById('wSub').innerText = 'Area Manager workspace ready. Monitor your territory team metrics.';
+        document.getElementById('wSub').innerText = 'Area Manager workspace active. Review territory itinerary hits.';
         document.getElementById('wAsm').innerText = loggedUser;
       }
 
@@ -432,101 +391,24 @@
       document.getElementById('loginBox').style.display = 'block';
     }
 
-    function cleanPercentage(val) {
-      if (val === null || val === undefined || val === '') return null;
-      let num = 0;
-      if (typeof val === 'number') {
-        num = val;
-      } else if (typeof val === 'string') {
-        let cleaned = val.replace(/[^0-9.-]/g, '');
-        if (cleaned === '') return null;
-        num = parseFloat(cleaned);
-      }
-      if (num > 0 && num <= 1.0) num = num * 100;
-      return num;
-    }
-
-    function cleanCount(val) {
-      if (val === null || val === undefined) return 0;
-      if (typeof val === 'number') return val;
-      let cleaned = String(val).replace(/[^0-9.-]/g, '');
-      return parseFloat(cleaned) || 0;
-    }
-
     async function loadData() {
       const statusBadge = document.getElementById('syncStatus');
       try {
         const res = await fetch(APPS_SCRIPT_URL, { redirect: "follow" });
         const json = await res.json();
         
-        if (json.monthlyData || Array.isArray(json)) {
+        if (json.monthlyData) {
           statusBadge.innerText = 'LIVE API CONNECTED';
-          processDataPayload(json);
+          monthlyDataset = json.monthlyData;
+          populateMonthDropdown();
+          onMonthChange();
           return;
         }
-        throw new Error("Empty Payload");
+        throw new Error("Invalid Payload");
       } catch (err) {
-        statusBadge.innerText = 'OFFLINE MOCK DATA';
+        statusBadge.innerText = 'OFFLINE MODE';
         statusBadge.style.background = '#f59e0b';
-        loadMockData();
       }
-    }
-
-    function loadMockData() {
-      monthlyDataset = {
-        'JAN': [
-          { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 55, hitRate: 82.0, dailyTrend: {'Day 1': 20, 'Day 15': 50, 'Day 30': 82} },
-          { se: 'RSD', asm: 'Mr.Farzaan', active: 54, visited: 41, hitRate: 76.0, dailyTrend: {'Day 1': 15, 'Day 15': 45, 'Day 30': 76} },
-          { se: 'FZN', asm: 'Mr.Farzaan', active: 65, visited: 44, hitRate: 68.0, dailyTrend: {'Day 1': 10, 'Day 15': 40, 'Day 30': 68} },
-          { se: 'RKZ', asm: 'Mr.Hilmy', active: 110, visited: 71, hitRate: 65.0, dailyTrend: {'Day 1': 12, 'Day 15': 38, 'Day 30': 65} },
-          { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 95, hitRate: 94.0, dailyTrend: {'Day 1': 30, 'Day 15': 65, 'Day 30': 94} },
-          { se: 'MZR', asm: 'Mr.Hilmy', active: 55, visited: 47, hitRate: 85.0, dailyTrend: {'Day 1': 25, 'Day 15': 55, 'Day 30': 85} },
-          { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 32, hitRate: 49.0, dailyTrend: {'Day 1': 10, 'Day 15': 30, 'Day 30': 49} },
-          { se: 'DNT', asm: 'Mr.Sabir', active: 48, visited: 28, hitRate: 58.0, dailyTrend: {'Day 1': 15, 'Day 15': 35, 'Day 30': 58} }
-        ],
-        'FEB': [
-          { se: 'HMD', asm: 'Mr.Farzaan', active: 69, visited: 42, hitRate: 61.0, dailyTrend: {'Day 1': 15, 'Day 15': 40, 'Day 28': 61} },
-          { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 38, hitRate: 68.0, dailyTrend: {'Day 1': 20, 'Day 15': 45, 'Day 28': 68} },
-          { se: 'FZN', asm: 'Mr.Farzaan', active: 64, visited: 29, hitRate: 45.0, dailyTrend: {'Day 1': 10, 'Day 15': 30, 'Day 28': 45} },
-          { se: 'RKZ', asm: 'Mr.Hilmy', active: 92, visited: 27, hitRate: 29.0, dailyTrend: {'Day 1': 5, 'Day 15': 18, 'Day 28': 29} },
-          { se: 'RFD', asm: 'Mr.Hilmy', active: 100, visited: 57, hitRate: 57.0, dailyTrend: {'Day 1': 20, 'Day 15': 42, 'Day 28': 57} },
-          { se: 'MZR', asm: 'Mr.Hilmy', active: 51, visited: 47, hitRate: 92.0, dailyTrend: {'Day 1': 30, 'Day 15': 65, 'Day 28': 92} },
-          { se: 'AMT', asm: 'Mr.Sabir', active: 66, visited: 29, hitRate: 44.0, dailyTrend: {'Day 1': 10, 'Day 15': 25, 'Day 28': 44} },
-          { se: 'DNT', asm: 'Mr.Sabir', active: 49, visited: 32, hitRate: 65.0, dailyTrend: {'Day 1': 18, 'Day 15': 40, 'Day 28': 65} }
-        ]
-      };
-
-      activeDateColumns = [
-        { title: 'Day 1' }, { title: 'Day 15' }, { title: 'Day 28' }
-      ];
-
-      populateMonthDropdown();
-      onMonthChange();
-    }
-
-    function processDataPayload(json) {
-      if (json.monthlyData) {
-        monthlyDataset = json.monthlyData;
-      } else {
-        monthlyDataset = { 'FEB': [] };
-        let rows = Array.isArray(json) ? json : (json.data || json.rows || []);
-        rows.forEach(r => {
-          let se = String(r[0] || '').trim().toUpperCase();
-          if (se && asmMapping[se]) {
-            monthlyDataset['FEB'].push({
-              se: se,
-              asm: asmMapping[se],
-              active: cleanCount(r[1]),
-              visited: cleanCount(r[2]),
-              hitRate: cleanPercentage(r[3]) || 0,
-              dailyTrend: {}
-            });
-          }
-        });
-      }
-
-      populateMonthDropdown();
-      onMonthChange();
     }
 
     function populateMonthDropdown() {
@@ -551,8 +433,7 @@
         se: 'EH',
         active: totalActive,
         visited: totalVisited,
-        hitRate: totalActive > 0 ? (totalVisited / totalActive) * 100 : 0,
-        dailyTrend: {}
+        itineraryHit: totalActive > 0 ? (totalVisited / totalActive) * 100 : 0
       };
 
       populateAsmDropdown();
@@ -566,9 +447,7 @@
       const asmFilter = document.getElementById('asmFilter');
       const asms = Array.from(new Set(Object.values(asmMapping)));
       asmFilter.innerHTML = '<option value="ALL">All Area Managers (ASM)</option>';
-      asms.forEach(asm => { 
-        asmFilter.innerHTML += `<option value="${asm}">${asm}</option>`; 
-      });
+      asms.forEach(asm => { asmFilter.innerHTML += `<option value="${asm}">${asm}</option>`; });
     }
 
     function populateSeDropdown() {
@@ -577,10 +456,9 @@
       const selectedASM = asmFilter.value;
       
       seFilter.innerHTML = '<option value="ALL">All Sales Executives (Overview)</option>';
-      
       globalRawData.forEach(d => {
         if (selectedASM === 'ALL' || d.asm === selectedASM) {
-          seFilter.innerHTML += `<option value="${d.se}">${d.se} (${d.hitRate.toFixed(1)}%)</option>`;
+          seFilter.innerHTML += `<option value="${d.se}">${d.se} (${d.itineraryHit.toFixed(1)}%)</option>`;
         }
       });
     }
@@ -588,16 +466,11 @@
     function onAsmChange() {
       const selectedASM = document.getElementById('asmFilter').value;
       populateSeDropdown();
-      
       selectedLineKeys.clear();
       selectedLineKeys.add('EH');
-      
       globalRawData.forEach(d => {
-        if (selectedASM === 'ALL' || d.asm === selectedASM) {
-          selectedLineKeys.add(d.se);
-        }
+        if (selectedASM === 'ALL' || d.asm === selectedASM) selectedLineKeys.add(d.se);
       });
-
       updateTogglePanel();
       renderUI();
     }
@@ -606,20 +479,8 @@
       const selectedSE = document.getElementById('seFilter').value;
       selectedLineKeys.clear();
       selectedLineKeys.add('EH');
-      
-      if (selectedSE !== 'ALL') {
-        selectedLineKeys.add(selectedSE);
-      } else {
-        const selectedASM = document.getElementById('asmFilter').value;
-        globalRawData.forEach(d => {
-          if (selectedASM === 'ALL' || d.asm === selectedASM) {
-            selectedLineKeys.add(d.se);
-          }
-        });
-      }
-      
-      updateTogglePanel();
-      renderUI();
+      if (selectedSE !== 'ALL') selectedLineKeys.add(selectedSE);
+      else onAsmChange();
     }
 
     function updateTogglePanel() {
@@ -629,36 +490,29 @@
       container.innerHTML = '';
 
       let availableReps = [{ key: 'EH', label: 'Overall Team (EH)' }];
-      
       if (selectedSE !== 'ALL') {
         availableReps.push({ key: selectedSE, label: selectedSE });
       } else {
         globalRawData.forEach(d => {
-          if (selectedASM === 'ALL' || d.asm === selectedASM) {
-            availableReps.push({ key: d.se, label: d.se });
-          }
+          if (selectedASM === 'ALL' || d.asm === selectedASM) availableReps.push({ key: d.se, label: d.se });
         });
       }
 
       availableReps.forEach(item => {
         const isChecked = selectedLineKeys.has(item.key) ? 'checked' : '';
         const color = colorPalette[item.key] || '#38bdf8';
-
         container.innerHTML += `
           <label class="toggle-item">
             <input type="checkbox" value="${item.key}" ${isChecked} onchange="toggleLine('${item.key}')">
             <span class="color-pill" style="background:${color};"></span>
             ${item.label}
-          </label>
-        `;
+          </label>`;
       });
     }
 
     function toggleLine(key) {
       if (selectedLineKeys.has(key)) {
-        if (selectedLineKeys.size > 1) {
-          selectedLineKeys.delete(key);
-        }
+        if (selectedLineKeys.size > 1) selectedLineKeys.delete(key);
       } else {
         selectedLineKeys.add(key);
       }
@@ -674,7 +528,7 @@
       if (selectedASM !== 'ALL') filtered = filtered.filter(d => d.asm === selectedASM);
       if (selectedSE !== 'ALL') filtered = filtered.filter(d => d.se === selectedSE);
 
-      const sorted = filtered.slice().sort((a, b) => b.hitRate - a.hitRate);
+      const sorted = filtered.slice().sort((a, b) => b.itineraryHit - a.itineraryHit);
       
       let totalActive = 0, totalVisited = 0;
       filtered.forEach(d => { totalActive += d.active; totalVisited += d.visited; });
@@ -682,14 +536,14 @@
       document.getElementById('kpiActive').innerText = totalActive;
       document.getElementById('kpiVisited').innerText = totalVisited;
       document.getElementById('kpiRemaining').innerText = Math.max(0, totalActive - totalVisited) + " Remaining";
-      document.getElementById('kpiHitRate').innerText = (totalActive > 0 ? ((totalVisited / totalActive) * 100).toFixed(1) : 0) + "%";
+      document.getElementById('kpiItineraryHit').innerText = (totalActive > 0 ? ((totalVisited / totalActive) * 100).toFixed(1) : 0) + "%";
       
       if (selectedSE !== 'ALL' && sorted.length) {
         document.getElementById('kpiRank').innerText = selectedSE;
         document.getElementById('kpiRankSub').innerText = 'ASM: ' + (asmMapping[selectedSE] || 'N/A');
       } else if (sorted.length) {
         document.getElementById('kpiRank').innerText = "#1 " + sorted[0].se;
-        document.getElementById('kpiRankSub').innerText = selectedASM !== 'ALL' ? 'Top SE in ' + selectedASM : 'Top Performing Sales Exec';
+        document.getElementById('kpiRankSub').innerText = selectedASM !== 'ALL' ? 'Top SE in ' + selectedASM : 'Top Itinerary Hit Rate';
       } else {
         document.getElementById('kpiRank').innerText = "#--";
         document.getElementById('kpiRankSub').innerText = 'Overview Mode';
@@ -705,12 +559,12 @@
           <td style="color:#8e9cb0;">${d.asm}</td>
           <td>${d.active}</td>
           <td style="color:#10b981;">${d.visited}</td>
-          <td style="color:#38bdf8;">${d.hitRate.toFixed(1)}%</td>
+          <td style="color:#38bdf8;">${d.itineraryHit.toFixed(1)}%</td>
         </tr>`;
       });
 
       if (window.Chart) {
-        const xLabels = activeDateColumns.length ? activeDateColumns.map(col => col.title) : ['Pace'];
+        const xLabels = ['Itinerary Hit Rate'];
         const datasets = [];
 
         selectedLineKeys.forEach(key => {
@@ -719,12 +573,10 @@
           let color = colorPalette[key] || '#38bdf8';
 
           if (key === 'EH' && overallTeamData) {
-            lineData = xLabels.map(day => overallTeamData.dailyTrend[day] ?? overallTeamData.hitRate);
+            lineData = [overallTeamData.itineraryHit];
           } else {
             const seObj = globalRawData.find(d => d.se === key);
-            if (seObj) {
-              lineData = xLabels.map(day => seObj.dailyTrend[day] ?? seObj.hitRate);
-            }
+            if (seObj) lineData = [seObj.itineraryHit];
           }
 
           if (lineData.length > 0) {
@@ -735,8 +587,7 @@
               backgroundColor: key === 'EH' ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
               fill: key === 'EH',
               tension: 0.35,
-              pointRadius: window.innerWidth < 480 ? 2 : 4,
-              pointHoverRadius: 6,
+              pointRadius: 4,
               pointBackgroundColor: color
             });
           }
@@ -751,13 +602,8 @@
             maintainAspectRatio: false, 
             plugins: { legend: { display: false } }, 
             scales: { 
-              y: { 
-                min: 0, 
-                max: 100,
-                ticks: { color: '#8e9cb0', stepSize: 20, callback: function(val) { return val + '%'; } },
-                grid: { color: '#1e293b' }
-              },
-              x: { ticks: { color: '#8e9cb0', font: { size: window.innerWidth < 480 ? 9 : 11 } }, grid: { color: '#1e293b' } }
+              y: { min: 0, max: 100, ticks: { color: '#8e9cb0', callback: function(v) { return v + '%'; } }, grid: { color: '#1e293b' } },
+              x: { ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } }
             } 
           }
         });
@@ -767,12 +613,10 @@
           type: 'bar',
           data: { 
             labels: sorted.map(d => d.se), 
-            datasets: [{ data: sorted.map(d => d.hitRate.toFixed(1)), backgroundColor: '#38bdf8' }] 
+            datasets: [{ data: sorted.map(d => d.itineraryHit.toFixed(1)), backgroundColor: '#38bdf8' }] 
           },
           options: { 
-            indexAxis: 'y', 
-            responsive: true, 
-            maintainAspectRatio: false, 
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
             plugins: { legend: { display: false } },
             scales: {
               x: { min: 0, max: 100, ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } },
@@ -792,8 +636,7 @@
             ]
           },
           options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             scales: {
               x: { stacked: true, ticks: { color: '#8e9cb0' }, grid: { display: false } },
               y: { stacked: true, ticks: { color: '#8e9cb0' }, grid: { color: '#1e293b' } }
