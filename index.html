@@ -4,358 +4,95 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sales Executive Itinerary Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root {
-      --bg-dark: #090d16;
-      --card-bg: #121929;
-      --border-color: #1e293b;
-      --text-main: #f8fafc;
-      --text-muted: #8e9cb0;
-      --accent-blue: #38bdf8;
-      --accent-green: #10b981;
-      --accent-gold: #f59e0b;
-      --accent-red: #ef4444;
-      --accent-purple: #a855f7;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      padding: 16px;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow-x: hidden;
-    }
-
-    @keyframes zoomInFade {
-      from { opacity: 0; transform: scale(0.95) translateY(10px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-
-    @keyframes floatIcon {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-6px); }
-    }
-
-    /* LOGIN SCREEN STYLES */
-    .login-container {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 24px;
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      animation: zoomInFade 0.4s ease-out forwards;
-    }
-    .login-container h2 { margin-bottom: 8px; font-size: 1.35rem; }
-    .login-container p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; }
-    .input-group { margin-bottom: 16px; text-align: left; }
-    .input-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
-    .input-group input, .input-group select { 
-      width: 100%; 
-      background: #1e293b; 
-      border: 1px solid var(--border-color); 
-      padding: 12px; 
-      border-radius: 6px; 
-      color: white; 
-      outline: none; 
-      font-size: 0.95rem;
-    }
-    .login-btn { width: 100%; background: var(--accent-blue); color: #090d16; font-weight: 700; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-top: 8px; }
-    .logout-btn { background: #1e293b; border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: background 0.2s; }
-    .logout-btn:hover { background: var(--accent-red); color: white; border-color: var(--accent-red); }
-    .error-msg { color: var(--accent-red); font-size: 0.8rem; margin-top: 12px; display: none; }
-
-    /* AFTER-LOGIN WELCOME DASHBOARD STYLES */
-    .welcome-container {
-      display: none;
-      background: linear-gradient(180deg, #151d30 0%, #0d1322 100%);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 24px;
-      width: 100%;
-      max-width: 650px;
-      text-align: center;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-      animation: zoomInFade 0.5s ease-out forwards;
-    }
-
-    .avatar-badge {
-      width: 56px;
-      height: 56px;
-      background: rgba(56, 189, 248, 0.15);
-      border: 2px solid var(--accent-blue);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px auto;
-      font-size: 1.5rem;
-      animation: floatIcon 3s ease-in-out infinite;
-    }
-
-    .welcome-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; color: #ffffff; }
-    .welcome-subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; }
-    .preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
-    .preview-card { background: #1e293b; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 8px; text-align: center; }
-    .preview-card .p-label { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-    .preview-card .p-val { font-size: 1.1rem; font-weight: 800; margin-top: 4px; word-break: break-word; }
-
-    .enter-btn {
-      width: 100%;
-      background: linear-gradient(135deg, var(--accent-blue) 0%, #0284c7 100%);
-      color: #ffffff;
-      font-weight: 800;
-      border: none;
-      padding: 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      transition: transform 0.2s, box-shadow 0.2s;
-      margin-bottom: 10px;
-    }
-
-    /* MAIN DASHBOARD STYLES */
-    #dashboardContent { display: none; width: 100%; max-width: 1400px; animation: zoomInFade 0.5s ease-out forwards; }
-    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
-    .top-bar h1 { font-size: 1.3rem; font-weight: 700; }
-    .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; width: 100%; }
-
-    .status-badge { background: #059669; color: white; padding: 8px 12px; border-radius: 6px; font-weight: 600; font-size: 0.75rem; text-align: center; }
-    .select-box { background: #1e293b; border: 1px solid var(--border-color); color: white; padding: 10px 12px; border-radius: 6px; font-size: 0.85rem; outline: none; flex: 1; min-width: 140px; }
-
-    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .kpi-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; }
-    .kpi-card .label { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
-    .kpi-card .value { font-size: 1.6rem; font-weight: 800; }
-    .kpi-card .subtext { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
-
-    .val-blue { color: #38bdf8; }
-    .val-green { color: #10b981; }
-    .val-gold { color: #f59e0b; }
-
-    .dashboard-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
-
-    .chart-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; }
-    .chart-header { display: flex; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-    .chart-title { font-size: 1rem; font-weight: 700; }
-    .chart-subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
-
-    .toggle-container { background: #0d1322; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
-    .toggle-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
-    .toggle-grid { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
-    .toggle-item { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; user-select: none; }
-    .toggle-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent-blue); cursor: pointer; }
-    .color-pill { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
-
-    .canvas-container { position: relative; height: 280px; width: 100%; }
-    .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.85rem; }
-    .leaderboard-table th { text-align: left; padding: 10px 8px; color: var(--text-muted); font-size: 0.7rem; border-bottom: 1px solid var(--border-color); }
-    .leaderboard-table td { padding: 10px 8px; border-bottom: 1px solid #1a2333; font-weight: 600; }
-
-    /* MOBILE & TABLET RESPONSIVE MEDIA QUERIES */
-    @media (max-width: 1024px) {
-      .dashboard-layout { grid-template-columns: 1fr; }
-    }
-
-    @media (min-width: 768px) {
-      body { padding: 24px; }
-      .top-bar h1 { font-size: 1.5rem; }
-      .controls { width: auto; }
-      .status-badge { font-size: 0.85rem; padding: 6px 12px; }
-      .select-box { min-width: 180px; flex: initial; }
-      .kpi-row { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
-      .kpi-card { padding: 20px; }
-      .kpi-card .value { font-size: 2.2rem; }
-      .canvas-container { height: 320px; }
-      .login-container { padding: 32px; }
-      .welcome-container { padding: 36px; }
-      .welcome-title { font-size: 2rem; }
-      .preview-grid { gap: 12px; }
-      .preview-card { padding: 16px 12px; }
-      .preview-card .p-val { font-size: 1.4rem; }
-    }
-
-    @media (max-width: 480px) {
-      .preview-grid { grid-template-columns: 1fr; }
-      .kpi-row { grid-template-columns: 1fr 1fr; }
-      .canvas-container { height: 230px; }
-      .top-bar { flex-direction: column; align-items: flex-start; }
-      .controls { flex-direction: column; align-items: stretch; }
-      .logout-btn { width: 100%; text-align: center; }
-    }
+    body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; margin: 0; padding: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .badge { padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; background: #f59e0b; color: #fff; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .card { background: #1e293b; padding: 20px; border-radius: 8px; }
+    .card h3 { margin: 0 0 10px 0; font-size: 14px; color: #94a3b8; }
+    .card .val { font-size: 28px; font-weight: bold; }
   </style>
 </head>
 <body>
 
-  <!-- LOGIN CONTAINER -->
-  <div class="login-container" id="loginBox">
-    <h2>Dashboard Login</h2>
-    <p>Select role & enter credentials</p>
-    
-    <div class="input-group">
-      <label>User Role</label>
-      <select id="roleSelect">
-        <option value="ADMIN">Admin / Overview</option>
-        <option value="ASM">Area Manager (ASM)</option>
-        <option value="SE">Sales Executive (SE)</option>
-      </select>
-    </div>
-
-    <div class="input-group">
-      <label>Username / Code</label>
-      <input type="text" id="userInput" placeholder="admin / Mr.Farzaan / FZN">
-    </div>
-    <div class="input-group">
-      <label>Password</label>
-      <input type="password" id="passInput" placeholder="••••••••">
-    </div>
-    <button class="login-btn" onclick="checkAuth()">Login</button>
-    <div class="error-msg" id="errorMsg">Invalid Credentials!</div>
+  <div class="header">
+    <h2>Sales Executive Itinerary Dashboard</h2>
+    <span id="syncStatus" class="badge">CONNECTING...</span>
   </div>
 
-  <!-- AFTER-LOGIN WELCOME CONTAINER -->
-  <div class="welcome-container" id="welcomeBox">
-    <div class="avatar-badge" id="wAvatar">👤</div>
-    <h1 class="welcome-title" id="wTitle">Welcome Back</h1>
-    <p class="welcome-subtitle" id="wSub">Authenticated session active for field itinerary management.</p>
-    
-    <div class="preview-grid">
-      <div class="preview-card">
-        <div class="p-label">Account</div>
-        <div class="p-val" id="wUser" style="color: var(--accent-blue);">---</div>
-      </div>
-      <div class="preview-card">
-        <div class="p-label">Role</div>
-        <div class="p-val" id="wRole" style="color: #fff;">---</div>
-      </div>
-      <div class="preview-card">
-        <div class="p-label">ASM Territory</div>
-        <div class="p-val" id="wAsm" style="color: var(--accent-gold);">---</div>
-      </div>
+  <div class="card-grid">
+    <div class="card">
+      <h3>ACTIVE CUSTOMERS</h3>
+      <div id="activeVal" class="val">--</div>
     </div>
-
-    <button class="enter-btn" onclick="proceedToDashboard()">Launch Performance Analytics</button>
-    <button class="logout-btn" style="width: 100%;" onclick="logout()">Sign Out</button>
-  </div>
-
-  <!-- DASHBOARD CONTAINER -->
-  <div id="dashboardContent">
-    <div class="top-bar">
-      <h1>Sales Executive Itinerary Dashboard</h1>
-      <div class="controls">
-        <div class="status-badge" id="syncStatus">CONNECTING...</div>
-        <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
-        <select id="seFilter" class="select-box" onchange="onSeChange()"><option value="ALL">All Sales Executives (Overview)</option></select>
-        <button class="logout-btn" onclick="logout()">Logout</button>
-      </div>
+    <div class="card">
+      <h3>VISITED CUSTOMERS</h3>
+      <div id="visitedVal" class="val">--</div>
     </div>
-
-    <div class="kpi-row">
-      <div class="kpi-card">
-        <div class="label">Active Customers</div>
-        <div class="value" id="kpiActive">0</div>
-        <div class="subtext">Total Portfolio</div>
-      </div>
-      <div class="kpi-card">
-        <div class="label">Visited Customers</div>
-        <div class="value val-green" id="kpiVisited">0</div>
-        <div class="subtext" id="kpiRemaining">0 Remaining</div>
-      </div>
-      <div class="kpi-card">
-        <div class="label">Current Hit Rate</div>
-        <div class="value val-blue" id="kpiHitRate">0.0%</div>
-        <div class="subtext">Target Pace</div>
-      </div>
-      <div class="kpi-card">
-        <div class="label">Leader</div>
-        <div class="value val-gold" id="kpiRank">#--</div>
-        <div class="subtext" id="kpiRankSub">Overview Mode</div>
-      </div>
-    </div>
-
-    <div class="dashboard-layout">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Monthly Visited Hit Rate Trend (%)</div>
-            <div class="chart-subtitle" id="trendSubText">Tracking Progression</div>
-          </div>
-        </div>
-
-        <div class="toggle-container">
-          <div class="toggle-label">Display Lines:</div>
-          <div class="toggle-grid" id="lineToggles"></div>
-        </div>
-
-        <div class="canvas-container"><canvas id="trendChart"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header"><div class="chart-title">Hit Rate by SE (%)</div></div>
-        <div class="canvas-container"><canvas id="rankChart"></canvas></div>
-      </div>
-    </div>
-
-    <div class="dashboard-layout">
-      <div class="chart-card">
-        <div class="chart-header"><div class="chart-title">Visited vs Remaining</div></div>
-        <div class="canvas-container"><canvas id="volumeChart"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header"><div class="chart-title">Leaderboard</div></div>
-        <div style="overflow-x: auto;">
-          <table class="leaderboard-table">
-            <thead><tr><th>SE</th><th>ASM</th><th>ACTIVE</th><th>VISITED</th><th>RATE</th></tr></thead>
-            <tbody id="leaderboardBody"></tbody>
-          </table>
-        </div>
-      </div>
+    <div class="card">
+      <h3>CURRENT HIT RATE</h3>
+      <div id="hitRateVal" class="val">--</div>
     </div>
   </div>
 
-<script>
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxm3e1uGi0JpvguTcW5eg7212biYd95mCwUqot2y7aViDDv0OuAR7_1oEwmuNikMjc/exec';
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxm3e1uGi0JpvguTcW5eg7212biYd95mCwUqot2y7aViDDv0OuAR7_1oEwmuNikMjc/exec';
 
-  async function loadData() {
-    const statusBadge = document.getElementById('syncStatus');
-    try {
-      const res = await fetch(APPS_SCRIPT_URL, { 
-        method: "GET",
-        redirect: "follow" 
+    async function loadData() {
+      const statusBadge = document.getElementById('syncStatus');
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, { 
+          method: "GET",
+          redirect: "follow" 
+        });
+
+        if (!res.ok) throw new Error(`HTTP Status: ${res.status}`);
+
+        const json = await res.json();
+
+        if (json.monthlyData && Object.keys(json.monthlyData).length > 0) {
+          statusBadge.innerText = 'LIVE API CONNECTED';
+          statusBadge.style.background = '#059669';
+          processData(json.monthlyData);
+          return;
+        }
+
+        throw new Error("Empty or malformed payload");
+      } catch (err) {
+        console.error("Fetch failure:", err);
+        statusBadge.innerText = 'OFFLINE MOCK DATA';
+        statusBadge.style.background = '#f59e0b';
+        loadMockData();
+      }
+    }
+
+    function processData(monthlyData) {
+      let totalActive = 0;
+      let totalVisited = 0;
+
+      const firstPeriod = Object.keys(monthlyData)[0];
+      const rows = monthlyData[firstPeriod] || [];
+
+      rows.forEach(item => {
+        totalActive += item.active;
+        totalVisited += item.visited;
       });
 
-      if (!res.ok) throw new Error(`HTTP Error Status: ${res.status}`);
+      const overallHitRate = totalActive > 0 ? ((totalVisited / totalActive) * 100).toFixed(1) : 0;
 
-      const json = await res.json();
-
-      if (json.monthlyData && Object.keys(json.monthlyData).length > 0) {
-        statusBadge.innerText = 'LIVE API CONNECTED';
-        statusBadge.style.background = '#059669';
-        processDataPayload(json);
-        return;
-      }
-      
-      throw new Error("Empty payload");
-    } catch (err) {
-      console.error("Fetch failure:", err);
-      statusBadge.innerText = 'OFFLINE MOCK DATA';
-      statusBadge.style.background = '#f59e0b';
-      loadMockData();
+      document.getElementById('activeVal').innerText = totalActive;
+      document.getElementById('visitedVal').innerText = totalVisited;
+      document.getElementById('hitRateVal').innerText = overallHitRate + '%';
     }
-  }
 
-  // Call loadData when page loads
-  window.addEventListener('DOMContentLoaded', loadData);
-</script>
+    function loadMockData() {
+      document.getElementById('activeVal').innerText = '545';
+      document.getElementById('visitedVal').innerText = '459';
+      document.getElementById('hitRateVal').innerText = '84.2%';
+    }
+
+    window.addEventListener('DOMContentLoaded', loadData);
+  </script>
 </body>
 </html>
