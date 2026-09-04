@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sales Executive Itinerary Dashboard - January</title>
+  <title>Sales Executive Itinerary Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -73,7 +73,8 @@
     .controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
     .status-badge { background: #059669; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; }
-    .select-box { background: #1e293b; border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; outline: none; min-width: 180px; }
+    .select-box { background: #1e293b; border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; outline: none; min-width: 150px; }
+    .select-box-month { border-color: var(--accent-blue); font-weight: 700; }
 
     .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
     .kpi-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
@@ -101,9 +102,8 @@
 </head>
 <body>
 
-  <!-- LOGIN CONTAINER -->
   <div class="login-container" id="loginBox">
-    <h2>January Dashboard Login</h2>
+    <h2>Dashboard Login</h2>
     <p>Select role & enter credentials</p>
     
     <div class="input-group">
@@ -127,19 +127,23 @@
     <div class="error-msg" id="errorMsg">Invalid Credentials!</div>
   </div>
 
-  <!-- MAIN DASHBOARD CONTAINER -->
   <div id="dashboardContent">
     <div class="top-bar">
-      <h1>January Itinerary Hit Report</h1>
+      <h1 id="pageTitle">August Itinerary Hit Report</h1>
       <div class="controls">
         <div class="status-badge" id="syncStatus">CONNECTING...</div>
+        
+        <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
+          <option value="AUG" selected>📅 August (Current)</option>
+          <option value="JAN">📅 January</option>
+        </select>
+
         <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
         <select id="seFilter" class="select-box" onchange="onSeChange()"><option value="ALL">All Sales Executives</option></select>
         <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
     </div>
 
-    <!-- KPI CARDS -->
     <div class="kpi-row">
       <div class="kpi-card">
         <div class="label">Total Active CX</div>
@@ -152,7 +156,7 @@
         <div class="subtext" id="kpiRemaining">0 Remaining</div>
       </div>
       <div class="kpi-card">
-        <div class="label">January Hit Rate</div>
+        <div class="label" id="kpiHitRateLabel">August Hit Rate</div>
         <div class="value val-blue" id="kpiHitRate">0.0%</div>
         <div class="subtext">Monthly Performance</div>
       </div>
@@ -163,7 +167,6 @@
       </div>
     </div>
 
-    <!-- CHARTS LAYOUT -->
     <div class="dashboard-layout">
       <div class="chart-card">
         <div class="chart-header"><div class="chart-title">Hit Rate by SE (%)</div></div>
@@ -175,9 +178,8 @@
       </div>
     </div>
 
-    <!-- LEADERBOARD TABLE -->
     <div class="chart-card">
-      <div class="chart-header"><div class="chart-title">January Sales Performance Table</div></div>
+      <div class="chart-header"><div class="chart-title" id="tableTitle">August Sales Performance Table</div></div>
       <div style="overflow-x: auto;">
         <table class="leaderboard-table">
           <thead>
@@ -249,13 +251,20 @@
     }
 
     async function loadData() {
+      const selectedMonth = document.getElementById('monthFilter').value;
       const statusBadge = document.getElementById('syncStatus');
+      
+      const fullMonthName = selectedMonth === 'AUG' ? 'August' : 'January';
+      document.getElementById('pageTitle').innerText = fullMonthName + ' Itinerary Hit Report';
+      document.getElementById('tableTitle').innerText = fullMonthName + ' Sales Performance Table';
+      document.getElementById('kpiHitRateLabel').innerText = fullMonthName + ' Hit Rate';
+
       try {
-        const res = await fetch(APPS_SCRIPT_URL, { redirect: "follow" });
+        const res = await fetch(`${APPS_SCRIPT_URL}?month=${selectedMonth}`, { redirect: "follow" });
         const json = await res.json();
         
         if (json && json.reps && json.reps.length > 0) {
-          statusBadge.innerText = 'JANUARY DATA SYNCED';
+          statusBadge.innerText = selectedMonth + ' DATA SYNCED';
           overallSummary = json.summary;
           globalRepsData = json.reps.map(r => ({
             se: r.se,
@@ -275,26 +284,44 @@
       } catch (err) {
         statusBadge.innerText = 'OFFLINE MODE';
         statusBadge.style.background = '#f59e0b';
-        loadFallbackJanData();
+        loadFallbackData(selectedMonth);
       }
     }
 
-    function loadFallbackJanData() {
-      overallSummary = { se: 'EH', active: 565, visited: 413, hitRate: 73.1 };
-      globalRepsData = [
-        { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 55, hitRate: 82.0 },
-        { se: 'RSD', asm: 'Mr.Farzaan', active: 54, visited: 41, hitRate: 76.0 },
-        { se: 'FZN', asm: 'Mr.Farzaan', active: 65, visited: 44, hitRate: 68.0 },
-        { se: 'RKZ', asm: 'Mr.Hilmy', active: 110, visited: 71, hitRate: 65.0 },
-        { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 95, hitRate: 94.0 },
-        { se: 'MZR', asm: 'Mr.Hilmy', active: 55, visited: 47, hitRate: 85.0 },
-        { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 32, hitRate: 49.0 },
-        { se: 'DNT', asm: 'Mr.Sabir', active: 48, visited: 28, hitRate: 58.0 }
-      ];
+    function loadFallbackData(month) {
+      if (month === 'JAN') {
+        overallSummary = { se: 'EH', active: 565, visited: 413, hitRate: 73.1 };
+        globalRepsData = [
+          { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 55, hitRate: 82.0 },
+          { se: 'RSD', asm: 'Mr.Farzaan', active: 54, visited: 41, hitRate: 76.0 },
+          { se: 'FZN', asm: 'Mr.Farzaan', active: 65, visited: 44, hitRate: 68.0 },
+          { se: 'RKZ', asm: 'Mr.Hilmy', active: 110, visited: 71, hitRate: 65.0 },
+          { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 95, hitRate: 94.0 },
+          { se: 'MZR', asm: 'Mr.Hilmy', active: 55, visited: 47, hitRate: 85.0 },
+          { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 32, hitRate: 49.0 },
+          { se: 'DNT', asm: 'Mr.Sabir', active: 48, visited: 28, hitRate: 58.0 }
+        ];
+      } else {
+        overallSummary = { se: 'EH', active: 545, visited: 459, hitRate: 84.2 };
+        globalRepsData = [
+          { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 50, hitRate: 74.6 },
+          { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 44, hitRate: 78.6 },
+          { se: 'FZN', asm: 'Mr.Farzaan', active: 68, visited: 55, hitRate: 80.9 },
+          { se: 'RKZ', asm: 'Mr.Hilmy', active: 89, visited: 70, hitRate: 78.7 },
+          { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 90, hitRate: 89.1 },
+          { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 50, hitRate: 94.3 },
+          { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 60, hitRate: 92.3 },
+          { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0 }
+        ];
+      }
       populateAsmDropdown();
       populateSeDropdown();
       applyRoleRestrictions();
       renderUI();
+    }
+
+    function onMonthChange() {
+      loadData();
     }
 
     function populateAsmDropdown() {
@@ -367,7 +394,7 @@
         document.getElementById('kpiRankSub').innerText = 'ASM: ' + (asmMapping[selectedSE] || 'N/A');
       } else if (sorted.length) {
         document.getElementById('kpiRank').innerText = "#1 " + sorted[0].se;
-        document.getElementById('kpiRankSub').innerText = selectedASM !== 'ALL' ? 'Top SE in ' + selectedASM : 'Top January Executive';
+        document.getElementById('kpiRankSub').innerText = selectedASM !== 'ALL' ? 'Top SE in ' + selectedASM : 'Top Executive';
       }
 
       // Populate Table
