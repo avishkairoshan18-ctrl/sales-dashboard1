@@ -250,43 +250,43 @@
       document.getElementById('loginBox').style.display = 'block';
     }
 
-    async function loadData() {
-      const selectedMonth = document.getElementById('monthFilter').value;
-      const statusBadge = document.getElementById('syncStatus');
-      
-      const fullMonthName = selectedMonth === 'AUG' ? 'August' : 'January';
-      document.getElementById('pageTitle').innerText = fullMonthName + ' Itinerary Hit Report';
-      document.getElementById('tableTitle').innerText = fullMonthName + ' Sales Performance Table';
-      document.getElementById('kpiHitRateLabel').innerText = fullMonthName + ' Hit Rate';
+async function loadData() {
+  const selectedMonth = document.getElementById('monthFilter').value;
+  const statusBadge = document.getElementById('syncStatus');
+  
+  // Static headers without month names
+  document.getElementById('pageTitle').innerText = 'Itinerary Hit Report';
+  document.getElementById('tableTitle').innerText = 'Sales Performance Table';
+  document.getElementById('kpiHitRateLabel').innerText = 'Monthly Hit Rate';
 
-      try {
-        const res = await fetch(`${APPS_SCRIPT_URL}?month=${selectedMonth}`, { redirect: "follow" });
-        const json = await res.json();
-        
-        if (json && json.reps && json.reps.length > 0) {
-          statusBadge.innerText = selectedMonth + ' DATA SYNCED';
-          overallSummary = json.summary;
-          globalRepsData = json.reps.map(r => ({
-            se: r.se,
-            asm: asmMapping[r.se] || 'N/A',
-            active: r.active,
-            visited: r.visited,
-            hitRate: r.hitRate
-          }));
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?month=${selectedMonth}`, { redirect: "follow" });
+    const json = await res.json();
+    
+    if (json && json.reps && json.reps.length > 0) {
+      statusBadge.innerText = 'DATA SYNCED'; // Clean status badge
+      overallSummary = json.summary;
+      globalRepsData = json.reps.map(r => ({
+        se: r.se,
+        asm: asmMapping[r.se] || 'N/A',
+        active: r.active,
+        visited: r.visited,
+        hitRate: r.hitRate
+      }));
 
-          populateAsmDropdown();
-          populateSeDropdown();
-          applyRoleRestrictions();
-          renderUI();
-          return;
-        }
-        throw new Error("No payload");
-      } catch (err) {
-        statusBadge.innerText = 'OFFLINE MODE';
-        statusBadge.style.background = '#f59e0b';
-        loadFallbackData(selectedMonth);
-      }
+      populateAsmDropdown();
+      populateSeDropdown();
+      applyRoleRestrictions();
+      renderUI();
+      return;
     }
+    throw new Error("No payload");
+  } catch (err) {
+    statusBadge.innerText = 'OFFLINE MODE';
+    statusBadge.style.background = '#f59e0b';
+    loadFallbackData(selectedMonth);
+  }
+}
 
     function loadFallbackData(month) {
       if (month === 'JAN') {
