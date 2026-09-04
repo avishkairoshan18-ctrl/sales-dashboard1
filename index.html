@@ -93,7 +93,7 @@
     .chart-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
     .chart-title { font-size: 1.1rem; font-weight: 700; }
 
-    .canvas-container { position: relative; height: 300px; width: 100%; }
+    .canvas-container { position: relative; height: 280px; width: 100%; }
 
     .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
     .leaderboard-table th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 0.75rem; border-bottom: 1px solid var(--border-color); }
@@ -102,6 +102,7 @@
 </head>
 <body>
 
+  <!-- LOGIN CONTAINER -->
   <div class="login-container" id="loginBox">
     <h2>Dashboard Login</h2>
     <p>Select role & enter credentials</p>
@@ -127,12 +128,14 @@
     <div class="error-msg" id="errorMsg">Invalid Credentials!</div>
   </div>
 
+  <!-- MAIN DASHBOARD CONTAINER -->
   <div id="dashboardContent">
     <div class="top-bar">
-      <h1 id="pageTitle">August Itinerary Hit Report</h1>
+      <h1>Itinerary Hit Report</h1>
       <div class="controls">
         <div class="status-badge" id="syncStatus">CONNECTING...</div>
         
+        <!-- MONTH SELECTOR -->
         <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
           <option value="AUG" selected>📅 August (Current)</option>
           <option value="JAN">📅 January</option>
@@ -144,6 +147,7 @@
       </div>
     </div>
 
+    <!-- KPI CARDS -->
     <div class="kpi-row">
       <div class="kpi-card">
         <div class="label">Total Active CX</div>
@@ -156,9 +160,9 @@
         <div class="subtext" id="kpiRemaining">0 Remaining</div>
       </div>
       <div class="kpi-card">
-        <div class="label" id="kpiHitRateLabel">August Hit Rate</div>
+        <div class="label">Monthly Hit Rate</div>
         <div class="value val-blue" id="kpiHitRate">0.0%</div>
-        <div class="subtext">Monthly Performance</div>
+        <div class="subtext" id="kpiHitRateSub">Monthly Performance</div>
       </div>
       <div class="kpi-card">
         <div class="label">Top Performer</div>
@@ -167,6 +171,17 @@
       </div>
     </div>
 
+    <!-- MONTHLY TREND LINE CHART (FULL WIDTH) -->
+    <div class="chart-card" style="margin-bottom: 20px;">
+      <div class="chart-header">
+        <div class="chart-title">Month-over-Month Hit Rate Trend (%)</div>
+      </div>
+      <div class="canvas-container" style="height: 220px;">
+        <canvas id="trendChart"></canvas>
+      </div>
+    </div>
+
+    <!-- CHARTS LAYOUT -->
     <div class="dashboard-layout">
       <div class="chart-card">
         <div class="chart-header"><div class="chart-title">Hit Rate by SE (%)</div></div>
@@ -178,8 +193,9 @@
       </div>
     </div>
 
+    <!-- LEADERBOARD TABLE -->
     <div class="chart-card">
-      <div class="chart-header"><div class="chart-title" id="tableTitle">August Sales Performance Table</div></div>
+      <div class="chart-header"><div class="chart-title">Sales Performance Table</div></div>
       <div style="overflow-x: auto;">
         <table class="leaderboard-table">
           <thead>
@@ -198,7 +214,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVIcw3gKsdxzocOlbUIjV-krRJPnG5yAMhAYaVNBoRYZl0584cAWPHud46BZVa6w/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQx7G10Kpb1v4LDO_iZxEGxCVQrRen6wWvRNnn9tzAT6AXmGHDddiMg4vqWh8D_Sk/exec';
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
@@ -212,8 +228,9 @@
     };
 
     let globalRepsData = [];
-    let overallSummary = null;
-    let rankChartInstance = null, volumeChartInstance = null;
+    let globalTrendHistory = [];
+    let globalTrendPct = 0;
+    let rankChartInstance = null, volumeChartInstance = null, trendChartInstance = null;
     let loggedRole = 'ADMIN', loggedUser = '';
 
     function checkAuth() {
@@ -250,47 +267,48 @@
       document.getElementById('loginBox').style.display = 'block';
     }
 
-async function loadData() {
-  const selectedMonth = document.getElementById('monthFilter').value;
-  const statusBadge = document.getElementById('syncStatus');
-  
-  // Static headers without month names
-  document.getElementById('pageTitle').innerText = 'Itinerary Hit Report';
-  document.getElementById('tableTitle').innerText = 'Sales Performance Table';
-  document.getElementById('kpiHitRateLabel').innerText = 'Monthly Hit Rate';
+    async function loadData() {
+      const selectedMonth = document.getElementById('monthFilter').value;
+      const statusBadge = document.getElementById('syncStatus');
 
-  try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?month=${selectedMonth}`, { redirect: "follow" });
-    const json = await res.json();
-    
-    if (json && json.reps && json.reps.length > 0) {
-      statusBadge.innerText = 'DATA SYNCED'; // Clean status badge
-      overallSummary = json.summary;
-      globalRepsData = json.reps.map(r => ({
-        se: r.se,
-        asm: asmMapping[r.se] || 'N/A',
-        active: r.active,
-        visited: r.visited,
-        hitRate: r.hitRate
-      }));
+      try {
+        const res = await fetch(`${APPS_SCRIPT_URL}?month=${selectedMonth}`, { redirect: "follow" });
+        const json = await res.json();
+        
+        if (json && json.reps && json.reps.length > 0) {
+          statusBadge.innerText = 'DATA SYNCED';
+          globalTrendHistory = json.trendHistory || [];
+          globalTrendPct = json.trendPct || 0;
+          globalRepsData = json.reps.map(r => ({
+            se: r.se,
+            asm: asmMapping[r.se] || 'N/A',
+            active: r.active,
+            visited: r.visited,
+            hitRate: r.hitRate
+          }));
 
-      populateAsmDropdown();
-      populateSeDropdown();
-      applyRoleRestrictions();
-      renderUI();
-      return;
+          populateAsmDropdown();
+          populateSeDropdown();
+          applyRoleRestrictions();
+          renderUI();
+          return;
+        }
+        throw new Error("No payload");
+      } catch (err) {
+        statusBadge.innerText = 'OFFLINE MODE';
+        statusBadge.style.background = '#f59e0b';
+        loadFallbackData(selectedMonth);
+      }
     }
-    throw new Error("No payload");
-  } catch (err) {
-    statusBadge.innerText = 'OFFLINE MODE';
-    statusBadge.style.background = '#f59e0b';
-    loadFallbackData(selectedMonth);
-  }
-}
 
     function loadFallbackData(month) {
+      globalTrendHistory = [
+        { month: 'JAN', hitRate: 73.1 },
+        { month: 'AUG', hitRate: 84.2 }
+      ];
+      
       if (month === 'JAN') {
-        overallSummary = { se: 'EH', active: 565, visited: 413, hitRate: 73.1 };
+        globalTrendPct = 0;
         globalRepsData = [
           { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 55, hitRate: 82.0 },
           { se: 'RSD', asm: 'Mr.Farzaan', active: 54, visited: 41, hitRate: 76.0 },
@@ -302,7 +320,7 @@ async function loadData() {
           { se: 'DNT', asm: 'Mr.Sabir', active: 48, visited: 28, hitRate: 58.0 }
         ];
       } else {
-        overallSummary = { se: 'EH', active: 545, visited: 459, hitRate: 84.2 };
+        globalTrendPct = 11.1;
         globalRepsData = [
           { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 50, hitRate: 74.6 },
           { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 44, hitRate: 78.6 },
@@ -389,6 +407,11 @@ async function loadData() {
       document.getElementById('kpiRemaining').innerText = Math.max(0, totalActive - totalVisited) + " Remaining";
       document.getElementById('kpiHitRate').innerText = (totalActive > 0 ? ((totalVisited / totalActive) * 100).toFixed(1) : 0) + "%";
 
+      // Trend KPI Indicator
+      const trendSign = globalTrendPct >= 0 ? `+${globalTrendPct}%` : `${globalTrendPct}%`;
+      const trendColor = globalTrendPct >= 0 ? '#10b981' : '#ef4444';
+      document.getElementById('kpiHitRateSub').innerHTML = `<span style="color:${trendColor}; font-weight:bold;">${trendSign}</span> vs Previous Month`;
+
       if (selectedSE !== 'ALL' && sorted.length) {
         document.getElementById('kpiRank').innerText = selectedSE;
         document.getElementById('kpiRankSub').innerText = 'ASM: ' + (asmMapping[selectedSE] || 'N/A');
@@ -412,6 +435,38 @@ async function loadData() {
 
       // Render Charts
       if (window.Chart) {
+        // 1. Month-over-Month Trend Line Chart
+        if (trendChartInstance) trendChartInstance.destroy();
+        if (globalTrendHistory && globalTrendHistory.length > 0) {
+          trendChartInstance = new Chart(document.getElementById('trendChart'), {
+            type: 'line',
+            data: {
+              labels: globalTrendHistory.map(item => item.month),
+              datasets: [{
+                label: 'Hit Rate %',
+                data: globalTrendHistory.map(item => item.hitRate),
+                borderColor: '#38bdf8',
+                backgroundColor: 'rgba(56, 189, 248, 0.15)',
+                borderWidth: 3,
+                pointRadius: 5,
+                pointBackgroundColor: '#38bdf8',
+                fill: true,
+                tension: 0.3
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e293b' } },
+                x: { grid: { color: '#1e293b' } }
+              }
+            }
+          });
+        }
+
+        // 2. Rep Rank Bar Chart
         if (rankChartInstance) rankChartInstance.destroy();
         rankChartInstance = new Chart(document.getElementById('rankChart'), {
           type: 'bar',
@@ -419,6 +474,7 @@ async function loadData() {
           options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
 
+        // 3. Volume Stacked Bar Chart
         if (volumeChartInstance) volumeChartInstance.destroy();
         volumeChartInstance = new Chart(document.getElementById('volumeChart'), {
           type: 'bar',
