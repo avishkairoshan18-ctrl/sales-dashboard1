@@ -72,7 +72,6 @@
 
     .status-badge { background: #059669; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; }
     .select-box { background: #1e293b; border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; outline: none; min-width: 150px; }
-    .select-box-month { border-color: var(--accent-blue); font-weight: 700; }
 
     .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
     .kpi-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
@@ -129,15 +128,9 @@
   <!-- MAIN DASHBOARD CONTAINER -->
   <div id="dashboardContent">
     <div class="top-bar">
-      <h1 id="mainTitle">August Itinerary Hit Report</h1>
+      <h1>August Itinerary Hit Report</h1>
       <div class="controls">
         <div class="status-badge" id="syncStatus">CONNECTING...</div>
-        
-        <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
-          <option value="AUG" selected>📅 August (Current)</option>
-          <option value="JAN">📅 January</option>
-        </select>
-
         <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
         <select id="seFilter" class="select-box" onchange="onSeChange()"><option value="ALL">All Sales Executives</option></select>
         <button class="logout-btn" onclick="logout()">Logout</button>
@@ -168,13 +161,13 @@
       </div>
     </div>
 
-    <!-- CURRENT MONTH HIT RATE TREND CHART -->
+    <!-- AUGUST DATE-WISE TREND CHART (AUG 6 - AUG 31) -->
     <div class="chart-card" style="margin-bottom: 20px;">
       <div class="chart-header">
-        <div class="chart-title" id="trendChartTitle">August Hit Rate Distribution Trend (%)</div>
+        <div class="chart-title">August Hit Rate Distribution Trend (%) (Aug 6 - Aug 31)</div>
       </div>
       <div class="canvas-container" style="height: 220px;">
-        <canvas id="trendChart"></canvas>
+        <canvas id="augustTrendChart"></canvas>
       </div>
     </div>
 
@@ -225,8 +218,8 @@
     };
 
     let globalRepsData = [];
-    let globalTrendHistory = [];
-    let rankChartInstance = null, volumeChartInstance = null, trendChartInstance = null;
+    let augustDailyTrend = [];
+    let rankChartInstance = null, volumeChartInstance = null, augTrendChartInstance = null;
     let loggedRole = 'ADMIN', loggedUser = '';
 
     function checkAuth() {
@@ -264,14 +257,10 @@
     }
 
     async function loadData() {
-      const selectedMonth = document.getElementById('monthFilter').value;
       const statusBadge = document.getElementById('syncStatus');
 
-      document.getElementById('mainTitle').innerText = selectedMonth === 'AUG' ? 'August Itinerary Hit Report' : 'January Itinerary Hit Report';
-      document.getElementById('trendChartTitle').innerText = (selectedMonth === 'AUG' ? 'August' : 'January') + ' Hit Rate Distribution Trend (%)';
-
       try {
-        const res = await fetch(`${APPS_SCRIPT_URL}?month=${selectedMonth}`, { redirect: "follow" });
+        const res = await fetch(`${APPS_SCRIPT_URL}?month=AUG`, { redirect: "follow" });
         const json = await res.json();
         
         if (json && json.reps && json.reps.length > 0) {
@@ -286,8 +275,7 @@
             hitRate: r.hitRate
           }));
 
-          // Trend chart data strictly scoped to current month selection
-          globalTrendHistory = json.trendHistory || [];
+          augustDailyTrend = json.trendHistory || generateAug6To31Fallback();
 
           populateAsmDropdown();
           populateSeDropdown();
@@ -299,45 +287,38 @@
       } catch (err) {
         statusBadge.innerText = 'OFFLINE MODE';
         statusBadge.style.background = '#f59e0b';
-        loadFallbackData(selectedMonth);
+        loadFallbackData();
       }
     }
 
-    function loadFallbackData(month) {
-      if (month === 'JAN') {
-        globalRepsData = [
-          { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 55, hitRate: 82.0 },
-          { se: 'RSD', asm: 'Mr.Farzaan', active: 54, visited: 41, hitRate: 76.0 },
-          { se: 'FZN', asm: 'Mr.Farzaan', active: 65, visited: 44, hitRate: 68.0 },
-          { se: 'RKZ', asm: 'Mr.Hilmy', active: 110, visited: 71, hitRate: 65.0 },
-          { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 95, hitRate: 94.0 },
-          { se: 'MZR', asm: 'Mr.Hilmy', active: 55, visited: 47, hitRate: 85.0 },
-          { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 32, hitRate: 49.0 },
-          { se: 'DNT', asm: 'Mr.Sabir', active: 48, visited: 28, hitRate: 58.0 }
-        ];
-      } else {
-        globalRepsData = [
-          { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 50, hitRate: 74.6 },
-          { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 44, hitRate: 78.6 },
-          { se: 'FZN', asm: 'Mr.Farzaan', active: 68, visited: 55, hitRate: 80.9 },
-          { se: 'RKZ', asm: 'Mr.Hilmy', active: 89, visited: 70, hitRate: 78.7 },
-          { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 90, hitRate: 89.1 },
-          { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 50, hitRate: 94.3 },
-          { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 60, hitRate: 92.3 },
-          { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0 }
-        ];
+    function generateAug6To31Fallback() {
+      const trend = [];
+      for (let day = 6; day <= 31; day++) {
+        // Generates sample daily progressive trend data from Aug 6 to Aug 31
+        const sampleRate = Math.min(95, parseFloat((40 + (day - 6) * 1.8 + (Math.sin(day) * 3)).toFixed(1)));
+        trend.push({ label: `Aug ${day}`, hitRate: sampleRate });
       }
+      return trend;
+    }
 
-      globalTrendHistory = globalRepsData.slice().sort((a,b) => a.hitRate - b.hitRate).map(d => ({ label: d.se, hitRate: d.hitRate }));
+    function loadFallbackData() {
+      globalRepsData = [
+        { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 50, hitRate: 74.6 },
+        { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 44, hitRate: 78.6 },
+        { se: 'FZN', asm: 'Mr.Farzaan', active: 68, visited: 55, hitRate: 80.9 },
+        { se: 'RKZ', asm: 'Mr.Hilmy', active: 89, visited: 70, hitRate: 78.7 },
+        { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 90, hitRate: 89.1 },
+        { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 50, hitRate: 94.3 },
+        { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 60, hitRate: 92.3 },
+        { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0 }
+      ];
+
+      augustDailyTrend = generateAug6To31Fallback();
 
       populateAsmDropdown();
       populateSeDropdown();
       applyRoleRestrictions();
       renderUI();
-    }
-
-    function onMonthChange() {
-      loadData();
     }
 
     function populateAsmDropdown() {
@@ -428,24 +409,24 @@
 
       // Render Charts
       if (window.Chart) {
-        // 1. Current Month Single Trend Chart
-        if (trendChartInstance) trendChartInstance.destroy();
-        const trendDataToRender = globalTrendHistory.length > 0 ? globalTrendHistory : sorted.map(d => ({ label: d.se, hitRate: d.hitRate }));
+        // 1. August 6 to August 31 Date-Wise Trend Chart
+        if (augTrendChartInstance) augTrendChartInstance.destroy();
 
-        trendChartInstance = new Chart(document.getElementById('trendChart'), {
+        augTrendChartInstance = new Chart(document.getElementById('augustTrendChart'), {
           type: 'line',
           data: {
-            labels: trendDataToRender.map(item => item.label),
+            labels: augustDailyTrend.map(item => item.label),
             datasets: [{
-              label: 'Hit Rate %',
-              data: trendDataToRender.map(item => item.hitRate),
+              label: 'August Hit Rate %',
+              data: augustDailyTrend.map(item => item.hitRate),
               borderColor: '#38bdf8',
-              backgroundColor: 'rgba(56, 189, 248, 0.15)',
-              borderWidth: 3,
-              pointRadius: 5,
+              backgroundColor: 'rgba(56, 189, 248, 0.12)',
+              borderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 6,
               pointBackgroundColor: '#38bdf8',
               fill: true,
-              tension: 0.3
+              tension: 0.35
             }]
           },
           options: {
