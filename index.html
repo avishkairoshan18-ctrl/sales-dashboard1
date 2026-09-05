@@ -36,7 +36,6 @@
       to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
-    /* LOGIN SCREEN */
     .login-container {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -60,7 +59,6 @@
     .logout-btn:hover { background: var(--accent-red); color: white; border-color: var(--accent-red); }
     .error-msg { color: var(--accent-red); font-size: 0.8rem; margin-top: 12px; display: none; }
 
-    /* DASHBOARD LAYOUT */
     #dashboardContent { 
       display: none; 
       width: 100%; 
@@ -131,11 +129,10 @@
   <!-- MAIN DASHBOARD CONTAINER -->
   <div id="dashboardContent">
     <div class="top-bar">
-      <h1>Itinerary Hit Report</h1>
+      <h1 id="mainTitle">August Itinerary Hit Report</h1>
       <div class="controls">
         <div class="status-badge" id="syncStatus">CONNECTING...</div>
         
-        <!-- MONTH SELECTOR -->
         <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
           <option value="AUG" selected>📅 August (Current)</option>
           <option value="JAN">📅 January</option>
@@ -160,9 +157,9 @@
         <div class="subtext" id="kpiRemaining">0 Remaining</div>
       </div>
       <div class="kpi-card">
-        <div class="label">Monthly Hit Rate</div>
+        <div class="label">August Hit Rate</div>
         <div class="value val-blue" id="kpiHitRate">0.0%</div>
-        <div class="subtext" id="kpiHitRateSub">Monthly Performance</div>
+        <div class="subtext">Monthly Performance</div>
       </div>
       <div class="kpi-card">
         <div class="label">Top Performer</div>
@@ -171,10 +168,10 @@
       </div>
     </div>
 
-    <!-- MONTHLY TREND LINE CHART (FULL WIDTH) -->
+    <!-- CURRENT MONTH HIT RATE TREND CHART -->
     <div class="chart-card" style="margin-bottom: 20px;">
       <div class="chart-header">
-        <div class="chart-title">Month-over-Month Hit Rate Trend (%)</div>
+        <div class="chart-title" id="trendChartTitle">August Hit Rate Distribution Trend (%)</div>
       </div>
       <div class="canvas-container" style="height: 220px;">
         <canvas id="trendChart"></canvas>
@@ -229,7 +226,6 @@
 
     let globalRepsData = [];
     let globalTrendHistory = [];
-    let globalTrendPct = 0;
     let rankChartInstance = null, volumeChartInstance = null, trendChartInstance = null;
     let loggedRole = 'ADMIN', loggedUser = '';
 
@@ -271,14 +267,17 @@
       const selectedMonth = document.getElementById('monthFilter').value;
       const statusBadge = document.getElementById('syncStatus');
 
+      document.getElementById('mainTitle').innerText = selectedMonth === 'AUG' ? 'August Itinerary Hit Report' : 'January Itinerary Hit Report';
+      document.getElementById('trendChartTitle').innerText = (selectedMonth === 'AUG' ? 'August' : 'January') + ' Hit Rate Distribution Trend (%)';
+
       try {
         const res = await fetch(`${APPS_SCRIPT_URL}?month=${selectedMonth}`, { redirect: "follow" });
         const json = await res.json();
         
         if (json && json.reps && json.reps.length > 0) {
           statusBadge.innerText = 'DATA SYNCED';
-          globalTrendHistory = json.trendHistory || [];
-          globalTrendPct = json.trendPct || 0;
+          statusBadge.style.background = '#059669';
+          
           globalRepsData = json.reps.map(r => ({
             se: r.se,
             asm: asmMapping[r.se] || 'N/A',
@@ -286,6 +285,9 @@
             visited: r.visited,
             hitRate: r.hitRate
           }));
+
+          // Trend chart data strictly scoped to current month selection
+          globalTrendHistory = json.trendHistory || [];
 
           populateAsmDropdown();
           populateSeDropdown();
@@ -302,13 +304,7 @@
     }
 
     function loadFallbackData(month) {
-      globalTrendHistory = [
-        { month: 'JAN', hitRate: 73.1 },
-        { month: 'AUG', hitRate: 84.2 }
-      ];
-      
       if (month === 'JAN') {
-        globalTrendPct = 0;
         globalRepsData = [
           { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 55, hitRate: 82.0 },
           { se: 'RSD', asm: 'Mr.Farzaan', active: 54, visited: 41, hitRate: 76.0 },
@@ -320,7 +316,6 @@
           { se: 'DNT', asm: 'Mr.Sabir', active: 48, visited: 28, hitRate: 58.0 }
         ];
       } else {
-        globalTrendPct = 11.1;
         globalRepsData = [
           { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 50, hitRate: 74.6 },
           { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 44, hitRate: 78.6 },
@@ -332,6 +327,9 @@
           { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0 }
         ];
       }
+
+      globalTrendHistory = globalRepsData.slice().sort((a,b) => a.hitRate - b.hitRate).map(d => ({ label: d.se, hitRate: d.hitRate }));
+
       populateAsmDropdown();
       populateSeDropdown();
       applyRoleRestrictions();
@@ -407,11 +405,6 @@
       document.getElementById('kpiRemaining').innerText = Math.max(0, totalActive - totalVisited) + " Remaining";
       document.getElementById('kpiHitRate').innerText = (totalActive > 0 ? ((totalVisited / totalActive) * 100).toFixed(1) : 0) + "%";
 
-      // Trend KPI Indicator
-      const trendSign = globalTrendPct >= 0 ? `+${globalTrendPct}%` : `${globalTrendPct}%`;
-      const trendColor = globalTrendPct >= 0 ? '#10b981' : '#ef4444';
-      document.getElementById('kpiHitRateSub').innerHTML = `<span style="color:${trendColor}; font-weight:bold;">${trendSign}</span> vs Previous Month`;
-
       if (selectedSE !== 'ALL' && sorted.length) {
         document.getElementById('kpiRank').innerText = selectedSE;
         document.getElementById('kpiRankSub').innerText = 'ASM: ' + (asmMapping[selectedSE] || 'N/A');
@@ -435,36 +428,36 @@
 
       // Render Charts
       if (window.Chart) {
-        // 1. Month-over-Month Trend Line Chart
+        // 1. Current Month Single Trend Chart
         if (trendChartInstance) trendChartInstance.destroy();
-        if (globalTrendHistory && globalTrendHistory.length > 0) {
-          trendChartInstance = new Chart(document.getElementById('trendChart'), {
-            type: 'line',
-            data: {
-              labels: globalTrendHistory.map(item => item.month),
-              datasets: [{
-                label: 'Hit Rate %',
-                data: globalTrendHistory.map(item => item.hitRate),
-                borderColor: '#38bdf8',
-                backgroundColor: 'rgba(56, 189, 248, 0.15)',
-                borderWidth: 3,
-                pointRadius: 5,
-                pointBackgroundColor: '#38bdf8',
-                fill: true,
-                tension: 0.3
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: {
-                y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e293b' } },
-                x: { grid: { color: '#1e293b' } }
-              }
+        const trendDataToRender = globalTrendHistory.length > 0 ? globalTrendHistory : sorted.map(d => ({ label: d.se, hitRate: d.hitRate }));
+
+        trendChartInstance = new Chart(document.getElementById('trendChart'), {
+          type: 'line',
+          data: {
+            labels: trendDataToRender.map(item => item.label),
+            datasets: [{
+              label: 'Hit Rate %',
+              data: trendDataToRender.map(item => item.hitRate),
+              borderColor: '#38bdf8',
+              backgroundColor: 'rgba(56, 189, 248, 0.15)',
+              borderWidth: 3,
+              pointRadius: 5,
+              pointBackgroundColor: '#38bdf8',
+              fill: true,
+              tension: 0.3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e293b' } },
+              x: { grid: { color: '#1e293b' } }
             }
-          });
-        }
+          }
+        });
 
         // 2. Rep Rank Bar Chart
         if (rankChartInstance) rankChartInstance.destroy();
