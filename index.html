@@ -36,9 +36,51 @@
       to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
+    /* LOGIN & WELCOME STYLES */
+    .auth-container {
+      width: 100%;
+      max-width: 400px;
+      margin-top: 80px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      text-align: center;
+      animation: zoomInFade 0.4s ease-out forwards;
+    }
+
+    .auth-container h2 { font-size: 1.5rem; margin-bottom: 8px; color: var(--text-main); }
+    .auth-container p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; }
+
+    .input-group { margin-bottom: 16px; text-align: left; }
+    .input-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+    .input-field { width: 100%; background: #1e293b; border: 1px solid var(--border-color); color: white; padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; outline: none; }
+    .input-field:focus { border-color: var(--accent-blue); }
+
+    .btn-action { width: 100%; background: var(--accent-blue); color: #090d16; border: none; padding: 12px; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; margin-top: 8px; }
+    .btn-action:hover { opacity: 0.9; }
+
+    .btn-logout { background: #1e293b; color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+    .btn-logout:hover { background: var(--accent-red); color: white; border-color: var(--accent-red); }
+
+    .welcome-container {
+      width: 100%;
+      max-width: 600px;
+      margin-top: 100px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      animation: zoomInFade 0.4s ease-out forwards;
+    }
+
+    /* DASHBOARD LAYOUT STYLES */
     #dashboardContent { 
       width: 100%; 
       max-width: 1200px; 
+      display: none;
       animation: zoomInFade 0.4s ease-out forwards; 
     }
     
@@ -76,6 +118,30 @@
 </head>
 <body>
 
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="auth-container">
+    <h2>Portal Access</h2>
+    <p>Sign in to view executive performance data</p>
+    <form onsubmit="handleLogin(event)">
+      <div class="input-group">
+        <label>Username</label>
+        <input type="text" id="username" class="input-field" placeholder="Enter username" required>
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="password" class="input-field" placeholder="Enter password" required>
+      </div>
+      <button type="submit" class="btn-action">Log In</button>
+    </form>
+  </div>
+
+  <!-- WELCOME SCREEN -->
+  <div id="welcomeScreen" class="welcome-container" style="display: none;">
+    <h2 style="font-size: 2rem; margin-bottom: 12px;">Welcome Back!</h2>
+    <p style="margin-bottom: 30px;">Sales Executive Itinerary Performance Dashboard</p>
+    <button onclick="enterDashboard()" class="btn-action" style="max-width: 250px; margin: 0 auto;">Open Dashboard</button>
+  </div>
+
   <!-- MAIN DASHBOARD CONTAINER -->
   <div id="dashboardContent">
     <div class="top-bar">
@@ -91,6 +157,7 @@
 
         <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
         <select id="seFilter" class="select-box" onchange="onSeChange()"><option value="ALL">All Sales Executives</option></select>
+        <button class="btn-logout" onclick="handleLogout()">Logout</button>
       </div>
     </div>
 
@@ -161,7 +228,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzGkyFYhk8Vznyh3VcC4s_EDjrJRAHRVVNleV3iEinxviWjwJQYbDcj2TjmoAiDg68/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQx7G10Kpb1v4LDO_iZxEGxCVQrRen6wWvRNnn9tzAT6AXmGHDddiMg4vqWh8D_Sk/exec';
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
@@ -177,9 +244,26 @@
     let globalRepsData = [];
     let rankChartInstance = null, volumeChartInstance = null, seTrendChartInstance = null;
 
-    window.addEventListener('DOMContentLoaded', () => {
+    // Login logic
+    function handleLogin(e) {
+      e.preventDefault();
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('welcomeScreen').style.display = 'block';
+    }
+
+    function enterDashboard() {
+      document.getElementById('welcomeScreen').style.display = 'none';
+      document.getElementById('dashboardContent').style.display = 'block';
       loadData();
-    });
+    }
+
+    function handleLogout() {
+      document.getElementById('dashboardContent').style.display = 'none';
+      document.getElementById('welcomeScreen').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'block';
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+    }
 
     async function loadData() {
       const selectedMonth = document.getElementById('monthFilter').value;
