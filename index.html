@@ -76,12 +76,14 @@
 </head>
 <body>
 
+  <!-- MAIN DASHBOARD CONTAINER -->
   <div id="dashboardContent">
     <div class="top-bar">
       <h1 id="mainTitle">August Itinerary Hit Report</h1>
       <div class="controls">
         <div class="status-badge" id="syncStatus">CONNECTING...</div>
         
+        <!-- MONTH SELECTOR -->
         <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
           <option value="AUG" selected>📅 August (Current)</option>
           <option value="JAN">📅 January</option>
@@ -92,6 +94,7 @@
       </div>
     </div>
 
+    <!-- KPI CARDS -->
     <div class="kpi-row">
       <div class="kpi-card">
         <div class="label">Total Active CX</div>
@@ -115,6 +118,7 @@
       </div>
     </div>
 
+    <!-- SE-WISE HIT RATE DISTRIBUTION TREND CHART -->
     <div class="chart-card" style="margin-bottom: 20px;">
       <div class="chart-header">
         <div class="chart-title" id="trendChartTitle">August Hit Rate Distribution Trend by SE (%)</div>
@@ -124,6 +128,7 @@
       </div>
     </div>
 
+    <!-- CHARTS LAYOUT -->
     <div class="dashboard-layout">
       <div class="chart-card">
         <div class="chart-header"><div class="chart-title">Hit Rate by SE (%)</div></div>
@@ -135,6 +140,7 @@
       </div>
     </div>
 
+    <!-- LEADERBOARD TABLE -->
     <div class="chart-card">
       <div class="chart-header"><div class="chart-title">Sales Performance Table</div></div>
       <div style="overflow-x: auto;">
@@ -155,7 +161,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9wXk7zzN8mlk22dLyyIkDHhkS8fiBBZeNvCo5ErqrsfJHVda2grUVB2gF_Jm-ipA/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQx7G10Kpb1v4LDO_iZxEGxCVQrRen6wWvRNnn9tzAT6AXmGHDddiMg4vqWh8D_Sk/exec';
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
@@ -354,7 +360,7 @@
 
         // 2. Rep Rank Bar Chart
         if (rankChartInstance) rankChartInstance.destroy();
-        rankChartInstance = new RankChartInstance = new Chart(document.getElementById('rankChart'), {
+        rankChartInstance = new Chart(document.getElementById('rankChart'), {
           type: 'bar',
           data: { labels: sorted.map(d => d.se), datasets: [{ data: sorted.map(d => d.hitRate.toFixed(1)), backgroundColor: '#38bdf8' }] },
           options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
