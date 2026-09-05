@@ -36,7 +36,7 @@
       to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
-    /* LOGIN SCREEN STYLES (MATCHED TO REFERENCE) */
+    /* LOGIN SCREEN STYLES */
     .auth-container {
       width: 100%;
       max-width: 440px;
@@ -101,6 +101,7 @@
     .status-badge { background: #059669; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; }
     .select-box { background: #1e293b; border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; outline: none; min-width: 150px; }
     .select-box-month { border-color: var(--accent-blue); font-weight: 700; }
+    .select-box:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
     .kpi-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
@@ -128,7 +129,6 @@
 </head>
 <body>
 
-  <!-- DASHBOARD LOGIN SCREEN -->
   <div id="loginScreen" class="auth-container">
     <h2>Dashboard Login</h2>
     <p>Select role & enter credentials</p>
@@ -143,7 +143,7 @@
       </div>
       <div class="input-group">
         <label>USERNAME / CODE</label>
-        <input type="text" id="username" class="input-field" placeholder="Mr.Sabir" required>
+        <input type="text" id="username" class="input-field" placeholder="e.g. Mr.Sabir or AMT" required>
       </div>
       <div class="input-group">
         <label>PASSWORD</label>
@@ -153,14 +153,12 @@
     </form>
   </div>
 
-  <!-- MAIN DASHBOARD CONTAINER -->
   <div id="dashboardContent">
     <div class="top-bar">
       <h1 id="mainTitle">August Itinerary Hit Report</h1>
       <div class="controls">
         <div class="status-badge" id="syncStatus">CONNECTING...</div>
         
-        <!-- MONTH SELECTOR -->
         <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
           <option value="AUG" selected>📅 August (Current)</option>
           <option value="JAN">📅 January</option>
@@ -172,7 +170,6 @@
       </div>
     </div>
 
-    <!-- KPI CARDS -->
     <div class="kpi-row">
       <div class="kpi-card">
         <div class="label">Total Active CX</div>
@@ -190,13 +187,12 @@
         <div class="subtext">Monthly Performance</div>
       </div>
       <div class="kpi-card">
-        <div class="label">Top Performer</div>
+        <div class="label" id="kpiRankTitle">Top Performer</div>
         <div class="value val-gold" id="kpiRank">#--</div>
         <div class="subtext" id="kpiRankSub">Overview Mode</div>
       </div>
     </div>
 
-    <!-- SE-WISE HIT RATE DISTRIBUTION TREND CHART -->
     <div class="chart-card" style="margin-bottom: 20px;">
       <div class="chart-header">
         <div class="chart-title" id="trendChartTitle">August Hit Rate Distribution Trend by SE (%)</div>
@@ -206,7 +202,6 @@
       </div>
     </div>
 
-    <!-- CHARTS LAYOUT -->
     <div class="dashboard-layout">
       <div class="chart-card">
         <div class="chart-header"><div class="chart-title">Hit Rate by SE (%)</div></div>
@@ -218,7 +213,6 @@
       </div>
     </div>
 
-    <!-- LEADERBOARD TABLE -->
     <div class="chart-card">
       <div class="chart-header"><div class="chart-title">Sales Performance Table</div></div>
       <div style="overflow-x: auto;">
@@ -253,11 +247,17 @@
     };
 
     let globalRepsData = [];
+    let loggedInUser = { role: 'ADMIN', name: '' };
     let rankChartInstance = null, volumeChartInstance = null, seTrendChartInstance = null;
 
-    // Direct Login to Dashboard
+    // Login Handler with Role Access Restrictions
     function handleLogin(e) {
       e.preventDefault();
+      const role = document.getElementById('userRole').value;
+      const username = document.getElementById('username').value.trim();
+
+      loggedInUser = { role: role, name: username };
+
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('dashboardContent').style.display = 'block';
       loadData();
@@ -268,6 +268,10 @@
       document.getElementById('loginScreen').style.display = 'block';
       document.getElementById('username').value = '';
       document.getElementById('password').value = '';
+      
+      // Reset filter controls
+      document.getElementById('asmFilter').disabled = false;
+      document.getElementById('seFilter').disabled = false;
     }
 
     async function loadData() {
@@ -295,8 +299,7 @@
             hitRate: r.hitRate
           }));
 
-          populateAsmDropdown();
-          populateSeDropdown();
+          applyRolePermissions();
           renderUI();
           return;
         }
@@ -333,9 +336,43 @@
         ];
       }
 
-      populateAsmDropdown();
-      populateSeDropdown();
+      applyRolePermissions();
       renderUI();
+    }
+
+    // Role Permission & Dropdown Locking
+    function applyRolePermissions() {
+      const asmFilter = document.getElementById('asmFilter');
+      const seFilter = document.getElementById('seFilter');
+
+      populateAsmDropdown();
+
+      if (loggedInUser.role === 'SE') {
+        const matchedSE = globalRepsData.find(d => d.se.toLowerCase() === loggedInUser.name.toLowerCase());
+        const seCode = matchedSE ? matchedSE.se : globalRepsData[0].se;
+        const asmName = asmMapping[seCode] || 'N/A';
+
+        asmFilter.value = asmName;
+        populateSeDropdown();
+        seFilter.value = seCode;
+
+        asmFilter.disabled = true;
+        seFilter.disabled = true;
+      } else if (loggedInUser.role === 'ASM') {
+        const matchedASM = Object.values(asmMapping).find(a => a.toLowerCase().includes(loggedInUser.name.toLowerCase()));
+        const asmName = matchedASM || 'Mr.Sabir';
+
+        asmFilter.value = asmName;
+        populateSeDropdown();
+        seFilter.value = 'ALL';
+
+        asmFilter.disabled = true;
+        seFilter.disabled = false;
+      } else {
+        asmFilter.disabled = false;
+        seFilter.disabled = false;
+        populateSeDropdown();
+      }
     }
 
     function onMonthChange() {
@@ -395,9 +432,11 @@
       document.getElementById('kpiHitRate').innerText = (totalActive > 0 ? ((totalVisited / totalActive) * 100).toFixed(1) : 0) + "%";
 
       if (selectedSE !== 'ALL' && sorted.length) {
+        document.getElementById('kpiRankTitle').innerText = 'SELECTED SE';
         document.getElementById('kpiRank').innerText = selectedSE;
         document.getElementById('kpiRankSub').innerText = 'ASM: ' + (asmMapping[selectedSE] || 'N/A');
       } else if (sorted.length) {
+        document.getElementById('kpiRankTitle').innerText = 'TOP PERFORMER';
         document.getElementById('kpiRank').innerText = "#1 " + sorted[0].se;
         document.getElementById('kpiRankSub').innerText = selectedASM !== 'ALL' ? 'Top SE in ' + selectedASM : 'Top Executive';
       }
