@@ -295,13 +295,13 @@
       try {
         const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}&t=${new Date().getTime()}`;
         
-        // Google Apps Script requires redirect following without explicit mode:'cors' overrides
         const res = await fetch(fetchUrl, {
           method: 'GET',
-          redirect: 'follow'
+          redirect: 'follow',
+          headers: { 'Accept': 'application/json' }
         });
 
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        if (!res.ok) throw new Error(`HTTP status: ${res.status}`);
         const json = await res.json();
         
         const repsList = json.reps || json.data || (Array.isArray(json) ? json : null);
@@ -328,16 +328,16 @@
             .filter(r => r.se.toUpperCase() !== 'SE' && r.se !== '' && (r.active > 0 || r.visited > 0 || r.hitRate > 0));
 
           if (globalRepsData.length === 0) {
-            throw new Error("No non-header rep objects found");
+            throw new Error("No rep objects found");
           }
 
           applyRolePermissions();
           renderUI();
           return;
         }
-        throw new Error("Invalid payload format");
+        throw new Error("Payload format incorrect");
       } catch (err) {
-        console.warn('Live sync fallback activated:', err);
+        console.warn('Network sync notice:', err);
         statusBadge.innerText = 'OFFLINE MODE';
         statusBadge.style.background = '#f59e0b';
         loadFallbackData(selectedMonth);
