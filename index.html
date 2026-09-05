@@ -233,7 +233,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgzFH5HgGA0Ppfjq5bPjaDtslYED50XSZ9Obh6L-isW0_oxAf6XouhV3Yh-xofGzw/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQx7G10Kpb1v4LDO_iZxEGxCVQrRen6wWvRNnn9tzAT6AXmGHDddiMg4vqWh8D_Sk/exec';
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
@@ -243,7 +243,8 @@
       'RFD': 'Mr.Hilmy',   
       'MZR': 'Mr.Hilmy',
       'AMT': 'Mr.Sabir',   
-      'DNT': 'Mr.Sabir'
+      'DNT': 'Mr.Sabir',
+      'EH':  'Mr.Sabir'
     };
 
     let globalRepsData = [];
@@ -301,13 +302,18 @@
           statusBadge.innerText = `${selectedMonth} DATA SYNCED`;
           statusBadge.style.background = '#059669';
           
-          globalRepsData = repsList.map(r => ({
-            se: r.se || r.SE || r.code || 'UNKNOWN',
-            asm: asmMapping[r.se || r.SE] || r.asm || r.ASM || 'N/A',
-            active: Number(r.active || r.Active || 0),
-            visited: Number(r.visited || r.Visited || 0),
-            hitRate: Number(r.hitRate || r.HitRate || (r.active ? (r.visited / r.active * 100) : 0))
-          }));
+          globalRepsData = repsList
+            .filter(r => {
+              const code = String(r.se || r.SE || r.code || '').trim().toUpperCase();
+              return code !== '' && code !== 'SE'; // Filter out generic header/placeholder 'SE'
+            })
+            .map(r => ({
+              se: String(r.se || r.SE || r.code).trim().toUpperCase(),
+              asm: asmMapping[String(r.se || r.SE).trim().toUpperCase()] || r.asm || r.ASM || 'N/A',
+              active: Number(r.active || r.Active || 0),
+              visited: Number(r.visited || r.Visited || 0),
+              hitRate: Number(r.hitRate || r.HitRate || (r.active ? (r.visited / r.active * 100) : 0))
+            }));
 
           applyRolePermissions();
           renderUI();
@@ -332,7 +338,8 @@
           { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 95, hitRate: 94.0 },
           { se: 'MZR', asm: 'Mr.Hilmy', active: 55, visited: 47, hitRate: 85.0 },
           { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 32, hitRate: 49.0 },
-          { se: 'DNT', asm: 'Mr.Sabir', active: 48, visited: 28, hitRate: 58.0 }
+          { se: 'DNT', asm: 'Mr.Sabir', active: 48, visited: 28, hitRate: 58.0 },
+          { se: 'EH',  asm: 'Mr.Sabir', active: 50, visited: 40, hitRate: 80.0 }
         ];
       } else {
         globalRepsData = [
@@ -343,7 +350,8 @@
           { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 90, hitRate: 89.1 },
           { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 50, hitRate: 94.3 },
           { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 60, hitRate: 92.3 },
-          { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0 }
+          { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0 },
+          { se: 'EH',  asm: 'Mr.Sabir', active: 50, visited: 40, hitRate: 80.0 }
         ];
       }
 
@@ -406,11 +414,16 @@
       
       seFilter.innerHTML = '<option value="ALL">All Sales Executives</option>';
       globalRepsData.forEach(d => {
-        if (selectedASM === 'ALL' || d.asm === selectedASM) {
+        if (d.se !== 'SE' && (selectedASM === 'ALL' || d.asm === selectedASM)) {
           seFilter.innerHTML += `<option value="${d.se}">${d.se} (${d.hitRate.toFixed(0)}%)</option>`;
         }
       });
-      seFilter.value = currentVal || 'ALL';
+
+      if (currentVal && currentVal !== 'SE') {
+        seFilter.value = currentVal;
+      } else {
+        seFilter.value = 'ALL';
+      }
     }
 
     function onAsmChange() {
@@ -426,7 +439,7 @@
       const selectedASM = document.getElementById('asmFilter').value;
       const selectedSE = document.getElementById('seFilter').value;
 
-      let filtered = globalRepsData;
+      let filtered = globalRepsData.filter(d => d.se !== 'SE');
       if (selectedASM !== 'ALL') filtered = filtered.filter(d => d.asm === selectedASM);
       if (selectedSE !== 'ALL') filtered = filtered.filter(d => d.se === selectedSE);
 
