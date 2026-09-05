@@ -129,6 +129,7 @@
 </head>
 <body>
 
+  <!-- DASHBOARD LOGIN SCREEN -->
   <div id="loginScreen" class="auth-container">
     <h2>Dashboard Login</h2>
     <p>Select role & enter credentials</p>
@@ -153,12 +154,14 @@
     </form>
   </div>
 
+  <!-- MAIN DASHBOARD CONTAINER -->
   <div id="dashboardContent">
     <div class="top-bar">
       <h1 id="mainTitle">August Itinerary Hit Report</h1>
       <div class="controls">
         <div class="status-badge" id="syncStatus">CONNECTING...</div>
         
+        <!-- MONTH SELECTOR -->
         <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
           <option value="AUG" selected>📅 August (Current)</option>
           <option value="JAN">📅 January</option>
@@ -170,6 +173,7 @@
       </div>
     </div>
 
+    <!-- KPI CARDS -->
     <div class="kpi-row">
       <div class="kpi-card">
         <div class="label">Total Active CX</div>
@@ -193,6 +197,7 @@
       </div>
     </div>
 
+    <!-- SE-WISE HIT RATE DISTRIBUTION TREND CHART -->
     <div class="chart-card" style="margin-bottom: 20px;">
       <div class="chart-header">
         <div class="chart-title" id="trendChartTitle">August Hit Rate Distribution Trend by SE (%)</div>
@@ -202,6 +207,7 @@
       </div>
     </div>
 
+    <!-- CHARTS LAYOUT -->
     <div class="dashboard-layout">
       <div class="chart-card">
         <div class="chart-header"><div class="chart-title">Hit Rate by SE (%)</div></div>
@@ -213,6 +219,7 @@
       </div>
     </div>
 
+    <!-- LEADERBOARD TABLE -->
     <div class="chart-card">
       <div class="chart-header"><div class="chart-title">Sales Performance Table</div></div>
       <div style="overflow-x: auto;">
@@ -303,17 +310,25 @@
           statusBadge.style.background = '#059669';
           
           globalRepsData = repsList
-            .filter(r => {
-              const code = String(r.se || r.SE || r.code || '').trim().toUpperCase();
-              return code !== '' && code !== 'SE'; // Filter out generic header/placeholder 'SE'
+            .map(r => {
+              const code = String(r.se || r.SE || r.code || r.Se || '').trim();
+              const active = Number(r.active || r.Active || 0);
+              const visited = Number(r.visited || r.Visited || 0);
+              const rate = Number(r.hitRate || r.HitRate || (active ? (visited / active * 100) : 0));
+
+              return {
+                se: code,
+                asm: asmMapping[code.toUpperCase()] || r.asm || r.ASM || 'N/A',
+                active: active,
+                visited: visited,
+                hitRate: rate
+              };
             })
-            .map(r => ({
-              se: String(r.se || r.SE || r.code).trim().toUpperCase(),
-              asm: asmMapping[String(r.se || r.SE).trim().toUpperCase()] || r.asm || r.ASM || 'N/A',
-              active: Number(r.active || r.Active || 0),
-              visited: Number(r.visited || r.Visited || 0),
-              hitRate: Number(r.hitRate || r.HitRate || (r.active ? (r.visited / r.active * 100) : 0))
-            }));
+            .filter(r => r.se.toUpperCase() !== 'SE' && r.se !== '' && (r.active > 0 || r.visited > 0 || r.hitRate > 0));
+
+          if (globalRepsData.length === 0) {
+            throw new Error("No non-header rep objects found");
+          }
 
           applyRolePermissions();
           renderUI();
@@ -368,7 +383,7 @@
       if (loggedInUser.role === 'SE') {
         const matchedSE = globalRepsData.find(d => d.se.toLowerCase() === loggedInUser.name.toLowerCase());
         const seCode = matchedSE ? matchedSE.se : globalRepsData[0].se;
-        const asmName = asmMapping[seCode] || 'N/A';
+        const asmName = asmMapping[seCode.toUpperCase()] || 'N/A';
 
         asmFilter.value = asmName;
         populateSeDropdown();
@@ -414,12 +429,12 @@
       
       seFilter.innerHTML = '<option value="ALL">All Sales Executives</option>';
       globalRepsData.forEach(d => {
-        if (d.se !== 'SE' && (selectedASM === 'ALL' || d.asm === selectedASM)) {
+        if (d.se.toUpperCase() !== 'SE' && (selectedASM === 'ALL' || d.asm === selectedASM)) {
           seFilter.innerHTML += `<option value="${d.se}">${d.se} (${d.hitRate.toFixed(0)}%)</option>`;
         }
       });
 
-      if (currentVal && currentVal !== 'SE') {
+      if (currentVal && currentVal !== 'SE' && Array.from(seFilter.options).some(o => o.value === currentVal)) {
         seFilter.value = currentVal;
       } else {
         seFilter.value = 'ALL';
@@ -439,7 +454,7 @@
       const selectedASM = document.getElementById('asmFilter').value;
       const selectedSE = document.getElementById('seFilter').value;
 
-      let filtered = globalRepsData.filter(d => d.se !== 'SE');
+      let filtered = globalRepsData.filter(d => d.se.toUpperCase() !== 'SE');
       if (selectedASM !== 'ALL') filtered = filtered.filter(d => d.asm === selectedASM);
       if (selectedSE !== 'ALL') filtered = filtered.filter(d => d.se === selectedSE);
 
@@ -457,11 +472,15 @@
       if (selectedSE !== 'ALL' && sorted.length) {
         document.getElementById('kpiRankTitle').innerText = 'SELECTED SE';
         document.getElementById('kpiRank').innerText = selectedSE;
-        document.getElementById('kpiRankSub').innerText = 'ASM: ' + (asmMapping[selectedSE] || 'N/A');
+        document.getElementById('kpiRankSub').innerText = 'ASM: ' + (asmMapping[selectedSE.toUpperCase()] || 'N/A');
       } else if (sorted.length) {
         document.getElementById('kpiRankTitle').innerText = 'TOP PERFORMER';
         document.getElementById('kpiRank').innerText = "#1 " + sorted[0].se;
         document.getElementById('kpiRankSub').innerText = selectedASM !== 'ALL' ? 'Top SE in ' + selectedASM : 'Top Executive';
+      } else {
+        document.getElementById('kpiRankTitle').innerText = 'TOP PERFORMER';
+        document.getElementById('kpiRank').innerText = "#--";
+        document.getElementById('kpiRankSub').innerText = 'Overview Mode';
       }
 
       const tbody = document.getElementById('leaderboardBody');
