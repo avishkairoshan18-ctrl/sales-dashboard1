@@ -240,7 +240,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmX-SnKieI6GzlvdwzU0P4smhIWx4LPGbr2Gugh5SH9KTixijyyJNVH-I7nChOZf8/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQx7G10Kpb1v4LDO_iZxEGxCVQrRen6wWvRNnn9tzAT6AXmGHDddiMg4vqWh8D_Sk/exec';
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
@@ -294,10 +294,11 @@
 
       try {
         const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}&t=${new Date().getTime()}`;
+        
+        // Google Apps Script requires redirect following without explicit mode:'cors' overrides
         const res = await fetch(fetchUrl, {
           method: 'GET',
-          mode: 'cors',
-          cache: 'no-cache'
+          redirect: 'follow'
         });
 
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
