@@ -28,39 +28,15 @@
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
     }
 
     @keyframes zoomInFade {
-      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      from { opacity: 0; transform: scale(0.98) translateY(8px); }
       to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
-    .login-container {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 24px;
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      animation: zoomInFade 0.4s ease-out forwards;
-    }
-    .login-container h2 { margin-bottom: 8px; font-size: 1.35rem; }
-    .login-container p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; }
-    .input-group { margin-bottom: 16px; text-align: left; }
-    .input-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
-    .input-group input, .input-group select { 
-      width: 100%; background: #1e293b; border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; color: white; outline: none; font-size: 0.95rem;
-    }
-    .login-btn { width: 100%; background: var(--accent-blue); color: #090d16; font-weight: 700; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-top: 8px; }
-    .logout-btn { background: #1e293b; border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
-    .logout-btn:hover { background: var(--accent-red); color: white; border-color: var(--accent-red); }
-    .error-msg { color: var(--accent-red); font-size: 0.8rem; margin-top: 12px; display: none; }
-
     #dashboardContent { 
-      display: none; 
       width: 100%; 
       max-width: 1200px; 
       animation: zoomInFade 0.4s ease-out forwards; 
@@ -100,37 +76,14 @@
 </head>
 <body>
 
-  <div class="login-container" id="loginBox">
-    <h2>Dashboard Login</h2>
-    <p>Select role & enter credentials</p>
-    
-    <div class="input-group">
-      <label>User Role</label>
-      <select id="roleSelect">
-        <option value="ADMIN">Admin / Overview</option>
-        <option value="ASM">Area Manager (ASM)</option>
-        <option value="SE">Sales Executive (SE)</option>
-      </select>
-    </div>
-
-    <div class="input-group">
-      <label>Username / Code</label>
-      <input type="text" id="userInput" placeholder="admin / Mr.Farzaan / FZN">
-    </div>
-    <div class="input-group">
-      <label>Password</label>
-      <input type="password" id="passInput" placeholder="••••••••">
-    </div>
-    <button class="login-btn" onclick="checkAuth()">Login</button>
-    <div class="error-msg" id="errorMsg">Invalid Credentials!</div>
-  </div>
-
+  <!-- MAIN DASHBOARD CONTAINER -->
   <div id="dashboardContent">
     <div class="top-bar">
       <h1 id="mainTitle">Itinerary Hit Report</h1>
       <div class="controls">
         <div class="status-badge" id="syncStatus">CONNECTING...</div>
         
+        <!-- MONTH SELECTOR (JAN & AUG) -->
         <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
           <option value="AUG" selected>📅 August (Current)</option>
           <option value="JAN">📅 January</option>
@@ -138,10 +91,10 @@
 
         <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
         <select id="seFilter" class="select-box" onchange="onSeChange()"><option value="ALL">All Sales Executives</option></select>
-        <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
     </div>
 
+    <!-- KPI CARDS -->
     <div class="kpi-row">
       <div class="kpi-card">
         <div class="label">Total Active CX</div>
@@ -165,6 +118,7 @@
       </div>
     </div>
 
+    <!-- SE-WISE HIT RATE DISTRIBUTION TREND CHART -->
     <div class="chart-card" style="margin-bottom: 20px;">
       <div class="chart-header">
         <div class="chart-title" id="trendChartTitle">Hit Rate Distribution Trend by SE (%)</div>
@@ -174,6 +128,7 @@
       </div>
     </div>
 
+    <!-- CHARTS LAYOUT -->
     <div class="dashboard-layout">
       <div class="chart-card">
         <div class="chart-header"><div class="chart-title">Hit Rate by SE (%)</div></div>
@@ -185,6 +140,7 @@
       </div>
     </div>
 
+    <!-- LEADERBOARD TABLE -->
     <div class="chart-card">
       <div class="chart-header"><div class="chart-title">Sales Performance Table</div></div>
       <div style="overflow-x: auto;">
@@ -205,7 +161,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyLZJMeinBx55RrDgUg8U4yzn_iTGCvr9o35wEAvXy9PkEA-jUHcBjZZnsG_cP6zTk/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQx7G10Kpb1v4LDO_iZxEGxCVQrRen6wWvRNnn9tzAT6AXmGHDddiMg4vqWh8D_Sk/exec';
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
@@ -220,41 +176,11 @@
 
     let globalRepsData = [];
     let rankChartInstance = null, volumeChartInstance = null, seTrendChartInstance = null;
-    let loggedRole = 'ADMIN', loggedUser = '';
 
-    function checkAuth() {
-      const role = document.getElementById('roleSelect').value;
-      const u = document.getElementById('userInput').value.trim();
-      const p = document.getElementById('passInput').value.trim();
-      const err = document.getElementById('errorMsg');
-
-      const asms = Array.from(new Set(Object.values(asmMapping)));
-      const ses = Object.keys(asmMapping);
-
-      let isValid = false;
-      if (role === 'ADMIN' && u === 'admin' && p === 'password123') isValid = true;
-      else if (role === 'ASM' && asms.includes(u) && p === 'password123') isValid = true;
-      else if (role === 'SE' && ses.includes(u.toUpperCase()) && p === 'password123') isValid = true;
-
-      if (isValid) {
-        loggedRole = role;
-        loggedUser = role === 'SE' ? u.toUpperCase() : u;
-        document.getElementById('loginBox').style.display = 'none';
-        document.getElementById('dashboardContent').style.display = 'block';
-        loadData();
-      } else {
-        err.innerText = "Invalid credentials for " + role + "!";
-        err.style.display = 'block';
-      }
-    }
-
-    function logout() {
-      document.getElementById('userInput').value = '';
-      document.getElementById('passInput').value = '';
-      document.getElementById('errorMsg').style.display = 'none';
-      document.getElementById('dashboardContent').style.display = 'none';
-      document.getElementById('loginBox').style.display = 'block';
-    }
+    // Load dashboard automatically on page open
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+    });
 
     async function loadData() {
       const selectedMonth = document.getElementById('monthFilter').value;
@@ -283,7 +209,6 @@
 
           populateAsmDropdown();
           populateSeDropdown();
-          applyRoleRestrictions();
           renderUI();
           return;
         }
@@ -322,7 +247,6 @@
 
       populateAsmDropdown();
       populateSeDropdown();
-      applyRoleRestrictions();
       renderUI();
     }
 
@@ -332,14 +256,17 @@
 
     function populateAsmDropdown() {
       const asmFilter = document.getElementById('asmFilter');
+      const currentVal = asmFilter.value;
       const asms = Array.from(new Set(Object.values(asmMapping)));
       asmFilter.innerHTML = '<option value="ALL">All Area Managers (ASM)</option>';
       asms.forEach(asm => { asmFilter.innerHTML += `<option value="${asm}">${asm}</option>`; });
+      if (asms.includes(currentVal)) asmFilter.value = currentVal;
     }
 
     function populateSeDropdown() {
       const asmFilter = document.getElementById('asmFilter');
       const seFilter = document.getElementById('seFilter');
+      const currentVal = seFilter.value;
       const selectedASM = asmFilter.value;
       
       seFilter.innerHTML = '<option value="ALL">All Sales Executives</option>';
@@ -348,24 +275,7 @@
           seFilter.innerHTML += `<option value="${d.se}">${d.se} (${d.hitRate.toFixed(0)}%)</option>`;
         }
       });
-    }
-
-    function applyRoleRestrictions() {
-      const asmFilter = document.getElementById('asmFilter');
-      const seFilter = document.getElementById('seFilter');
-
-      if (loggedRole === 'ASM') {
-        asmFilter.value = loggedUser;
-        asmFilter.disabled = true;
-        populateSeDropdown();
-      } else if (loggedRole === 'SE') {
-        const userAsm = asmMapping[loggedUser];
-        if (userAsm) asmFilter.value = userAsm;
-        asmFilter.disabled = true;
-        populateSeDropdown();
-        seFilter.value = loggedUser;
-        seFilter.disabled = true;
-      }
+      seFilter.value = currentVal || 'ALL';
     }
 
     function onAsmChange() {
