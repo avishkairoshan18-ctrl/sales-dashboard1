@@ -240,7 +240,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz9NnDi5s3GSD7goa3Kojdw8ev0YqublLOqzw_xldUbKSgeGmVIZtCr8D9eXIXEOB8/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQx7G10Kpb1v4LDO_iZxEGxCVQrRen6wWvRNnn9tzAT6AXmGHDddiMg4vqWh8D_Sk/exec';
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
@@ -295,11 +295,8 @@
       try {
         const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}&t=${new Date().getTime()}`;
         
-        const res = await fetch(fetchUrl, {
-          method: 'GET',
-          redirect: 'follow',
-          headers: { 'Accept': 'application/json' }
-        });
+        // Simple fetch request to prevent CORS preflight OPTIONS error
+        const res = await fetch(fetchUrl);
 
         if (!res.ok) throw new Error(`HTTP status: ${res.status}`);
         const json = await res.json();
