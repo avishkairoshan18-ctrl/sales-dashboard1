@@ -319,8 +319,28 @@
             .map(r => {
               const code = String(r.se || r.SE || r.code || r.Se || '').trim();
               const active = Number(r.active || r.Active || 0);
-              const visited = Number(r.visited || r.Visited || 0);
-              const rate = Number(r.hitRate || r.HitRate || (active ? (visited / active * 100) : 0));
+              let visited = Number(r.visited || r.Visited || 0);
+              let rate = Number(r.hitRate || r.HitRate || 0);
+
+              // AUTO-HEAL ALGORITHM: Detects and fixes incorrect column pulls from Google Sheets
+              
+              // 1. If the script grabbed a decimal percentage (e.g. 0.85) instead of the Visited Count
+              if (visited > 0 && visited <= 1.5 && active > 1) {
+                  if (rate === 0) rate = visited * 100;
+                  visited = Math.round(active * visited);
+              }
+              
+              // 2. If the rate was captured as a raw decimal instead of a whole percentage
+              if (rate > 0 && rate <= 1.5) {
+                  rate = rate * 100;
+              }
+
+              // 3. Fallback calculators
+              if (visited === 0 && rate > 0 && active > 0) {
+                  visited = Math.round(active * (rate / 100));
+              } else if (rate === 0 && active > 0) {
+                  rate = (visited / active) * 100;
+              }
 
               return {
                 se: code,
