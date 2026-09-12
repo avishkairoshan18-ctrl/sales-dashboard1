@@ -293,8 +293,8 @@
       statusBadge.style.background = '#38bdf8';
 
       try {
-        // Cache buster added to prevent browser from loading old offline failures
-        const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}&t=${new Date().getTime()}`;
+        // Reverted to the exact URL format that successfully synced in the earlier steps
+        const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}`;
         
         const res = await fetch(fetchUrl);
         const textResponse = await res.text();
@@ -328,7 +328,6 @@
                 hitRate: rate
               };
             })
-            // Relaxed filter: only removes rows without an SE name (or literal header "SE")
             .filter(r => r.se.toUpperCase() !== 'SE' && r.se !== '');
 
           if (globalRepsData.length === 0) {
@@ -469,7 +468,6 @@
       let totalActive = 0, totalVisited = 0;
       filtered.forEach(d => { totalActive += Number(d.active) || 0; totalVisited += Number(d.visited) || 0; });
 
-      // FIX: Apply Math.round to correct JavaScript floating point arithmetic errors
       const displayActive = Math.round(totalActive);
       const displayVisited = Math.round(totalVisited);
 
