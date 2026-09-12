@@ -293,10 +293,13 @@
       statusBadge.style.background = '#38bdf8';
 
       try {
-        // Reverted to the exact URL format that successfully synced in the earlier steps
-        const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}`;
+        // Restored exact successful connection logic with cache-buster
+        const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}&t=${new Date().getTime()}`;
         
-        const res = await fetch(fetchUrl);
+        const res = await fetch(fetchUrl, {
+          redirect: 'follow'
+        });
+        
         const textResponse = await res.text();
         
         let json;
@@ -468,6 +471,7 @@
       let totalActive = 0, totalVisited = 0;
       filtered.forEach(d => { totalActive += Number(d.active) || 0; totalVisited += Number(d.visited) || 0; });
 
+      // Clean JavaScript floating point math handling
       const displayActive = Math.round(totalActive);
       const displayVisited = Math.round(totalVisited);
 
