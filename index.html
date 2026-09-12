@@ -240,7 +240,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby1pgo7gKjASgkZLT08O2ypmWQFnlJXRmxJLidIy0bm3jTKYxwFrsHknQB5Tw1ewUU/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQx7G10Kpb1v4LDO_iZxEGxCVQrRen6wWvRNnn9tzAT6AXmGHDddiMg4vqWh8D_Sk/exec';
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
@@ -293,58 +293,62 @@
       statusBadge.style.background = '#38bdf8';
 
       try {
-        const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}`;
+        const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}&t=${new Date().getTime()}`;
         
-        // Simple fetch request configured to handle Google Apps Script redirects
-        const res = await fetch(fetchUrl, {
-          redirect: 'follow'
-        });
-
-        // Read response as plain text first to prevent hidden HTML parsing errors
+        // Simple fetch request to prevent CORS preflight error
+        const res = await fetch(fetchUrl);
         const textResponse = await res.text();
         
         let json;
         try {
           json = JSON.parse(textResponse);
         } catch (parseErr) {
-          console.error("The API returned HTML instead of JSON. Ensure your App Script is deployed as 'Anyone'.", textResponse.substring(0, 100));
-          throw new Error("Failed to parse JSON response");
+          console.error("CRITICAL ERROR: Google Apps Script returned HTML instead of JSON. Ensure your deployment is set to 'Anyone' (NOT 'Anyone with Google Account'). Response summary:", textResponse.substring(0, 150));
+          throw new Error("HTML response received instead of data.");
         }
         
-        const repsList = json.reps || json.data || (Array.isArray(json) ? json : null);
-
-        if (repsList && repsList.length > 0) {
-          statusBadge.innerText = `${selectedMonth} DATA SYNCED`;
-          statusBadge.style.background = '#059669';
-          
-          globalRepsData = repsList
-            .map(r => {
-              const code = String(r.se || r.SE || r.code || r.Se || '').trim();
-              const active = Number(r.active || r.Active || 0);
-              const visited = Number(r.visited || r.Visited || 0);
-              const rate = Number(r.hitRate || r.HitRate || (active ? (visited / active * 100) : 0));
-
-              return {
-                se: code,
-                asm: asmMapping[code.toUpperCase()] || r.asm || r.ASM || 'N/A',
-                active: active,
-                visited: visited,
-                hitRate: rate
-              };
-            })
-            .filter(r => r.se.toUpperCase() !== 'SE' && r.se !== '' && (r.active > 0 || r.visited > 0 || r.hitRate > 0));
-
-          if (globalRepsData.length === 0) {
-            throw new Error("No rep objects found");
-          }
-
-          applyRolePermissions();
-          renderUI();
-          return;
+        if (json.error) {
+           console.error("APPS SCRIPT ERROR:", json.error);
+           throw new Error(json.error);
         }
-        throw new Error("Payload format incorrect");
+        
+        const repsList = json.reps || json.data || (Array.isArray(json) ? json : []);
+
+        if (repsList.length === 0) {
+           console.warn("WARNING: The Google Sheet returned empty data. Check if your tab is named exactly 'August' or 'January'.");
+           throw new Error("Data array is empty.");
+        }
+
+        statusBadge.innerText = `${selectedMonth} DATA SYNCED`;
+        statusBadge.style.background = '#059669';
+        
+        globalRepsData = repsList
+          .map(r => {
+            const code = String(r.se || r.SE || r.code || r.Se || '').trim();
+            const active = Number(r.active || r.Active || 0);
+            const visited = Number(r.visited || r.Visited || 0);
+            const rate = Number(r.hitRate || r.HitRate || (active ? (visited / active * 100) : 0));
+
+            return {
+              se: code,
+              asm: asmMapping[code.toUpperCase()] || r.asm || r.ASM || 'N/A',
+              active: active,
+              visited: visited,
+              hitRate: rate
+            };
+          })
+          .filter(r => r.se.toUpperCase() !== 'SE' && r.se !== '' && (r.active > 0 || r.visited > 0 || r.hitRate > 0));
+
+        if (globalRepsData.length === 0) {
+           console.warn("WARNING: Data was found but ignored. Ensure columns are correctly named 'SE', 'Active', 'Visited'.");
+           throw new Error("No valid rep objects found.");
+        }
+
+        applyRolePermissions();
+        renderUI();
+        
       } catch (err) {
-        console.warn('Network sync notice:', err);
+        console.warn('Live sync failed, loading fallback data:', err.message);
         statusBadge.innerText = 'OFFLINE MODE';
         statusBadge.style.background = '#f59e0b';
         loadFallbackData(selectedMonth);
