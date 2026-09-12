@@ -293,13 +293,23 @@
       statusBadge.style.background = '#38bdf8';
 
       try {
-        const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}&t=${new Date().getTime()}`;
+        const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}`;
         
-        // Simple fetch request to prevent CORS preflight OPTIONS error
-        const res = await fetch(fetchUrl);
+        // Simple fetch request configured to handle Google Apps Script redirects
+        const res = await fetch(fetchUrl, {
+          redirect: 'follow'
+        });
 
-        if (!res.ok) throw new Error(`HTTP status: ${res.status}`);
-        const json = await res.json();
+        // Read response as plain text first to prevent hidden HTML parsing errors
+        const textResponse = await res.text();
+        
+        let json;
+        try {
+          json = JSON.parse(textResponse);
+        } catch (parseErr) {
+          console.error("The API returned HTML instead of JSON. Ensure your App Script is deployed as 'Anyone'.", textResponse.substring(0, 100));
+          throw new Error("Failed to parse JSON response");
+        }
         
         const repsList = json.reps || json.data || (Array.isArray(json) ? json : null);
 
