@@ -293,19 +293,17 @@
       statusBadge.style.background = '#38bdf8';
 
       try {
-        const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}`;
+        // Cache buster added to prevent browser from loading old offline failures
+        const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}&t=${new Date().getTime()}`;
         
-        const res = await fetch(fetchUrl, {
-          redirect: 'follow'
-        });
-
+        const res = await fetch(fetchUrl);
         const textResponse = await res.text();
         
         let json;
         try {
           json = JSON.parse(textResponse);
         } catch (parseErr) {
-          console.error("The API returned HTML instead of JSON. Ensure your App Script is deployed as 'Anyone'.", textResponse.substring(0, 100));
+          console.error("API returned HTML instead of JSON.", textResponse.substring(0, 100));
           throw new Error("Failed to parse JSON response");
         }
         
@@ -330,7 +328,8 @@
                 hitRate: rate
               };
             })
-            .filter(r => r.se.toUpperCase() !== 'SE' && r.se !== '' && (r.active > 0 || r.visited > 0 || r.hitRate > 0));
+            // Relaxed filter: only removes rows without an SE name (or literal header "SE")
+            .filter(r => r.se.toUpperCase() !== 'SE' && r.se !== '');
 
           if (globalRepsData.length === 0) {
             throw new Error("No rep objects found");
@@ -499,7 +498,7 @@
         tbody.innerHTML += `<tr>
           <td style="color:#fff;">${d.se}</td>
           <td style="color:#8e9cb0;">${d.asm}</td>
-          <td>${d.active}</td>
+          <td>${Math.round(d.active)}</td>
           <td style="color:#10b981;">${Math.round(d.visited)}</td>
           <td style="color:#38bdf8;">${d.hitRate.toFixed(1)}%</td>
         </tr>`;
