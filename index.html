@@ -240,7 +240,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQx7G10Kpb1v4LDO_iZxEGxCVQrRen6wWvRNnn9tzAT6AXmGHDddiMg4vqWh8D_Sk/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0I6d1W6zyUGhoLJoH0Vs-ZhYbHvK3uHqsf1nMISt-lfjUg4LSKPaSYhcEoG2PrKU/exec';
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
@@ -293,7 +293,6 @@
       statusBadge.style.background = '#38bdf8';
 
       try {
-        // Restored exact successful connection logic with cache-buster
         const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}&t=${new Date().getTime()}`;
         
         const res = await fetch(fetchUrl, {
@@ -471,7 +470,6 @@
       let totalActive = 0, totalVisited = 0;
       filtered.forEach(d => { totalActive += Number(d.active) || 0; totalVisited += Number(d.visited) || 0; });
 
-      // Clean JavaScript floating point math handling
       const displayActive = Math.round(totalActive);
       const displayVisited = Math.round(totalVisited);
 
