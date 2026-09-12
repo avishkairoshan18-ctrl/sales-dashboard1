@@ -240,7 +240,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0I6d1W6zyUGhoLJoH0Vs-ZhYbHvK3uHqsf1nMISt-lfjUg4LSKPaSYhcEoG2PrKU/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQx7G10Kpb1v4LDO_iZxEGxCVQrRen6wWvRNnn9tzAT6AXmGHDddiMg4vqWh8D_Sk/exec';
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
@@ -293,62 +293,56 @@
       statusBadge.style.background = '#38bdf8';
 
       try {
-        const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}&t=${new Date().getTime()}`;
+        const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}`;
         
-        // Simple fetch request to prevent CORS preflight error
-        const res = await fetch(fetchUrl);
+        const res = await fetch(fetchUrl, {
+          redirect: 'follow'
+        });
+
         const textResponse = await res.text();
         
         let json;
         try {
           json = JSON.parse(textResponse);
         } catch (parseErr) {
-          console.error("CRITICAL ERROR: Google Apps Script returned HTML instead of JSON. Ensure your deployment is set to 'Anyone' (NOT 'Anyone with Google Account'). Response summary:", textResponse.substring(0, 150));
-          throw new Error("HTML response received instead of data.");
+          console.error("The API returned HTML instead of JSON. Ensure your App Script is deployed as 'Anyone'.", textResponse.substring(0, 100));
+          throw new Error("Failed to parse JSON response");
         }
         
-        if (json.error) {
-           console.error("APPS SCRIPT ERROR:", json.error);
-           throw new Error(json.error);
+        const repsList = json.reps || json.data || (Array.isArray(json) ? json : null);
+
+        if (repsList && repsList.length > 0) {
+          statusBadge.innerText = `${selectedMonth} DATA SYNCED`;
+          statusBadge.style.background = '#059669';
+          
+          globalRepsData = repsList
+            .map(r => {
+              const code = String(r.se || r.SE || r.code || r.Se || '').trim();
+              const active = Number(r.active || r.Active || 0);
+              const visited = Number(r.visited || r.Visited || 0);
+              const rate = Number(r.hitRate || r.HitRate || (active ? (visited / active * 100) : 0));
+
+              return {
+                se: code,
+                asm: asmMapping[code.toUpperCase()] || r.asm || r.ASM || 'N/A',
+                active: active,
+                visited: visited,
+                hitRate: rate
+              };
+            })
+            .filter(r => r.se.toUpperCase() !== 'SE' && r.se !== '' && (r.active > 0 || r.visited > 0 || r.hitRate > 0));
+
+          if (globalRepsData.length === 0) {
+            throw new Error("No rep objects found");
+          }
+
+          applyRolePermissions();
+          renderUI();
+          return;
         }
-        
-        const repsList = json.reps || json.data || (Array.isArray(json) ? json : []);
-
-        if (repsList.length === 0) {
-           console.warn("WARNING: The Google Sheet returned empty data. Check if your tab is named exactly 'August' or 'January'.");
-           throw new Error("Data array is empty.");
-        }
-
-        statusBadge.innerText = `${selectedMonth} DATA SYNCED`;
-        statusBadge.style.background = '#059669';
-        
-        globalRepsData = repsList
-          .map(r => {
-            const code = String(r.se || r.SE || r.code || r.Se || '').trim();
-            const active = Number(r.active || r.Active || 0);
-            const visited = Number(r.visited || r.Visited || 0);
-            const rate = Number(r.hitRate || r.HitRate || (active ? (visited / active * 100) : 0));
-
-            return {
-              se: code,
-              asm: asmMapping[code.toUpperCase()] || r.asm || r.ASM || 'N/A',
-              active: active,
-              visited: visited,
-              hitRate: rate
-            };
-          })
-          .filter(r => r.se.toUpperCase() !== 'SE' && r.se !== '' && (r.active > 0 || r.visited > 0 || r.hitRate > 0));
-
-        if (globalRepsData.length === 0) {
-           console.warn("WARNING: Data was found but ignored. Ensure columns are correctly named 'SE', 'Active', 'Visited'.");
-           throw new Error("No valid rep objects found.");
-        }
-
-        applyRolePermissions();
-        renderUI();
-        
+        throw new Error("Payload format incorrect");
       } catch (err) {
-        console.warn('Live sync failed, loading fallback data:', err.message);
+        console.warn('Network sync notice:', err);
         statusBadge.innerText = 'OFFLINE MODE';
         statusBadge.style.background = '#f59e0b';
         loadFallbackData(selectedMonth);
@@ -474,12 +468,16 @@
       const seTrendSorted = filtered.slice().sort((a, b) => a.hitRate - b.hitRate);
 
       let totalActive = 0, totalVisited = 0;
-      filtered.forEach(d => { totalActive += d.active; totalVisited += d.visited; });
+      filtered.forEach(d => { totalActive += Number(d.active) || 0; totalVisited += Number(d.visited) || 0; });
 
-      document.getElementById('kpiActive').innerText = totalActive;
-      document.getElementById('kpiVisited').innerText = totalVisited;
-      document.getElementById('kpiRemaining').innerText = Math.max(0, totalActive - totalVisited) + " Remaining";
-      document.getElementById('kpiHitRate').innerText = (totalActive > 0 ? ((totalVisited / totalActive) * 100).toFixed(1) : 0) + "%";
+      // FIX: Apply Math.round to correct JavaScript floating point arithmetic errors
+      const displayActive = Math.round(totalActive);
+      const displayVisited = Math.round(totalVisited);
+
+      document.getElementById('kpiActive').innerText = displayActive;
+      document.getElementById('kpiVisited').innerText = displayVisited;
+      document.getElementById('kpiRemaining').innerText = Math.max(0, displayActive - displayVisited) + " Remaining";
+      document.getElementById('kpiHitRate').innerText = (displayActive > 0 ? ((displayVisited / displayActive) * 100).toFixed(1) : 0) + "%";
 
       if (selectedSE !== 'ALL' && sorted.length) {
         document.getElementById('kpiRankTitle').innerText = 'SELECTED SE';
@@ -502,7 +500,7 @@
           <td style="color:#fff;">${d.se}</td>
           <td style="color:#8e9cb0;">${d.asm}</td>
           <td>${d.active}</td>
-          <td style="color:#10b981;">${d.visited}</td>
+          <td style="color:#10b981;">${Math.round(d.visited)}</td>
           <td style="color:#38bdf8;">${d.hitRate.toFixed(1)}%</td>
         </tr>`;
       });
@@ -550,8 +548,8 @@
           data: {
             labels: sorted.map(d => d.se),
             datasets: [
-              { label: 'Visited', data: sorted.map(d => d.visited), backgroundColor: '#10b981' },
-              { label: 'Remaining', data: sorted.map(d => Math.max(0, d.active - d.visited)), backgroundColor: '#1e293b' }
+              { label: 'Visited', data: sorted.map(d => Math.round(d.visited)), backgroundColor: '#10b981' },
+              { label: 'Remaining', data: sorted.map(d => Math.max(0, Math.round(d.active) - Math.round(d.visited))), backgroundColor: '#1e293b' }
             ]
           },
           options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
