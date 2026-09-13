@@ -240,7 +240,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhX9Qx8N6yOcHek3vA-6d89KJ4gxwWiKUhv41oKQUCp3cfbV1xsfDuzBiOFODKJ6w/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0I6d1W6zyUGhoLJoH0Vs-ZhYbHvK3uHqsf1nMISt-lfjUg4LSKPaSYhcEoG2PrKU/exec';
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
@@ -318,29 +318,22 @@
           globalRepsData = repsList
             .map(r => {
               const code = String(r.se || r.SE || r.code || r.Se || '').trim();
-              const active = Number(r.active || r.Active || 0);
+              let active = Number(r.active || r.Active || 0);
               let visited = Number(r.visited || r.Visited || 0);
-              let rate = Number(r.hitRate || r.HitRate || 0);
 
-              // AUTO-HEAL ALGORITHM: Detects and fixes incorrect column pulls from Google Sheets
-              
-              // 1. If the script grabbed a decimal percentage (e.g. 0.85) instead of the Visited Count
+              // REPAIR: Resolves the issue where Apps Script shifted the columns
               if (visited > 0 && visited <= 1.5 && active > 1) {
-                  if (rate === 0) rate = visited * 100;
-                  visited = Math.round(active * visited);
-              }
-              
-              // 2. If the rate was captured as a raw decimal instead of a whole percentage
-              if (rate > 0 && rate <= 1.5) {
-                  rate = rate * 100;
+                  let trueVisited = active;
+                  let trueRateDecimal = visited;
+                  active = Math.round(trueVisited / trueRateDecimal);
+                  visited = trueVisited;
               }
 
-              // 3. Fallback calculators
-              if (visited === 0 && rate > 0 && active > 0) {
-                  visited = Math.round(active * (rate / 100));
-              } else if (rate === 0 && active > 0) {
-                  rate = (visited / active) * 100;
-              }
+              // EXACT HIT RATE CALCULATION (Bypasses all bad guesses)
+              let rate = active > 0 ? (visited / active) * 100 : 0;
+              
+              // Cap at 100% just in case of any remaining anomalies
+              if (rate > 100) rate = 100;
 
               return {
                 se: code,
