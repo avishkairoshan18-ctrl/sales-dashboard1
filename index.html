@@ -201,7 +201,7 @@
     <div class="chart-card" style="margin-bottom: 20px;">
       <div class="chart-header" style="align-items: flex-start; display: flex; justify-content: space-between;">
         <div>
-          <div class="chart-title" id="trendChartTitle">August Hit Rate Distribution Trend by SE (%)</div>
+          <div class="chart-title" id="trendChartTitle">Monthly Visited Hit Rate Trend (%)</div>
           <div id="trendChartSubtitle" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; display: none;">Tracking Progression from Aug 6 to Aug 31</div>
         </div>
         <div id="trendChartBadge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: none;">Aug 6 - 31</div>
@@ -290,7 +290,7 @@
       'EH':  'Mr.Sabir'
     };
 
-    // Updated Mock Data Extended to August 31
+    // MOCK DATA FOR AUGUST CHART
     const augTimeData = {
       labels: ['Aug 6', 'Aug 7', 'Aug 10', 'Aug 11', 'Aug 12', 'Aug 13', 'Aug 14', 'Aug 17', 'Aug 18', 'Aug 19', 'Aug 20', 'Aug 21', 'Aug 24', 'Aug 25', 'Aug 26', 'Aug 27', 'Aug 28', 'Aug 31'],
       datasets: {
@@ -391,7 +391,7 @@
                 hitRate: rate
               };
             })
-            .filter(r => r.se.toUpperCase() !== 'SE' && r.se !== '');
+            .filter(r => r.se.toUpperCase() !== 'SE' && r.se.toUpperCase() !== 'EH' && r.se !== '');
 
           if (globalRepsData.length === 0) {
             throw new Error("No rep objects found");
@@ -420,8 +420,7 @@
           { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 95, hitRate: 94.0 },
           { se: 'MZR', asm: 'Mr.Hilmy', active: 55, visited: 47, hitRate: 85.0 },
           { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 32, hitRate: 49.0 },
-          { se: 'DNT', asm: 'Mr.Sabir', active: 48, visited: 28, hitRate: 58.0 },
-          { se: 'EH',  asm: 'Mr.Sabir', active: 50, visited: 40, hitRate: 80.0 }
+          { se: 'DNT', asm: 'Mr.Sabir', active: 48, visited: 28, hitRate: 58.0 }
         ];
       } else {
         globalRepsData = [
@@ -432,8 +431,7 @@
           { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 90, hitRate: 89.1 },
           { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 50, hitRate: 94.3 },
           { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 60, hitRate: 92.3 },
-          { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0 },
-          { se: 'EH',  asm: 'Mr.Sabir', active: 50, visited: 40, hitRate: 80.0 }
+          { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0 }
         ];
       }
 
@@ -527,7 +525,6 @@
 
       const sorted = filtered.slice().sort((a, b) => b.hitRate - a.hitRate);
       
-      // Save sorted snapshot for the January chart fallback
       currentTrendSorted = filtered.slice().sort((a, b) => a.hitRate - b.hitRate);
 
       let totalActive = 0, totalVisited = 0;
@@ -567,7 +564,6 @@
         </tr>`;
       });
 
-      // Update the main trend chart dynamically
       updateTrendChart();
 
       if (window.Chart) {
@@ -604,6 +600,9 @@
 
       if (selectedMonth === 'AUG') {
         titleEl.innerText = 'Monthly Visited Hit Rate Trend (%)';
+        subtitleEl.innerText = 'Tracking Progression from Aug 6 to Aug 31';
+        badgeEl.innerText = 'Aug 6 - 31';
+
         subtitleEl.style.display = 'block';
         badgeEl.style.display = 'block';
         panelEl.style.display = 'flex';
@@ -643,7 +642,7 @@
         });
 
       } else {
-        // JAN logic: Standard distribution chart
+        // JAN logic: Distribution chart by final hit rate
         titleEl.innerText = 'January Hit Rate Distribution Trend by SE (%)';
         subtitleEl.style.display = 'none';
         badgeEl.style.display = 'none';
