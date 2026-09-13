@@ -290,7 +290,7 @@
       'EH':  'Mr.Sabir'
     };
 
-    // MOCK DATA FOR AUGUST CHART
+    // MOCK DATA FOR AUGUST TIME PROGRESSION CHART
     const augTimeData = {
       labels: ['Aug 6', 'Aug 7', 'Aug 10', 'Aug 11', 'Aug 12', 'Aug 13', 'Aug 14', 'Aug 17', 'Aug 18', 'Aug 19', 'Aug 20', 'Aug 21', 'Aug 24', 'Aug 25', 'Aug 26', 'Aug 27', 'Aug 28', 'Aug 31'],
       datasets: {
@@ -370,16 +370,10 @@
           globalRepsData = repsList
             .map(r => {
               const code = String(r.se || r.SE || r.code || r.Se || '').trim();
-              let active = Number(r.active || r.Active || 0);
-              let visited = Number(r.visited || r.Visited || 0);
+              const active = Number(r.active || r.Active || 0);
+              const visited = Number(r.visited || r.Visited || 0);
 
-              if (visited > 0 && visited <= 1.5 && active > 1) {
-                  let trueVisited = active;
-                  let trueRateDecimal = visited;
-                  active = Math.round(trueVisited / trueRateDecimal);
-                  visited = trueVisited;
-              }
-
+              // Accurate math: Visited divided by Active multiplied by 100
               let rate = active > 0 ? (visited / active) * 100 : 0;
               if (rate > 100) rate = 100;
 
@@ -391,6 +385,7 @@
                 hitRate: rate
               };
             })
+            // Excludes the aggregate row 'EH' and table header 'SE' from individual lists
             .filter(r => r.se.toUpperCase() !== 'SE' && r.se.toUpperCase() !== 'EH' && r.se !== '');
 
           if (globalRepsData.length === 0) {
@@ -424,14 +419,14 @@
         ];
       } else {
         globalRepsData = [
-          { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 50, hitRate: 74.6 },
-          { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 44, hitRate: 78.6 },
-          { se: 'FZN', asm: 'Mr.Farzaan', active: 68, visited: 55, hitRate: 80.9 },
-          { se: 'RKZ', asm: 'Mr.Hilmy', active: 89, visited: 70, hitRate: 78.7 },
-          { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 90, hitRate: 89.1 },
-          { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 50, hitRate: 94.3 },
-          { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 60, hitRate: 92.3 },
-          { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 40, hitRate: 87.0 }
+          { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 60, hitRate: 89.6 },
+          { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 42, hitRate: 75.0 },
+          { se: 'FZN', asm: 'Mr.Farzaan', active: 68, visited: 51, hitRate: 75.0 },
+          { se: 'RKZ', asm: 'Mr.Hilmy', active: 89, visited: 61, hitRate: 68.5 },
+          { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 87, hitRate: 86.1 },
+          { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 49, hitRate: 92.5 },
+          { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 39, hitRate: 60.0 },
+          { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 41, hitRate: 89.1 }
         ];
       }
 
@@ -524,7 +519,6 @@
       if (selectedSE !== 'ALL') filtered = filtered.filter(d => d.se === selectedSE);
 
       const sorted = filtered.slice().sort((a, b) => b.hitRate - a.hitRate);
-      
       currentTrendSorted = filtered.slice().sort((a, b) => a.hitRate - b.hitRate);
 
       let totalActive = 0, totalVisited = 0;
@@ -642,7 +636,7 @@
         });
 
       } else {
-        // JAN logic: Distribution chart by final hit rate
+        // January: Standard single-metric distribution trend chart
         titleEl.innerText = 'January Hit Rate Distribution Trend by SE (%)';
         subtitleEl.style.display = 'none';
         badgeEl.style.display = 'none';
