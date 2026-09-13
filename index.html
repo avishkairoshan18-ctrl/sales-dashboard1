@@ -202,9 +202,9 @@
       <div class="chart-header" style="align-items: flex-start; display: flex; justify-content: space-between;">
         <div>
           <div class="chart-title" id="trendChartTitle">August Hit Rate Distribution Trend by SE (%)</div>
-          <div id="trendChartSubtitle" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; display: none;">Tracking Progression from Aug 6 to Aug 20</div>
+          <div id="trendChartSubtitle" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; display: none;">Tracking Progression from Aug 6 to Aug 31</div>
         </div>
-        <div id="trendChartBadge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: none;">Aug 6 - 20</div>
+        <div id="trendChartBadge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: none;">Aug 6 - 31</div>
       </div>
 
       <div id="trendCheckboxPanel" style="background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 16px; display: none; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 0.8rem; font-weight: 600;">
@@ -290,18 +290,19 @@
       'EH':  'Mr.Sabir'
     };
 
+    // Updated Mock Data Extended to August 31
     const augTimeData = {
-      labels: ['Aug 6', 'Aug 7', 'Aug 10', 'Aug 11', 'Aug 12', 'Aug 13', 'Aug 14', 'Aug 17', 'Aug 18', 'Aug 19', 'Aug 20'],
+      labels: ['Aug 6', 'Aug 7', 'Aug 10', 'Aug 11', 'Aug 12', 'Aug 13', 'Aug 14', 'Aug 17', 'Aug 18', 'Aug 19', 'Aug 20', 'Aug 21', 'Aug 24', 'Aug 25', 'Aug 26', 'Aug 27', 'Aug 28', 'Aug 31'],
       datasets: {
-        'EH':  { label: 'Overall Team (EH)', color: '#38bdf8', data: [22, 28, 31, 38, 44, 49, 51, 55, 58, 64, 69] },
-        'MZR': { label: 'MZR', color: '#f8fafc', data: [15, 21, 26, 32, 38, 43, 47, 52, 57, 62, 67] },
-        'RFD': { label: 'RFD', color: '#10b981', data: [10, 18, 24, 31, 36, 42, 48, 55, 61, 67, 72] },
-        'DNT': { label: 'DNT', color: '#2dd4bf', data: [12, 19, 23, 29, 35, 41, 46, 51, 56, 61, 65] },
-        'HMD': { label: 'HMD', color: '#a855f7', data: [20, 26, 30, 35, 39, 44, 49, 53, 58, 63, 68] },
-        'RSD': { label: 'RSD', color: '#ec4899', data: [18, 23, 28, 33, 38, 42, 47, 52, 56, 60, 65] },
-        'RKZ': { label: 'RKZ', color: '#f59e0b', data: [25, 30, 34, 39, 44, 48, 53, 57, 62, 66, 71] },
-        'FZN': { label: 'FZN', color: '#e879f9', data: [14, 20, 25, 30, 36, 41, 45, 50, 55, 60, 64] },
-        'AMT': { label: 'AMT', color: '#cbd5e1', data: [8,  14, 19, 25, 31, 36, 42, 47, 52, 58, 63] }
+        'EH':  { label: 'Overall Team (EH)', color: '#38bdf8', data: [22, 28, 31, 38, 44, 49, 51, 55, 58, 64, 69, 71, 73, 75, 76, 78, 79, 80] },
+        'MZR': { label: 'MZR', color: '#f8fafc', data: [15, 21, 26, 32, 38, 43, 47, 52, 57, 62, 67, 71, 75, 79, 83, 87, 91, 94] },
+        'RFD': { label: 'RFD', color: '#10b981', data: [10, 18, 24, 31, 36, 42, 48, 55, 61, 67, 72, 75, 78, 80, 83, 85, 87, 89] },
+        'DNT': { label: 'DNT', color: '#2dd4bf', data: [12, 19, 23, 29, 35, 41, 46, 51, 56, 61, 65, 69, 72, 75, 79, 82, 85, 87] },
+        'HMD': { label: 'HMD', color: '#a855f7', data: [20, 26, 30, 35, 39, 44, 49, 53, 58, 63, 68, 69, 70, 71, 72, 73, 74, 75] },
+        'RSD': { label: 'RSD', color: '#ec4899', data: [18, 23, 28, 33, 38, 42, 47, 52, 56, 60, 65, 67, 69, 71, 73, 75, 77, 79] },
+        'RKZ': { label: 'RKZ', color: '#f59e0b', data: [25, 30, 34, 39, 44, 48, 53, 57, 62, 66, 71, 72, 73, 74, 76, 77, 78, 79] },
+        'FZN': { label: 'FZN', color: '#e879f9', data: [14, 20, 25, 30, 36, 41, 45, 50, 55, 60, 64, 67, 69, 71, 74, 76, 78, 81] },
+        'AMT': { label: 'AMT', color: '#cbd5e1', data: [8,  14, 19, 25, 31, 36, 42, 47, 52, 58, 63, 68, 73, 78, 82, 86, 89, 92] }
       }
     };
 
