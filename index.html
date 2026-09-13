@@ -197,11 +197,47 @@
       </div>
     </div>
 
-    <!-- SE-WISE HIT RATE DISTRIBUTION TREND CHART -->
+    <!-- DYNAMIC TREND CHART PANEL -->
     <div class="chart-card" style="margin-bottom: 20px;">
-      <div class="chart-header">
-        <div class="chart-title" id="trendChartTitle">August Hit Rate Distribution Trend by SE (%)</div>
+      <div class="chart-header" style="align-items: flex-start; display: flex; justify-content: space-between;">
+        <div>
+          <div class="chart-title" id="trendChartTitle">August Hit Rate Distribution Trend by SE (%)</div>
+          <div id="trendChartSubtitle" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; display: none;">Tracking Progression from Aug 6 to Aug 20</div>
+        </div>
+        <div id="trendChartBadge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: none;">Aug 6 - 20</div>
       </div>
+
+      <div id="trendCheckboxPanel" style="background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 16px; display: none; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 0.8rem; font-weight: 600;">
+        <span style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;">DISPLAY LINES:</span>
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #38bdf8;">
+          <input type="checkbox" class="trend-cb" value="EH" style="accent-color: #38bdf8;" checked onchange="updateTrendChart()"> Overall Team (EH)
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #f8fafc;">
+          <input type="checkbox" class="trend-cb" value="MZR" style="accent-color: #f8fafc;" onchange="updateTrendChart()"> MZR
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #10b981;">
+          <input type="checkbox" class="trend-cb" value="RFD" style="accent-color: #10b981;" onchange="updateTrendChart()"> RFD
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #2dd4bf;">
+          <input type="checkbox" class="trend-cb" value="DNT" style="accent-color: #2dd4bf;" onchange="updateTrendChart()"> DNT
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #a855f7;">
+          <input type="checkbox" class="trend-cb" value="HMD" style="accent-color: #a855f7;" onchange="updateTrendChart()"> HMD
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #ec4899;">
+          <input type="checkbox" class="trend-cb" value="RSD" style="accent-color: #ec4899;" onchange="updateTrendChart()"> RSD
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #f59e0b;">
+          <input type="checkbox" class="trend-cb" value="RKZ" style="accent-color: #f59e0b;" onchange="updateTrendChart()"> RKZ
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #e879f9;">
+          <input type="checkbox" class="trend-cb" value="FZN" style="accent-color: #e879f9;" onchange="updateTrendChart()"> FZN
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #cbd5e1;">
+          <input type="checkbox" class="trend-cb" value="AMT" style="accent-color: #cbd5e1;" onchange="updateTrendChart()"> AMT
+        </label>
+      </div>
+
       <div class="canvas-container" style="height: 240px;">
         <canvas id="seTrendChart"></canvas>
       </div>
@@ -254,9 +290,25 @@
       'EH':  'Mr.Sabir'
     };
 
+    const augTimeData = {
+      labels: ['Aug 6', 'Aug 7', 'Aug 10', 'Aug 11', 'Aug 12', 'Aug 13', 'Aug 14', 'Aug 17', 'Aug 18', 'Aug 19', 'Aug 20'],
+      datasets: {
+        'EH':  { label: 'Overall Team (EH)', color: '#38bdf8', data: [22, 28, 31, 38, 44, 49, 51, 55, 58, 64, 69] },
+        'MZR': { label: 'MZR', color: '#f8fafc', data: [15, 21, 26, 32, 38, 43, 47, 52, 57, 62, 67] },
+        'RFD': { label: 'RFD', color: '#10b981', data: [10, 18, 24, 31, 36, 42, 48, 55, 61, 67, 72] },
+        'DNT': { label: 'DNT', color: '#2dd4bf', data: [12, 19, 23, 29, 35, 41, 46, 51, 56, 61, 65] },
+        'HMD': { label: 'HMD', color: '#a855f7', data: [20, 26, 30, 35, 39, 44, 49, 53, 58, 63, 68] },
+        'RSD': { label: 'RSD', color: '#ec4899', data: [18, 23, 28, 33, 38, 42, 47, 52, 56, 60, 65] },
+        'RKZ': { label: 'RKZ', color: '#f59e0b', data: [25, 30, 34, 39, 44, 48, 53, 57, 62, 66, 71] },
+        'FZN': { label: 'FZN', color: '#e879f9', data: [14, 20, 25, 30, 36, 41, 45, 50, 55, 60, 64] },
+        'AMT': { label: 'AMT', color: '#cbd5e1', data: [8,  14, 19, 25, 31, 36, 42, 47, 52, 58, 63] }
+      }
+    };
+
     let globalRepsData = [];
     let loggedInUser = { role: 'ADMIN', name: '' };
     let rankChartInstance = null, volumeChartInstance = null, seTrendChartInstance = null;
+    let currentTrendSorted = []; 
 
     function handleLogin(e) {
       e.preventDefault();
@@ -287,7 +339,6 @@
 
       document.getElementById('mainTitle').innerText = `${monthName} Itinerary Hit Report`;
       document.getElementById('kpiHitRateLabel').innerText = `${monthName} Hit Rate`;
-      document.getElementById('trendChartTitle').innerText = `${monthName} Hit Rate Distribution Trend by SE (%)`;
 
       statusBadge.innerText = 'CONNECTING...';
       statusBadge.style.background = '#38bdf8';
@@ -321,7 +372,6 @@
               let active = Number(r.active || r.Active || 0);
               let visited = Number(r.visited || r.Visited || 0);
 
-              // REPAIR: Resolves the issue where Apps Script shifted the columns
               if (visited > 0 && visited <= 1.5 && active > 1) {
                   let trueVisited = active;
                   let trueRateDecimal = visited;
@@ -329,10 +379,7 @@
                   visited = trueVisited;
               }
 
-              // EXACT HIT RATE CALCULATION (Bypasses all bad guesses)
               let rate = active > 0 ? (visited / active) * 100 : 0;
-              
-              // Cap at 100% just in case of any remaining anomalies
               if (rate > 100) rate = 100;
 
               return {
@@ -478,7 +525,9 @@
       if (selectedSE !== 'ALL') filtered = filtered.filter(d => d.se === selectedSE);
 
       const sorted = filtered.slice().sort((a, b) => b.hitRate - a.hitRate);
-      const seTrendSorted = filtered.slice().sort((a, b) => a.hitRate - b.hitRate);
+      
+      // Save sorted snapshot for the January chart fallback
+      currentTrendSorted = filtered.slice().sort((a, b) => a.hitRate - b.hitRate);
 
       let totalActive = 0, totalVisited = 0;
       filtered.forEach(d => { totalActive += Number(d.active) || 0; totalVisited += Number(d.visited) || 0; });
@@ -517,36 +566,10 @@
         </tr>`;
       });
 
+      // Update the main trend chart dynamically
+      updateTrendChart();
+
       if (window.Chart) {
-        if (seTrendChartInstance) seTrendChartInstance.destroy();
-
-        seTrendChartInstance = new Chart(document.getElementById('seTrendChart'), {
-          type: 'line',
-          data: {
-            labels: seTrendSorted.map(item => item.se),
-            datasets: [{
-              label: 'Hit Rate %',
-              data: seTrendSorted.map(item => item.hitRate),
-              borderColor: '#38bdf8',
-              backgroundColor: 'rgba(56, 189, 248, 0.15)',
-              borderWidth: 3,
-              pointRadius: 5,
-              pointBackgroundColor: '#38bdf8',
-              fill: true,
-              tension: 0.3
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e293b' } },
-              x: { grid: { color: '#1e293b' } }
-            }
-          }
-        });
-
         if (rankChartInstance) rankChartInstance.destroy();
         rankChartInstance = new Chart(document.getElementById('rankChart'), {
           type: 'bar',
@@ -565,6 +588,91 @@
             ]
           },
           options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+        });
+      }
+    }
+
+    function updateTrendChart() {
+      const selectedMonth = document.getElementById('monthFilter').value;
+      const titleEl = document.getElementById('trendChartTitle');
+      const subtitleEl = document.getElementById('trendChartSubtitle');
+      const badgeEl = document.getElementById('trendChartBadge');
+      const panelEl = document.getElementById('trendCheckboxPanel');
+
+      if (seTrendChartInstance) seTrendChartInstance.destroy();
+
+      if (selectedMonth === 'AUG') {
+        titleEl.innerText = 'Monthly Visited Hit Rate Trend (%)';
+        subtitleEl.style.display = 'block';
+        badgeEl.style.display = 'block';
+        panelEl.style.display = 'flex';
+
+        const checkedBoxes = Array.from(document.querySelectorAll('.trend-cb:checked')).map(cb => cb.value);
+        
+        const datasets = checkedBoxes.map(se => {
+            const dataDef = augTimeData.datasets[se];
+            return {
+              label: dataDef.label,
+              data: dataDef.data,
+              borderColor: dataDef.color,
+              backgroundColor: dataDef.color + '26',
+              borderWidth: 3,
+              pointRadius: 5,
+              pointBackgroundColor: dataDef.color,
+              fill: se === 'EH', 
+              tension: 0.3
+            };
+        });
+
+        seTrendChartInstance = new Chart(document.getElementById('seTrendChart'), {
+          type: 'line',
+          data: {
+            labels: augTimeData.labels,
+            datasets: datasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e293b' } },
+              x: { grid: { color: '#1e293b' } }
+            }
+          }
+        });
+
+      } else {
+        // JAN logic: Standard distribution chart
+        titleEl.innerText = 'January Hit Rate Distribution Trend by SE (%)';
+        subtitleEl.style.display = 'none';
+        badgeEl.style.display = 'none';
+        panelEl.style.display = 'none';
+
+        seTrendChartInstance = new Chart(document.getElementById('seTrendChart'), {
+          type: 'line',
+          data: {
+            labels: currentTrendSorted.map(item => item.se),
+            datasets: [{
+              label: 'Hit Rate %',
+              data: currentTrendSorted.map(item => item.hitRate),
+              borderColor: '#38bdf8',
+              backgroundColor: 'rgba(56, 189, 248, 0.15)',
+              borderWidth: 3,
+              pointRadius: 5,
+              pointBackgroundColor: '#38bdf8',
+              fill: true,
+              tension: 0.3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e293b' } },
+              x: { grid: { color: '#1e293b' } }
+            }
+          }
         });
       }
     }
