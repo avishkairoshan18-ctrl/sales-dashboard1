@@ -144,7 +144,7 @@
       </div>
       <div class="input-group">
         <label>USERNAME / CODE</label>
-        <input type="text" id="username" class="input-field" placeholder="e.g. Sabir or AMT" required>
+        <input type="text" id="username" class="input-field" placeholder="e.g. Farzaan or AMT" required>
       </div>
       <div class="input-group">
         <label>PASSWORD</label>
@@ -285,7 +285,6 @@
       'SE': 'se123'
     };
 
-    // Kept "Mr." everywhere inside the actual dashboard
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
       'RSD': 'Mr.Farzaan', 
@@ -335,7 +334,20 @@
         return;
       }
 
-      loggedInUser = { role: role, name: username };
+      // PREVENT "EH" LOGIN
+      if (role === 'SE' && username === 'EH') {
+        alert("EH is an overall team aggregate, not a valid user code.");
+        return;
+      }
+
+      let finalRole = role;
+      
+      // SABIR GETS FULL ADMIN ACCESS AUTOMATICALLY
+      if (username === 'SABIR' || username === 'MR.SABIR') {
+        finalRole = 'ADMIN';
+      }
+
+      loggedInUser = { role: finalRole, name: username };
 
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('dashboardContent').style.display = 'block';
@@ -484,7 +496,6 @@
         asmFilter.disabled = true;
         seFilter.disabled = true;
       } else if (loggedInUser.role === 'ASM') {
-        // Allows user to just type "Sabir" to match "Mr.Sabir"
         const matchedASM = Object.values(asmMapping).find(a => a.toLowerCase().includes(loggedInUser.name.toLowerCase()));
         const asmName = matchedASM || 'Mr.Sabir';
 
