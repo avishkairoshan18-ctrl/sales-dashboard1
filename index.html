@@ -144,7 +144,7 @@
       </div>
       <div class="input-group">
         <label>USERNAME / CODE</label>
-        <input type="text" id="username" class="input-field" placeholder="e.g. Mr.Sabir or AMT" required>
+        <input type="text" id="username" class="input-field" placeholder="e.g. Sabir or AMT" required>
       </div>
       <div class="input-group">
         <label>PASSWORD</label>
@@ -278,16 +278,23 @@
   <script>
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0I6d1W6zyUGhoLJoH0Vs-ZhYbHvK3uHqsf1nMISt-lfjUg4LSKPaSYhcEoG2PrKU/exec';
 
+    // --- SECURE LOGIN PASSWORDS ---
+    const ROLE_PASSWORDS = {
+      'ADMIN': 'admin123',
+      'ASM': 'asm123',
+      'SE': 'se123'
+    };
+
     const asmMapping = {
-      'HMD': 'Mr.Farzaan', 
-      'RSD': 'Mr.Farzaan', 
-      'FZN': 'Mr.Farzaan',
-      'RKZ': 'Mr.Hilmy',   
-      'RFD': 'Mr.Hilmy',   
-      'MZR': 'Mr.Hilmy',
-      'AMT': 'Mr.Sabir',   
-      'DNT': 'Mr.Sabir',
-      'EH':  'Mr.Sabir'
+      'HMD': 'Farzaan', 
+      'RSD': 'Farzaan', 
+      'FZN': 'Farzaan',
+      'RKZ': 'Hilmy',   
+      'RFD': 'Hilmy',   
+      'MZR': 'Hilmy',
+      'AMT': 'Sabir',   
+      'DNT': 'Sabir',
+      'EH':  'Sabir'
     };
 
     // MOCK DATA FOR AUGUST TIME PROGRESSION CHART
@@ -314,7 +321,18 @@
     function handleLogin(e) {
       e.preventDefault();
       const role = document.getElementById('userRole').value;
-      const username = document.getElementById('username').value.trim();
+      const username = document.getElementById('username').value.trim().toUpperCase();
+      const password = document.getElementById('password').value;
+
+      if (password !== ROLE_PASSWORDS[role]) {
+        alert("Incorrect password for the " + role + " role! Please try again.");
+        return;
+      }
+
+      if (role === 'SE' && !asmMapping[username]) {
+        alert("Invalid SE Code! Please enter a recognized code (e.g., HMD, AMT, etc.).");
+        return;
+      }
 
       loggedInUser = { role: role, name: username };
 
@@ -367,15 +385,11 @@
           statusBadge.innerText = `${selectedMonth} DATA SYNCED`;
           statusBadge.style.background = '#059669';
 
-          // TRUE TARGET DICTIONARY
-          // Safeguards the exact Active CX targets inside the frontend
-          // This silently heals the data if the backend pushes shifted columns
           const trueTargets = {
             'AUG': { 'HMD': 67, 'RSD': 56, 'FZN': 68, 'RKZ': 89, 'RFD': 101, 'MZR': 53, 'AMT': 65, 'DNT': 46 },
             'JAN': { 'HMD': 67, 'RSD': 54, 'FZN': 65, 'RKZ': 110, 'RFD': 101, 'MZR': 55, 'AMT': 65, 'DNT': 48 }
           };
 
-          // Auto-detects if the backend is accidentally sending decimal Hit Rates in the Visited column
           const isShifted = repsList.some(r => {
             let v = Number(r.visited || r.Visited || 0);
             return v > 0 && v < 1 && v % 1 !== 0; 
@@ -387,7 +401,6 @@
               let active = Number(r.active || r.Active || 0);
               let visited = Number(r.visited || r.Visited || 0);
 
-              // SILENT AUTO-HEAL: Reconstructs the exact numbers without needing a backend update
               if (isShifted) {
                   visited = active; 
                   active = (trueTargets[selectedMonth] && trueTargets[selectedMonth][code]) ? trueTargets[selectedMonth][code] : active;
@@ -404,7 +417,6 @@
                 hitRate: rate
               };
             })
-            // Excludes the aggregate row 'EH' and table header 'SE' from individual lists
             .filter(r => r.se !== 'SE' && r.se !== 'EH' && r.se !== '');
 
           if (globalRepsData.length === 0) {
@@ -427,25 +439,25 @@
     function loadFallbackData(month) {
       if (month === 'JAN') {
         globalRepsData = [
-          { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 55, hitRate: 82.0 },
-          { se: 'RSD', asm: 'Mr.Farzaan', active: 54, visited: 41, hitRate: 76.0 },
-          { se: 'FZN', asm: 'Mr.Farzaan', active: 65, visited: 44, hitRate: 68.0 },
-          { se: 'RKZ', asm: 'Mr.Hilmy', active: 110, visited: 71, hitRate: 65.0 },
-          { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 95, hitRate: 94.0 },
-          { se: 'MZR', asm: 'Mr.Hilmy', active: 55, visited: 47, hitRate: 85.0 },
-          { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 32, hitRate: 49.0 },
-          { se: 'DNT', asm: 'Mr.Sabir', active: 48, visited: 28, hitRate: 58.0 }
+          { se: 'HMD', asm: 'Farzaan', active: 67, visited: 55, hitRate: 82.0 },
+          { se: 'RSD', asm: 'Farzaan', active: 54, visited: 41, hitRate: 76.0 },
+          { se: 'FZN', asm: 'Farzaan', active: 65, visited: 44, hitRate: 68.0 },
+          { se: 'RKZ', asm: 'Hilmy', active: 110, visited: 71, hitRate: 65.0 },
+          { se: 'RFD', asm: 'Hilmy', active: 101, visited: 95, hitRate: 94.0 },
+          { se: 'MZR', asm: 'Hilmy', active: 55, visited: 47, hitRate: 85.0 },
+          { se: 'AMT', asm: 'Sabir', active: 65, visited: 32, hitRate: 49.0 },
+          { se: 'DNT', asm: 'Sabir', active: 48, visited: 28, hitRate: 58.0 }
         ];
       } else {
         globalRepsData = [
-          { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 60, hitRate: 89.6 },
-          { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 42, hitRate: 75.0 },
-          { se: 'FZN', asm: 'Mr.Farzaan', active: 68, visited: 51, hitRate: 75.0 },
-          { se: 'RKZ', asm: 'Mr.Hilmy', active: 89, visited: 61, hitRate: 68.5 },
-          { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 87, hitRate: 86.1 },
-          { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 49, hitRate: 92.5 },
-          { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 39, hitRate: 60.0 },
-          { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 41, hitRate: 89.1 }
+          { se: 'HMD', asm: 'Farzaan', active: 67, visited: 60, hitRate: 89.6 },
+          { se: 'RSD', asm: 'Farzaan', active: 56, visited: 42, hitRate: 75.0 },
+          { se: 'FZN', asm: 'Farzaan', active: 68, visited: 51, hitRate: 75.0 },
+          { se: 'RKZ', asm: 'Hilmy', active: 89, visited: 61, hitRate: 68.5 },
+          { se: 'RFD', asm: 'Hilmy', active: 101, visited: 87, hitRate: 86.1 },
+          { se: 'MZR', asm: 'Hilmy', active: 53, visited: 49, hitRate: 92.5 },
+          { se: 'AMT', asm: 'Sabir', active: 65, visited: 39, hitRate: 60.0 },
+          { se: 'DNT', asm: 'Sabir', active: 46, visited: 41, hitRate: 89.1 }
         ];
       }
 
@@ -472,7 +484,7 @@
         seFilter.disabled = true;
       } else if (loggedInUser.role === 'ASM') {
         const matchedASM = Object.values(asmMapping).find(a => a.toLowerCase().includes(loggedInUser.name.toLowerCase()));
-        const asmName = matchedASM || 'Mr.Sabir';
+        const asmName = matchedASM || 'Sabir';
 
         asmFilter.value = asmName;
         populateSeDropdown();
@@ -614,7 +626,7 @@
       if (seTrendChartInstance) seTrendChartInstance.destroy();
 
       if (selectedMonth === 'AUG') {
-        containerEl.style.display = 'block'; // Always show for August
+        containerEl.style.display = 'block'; 
         titleEl.innerText = 'Monthly Visited Hit Rate Trend (%)';
         subtitleEl.innerText = 'Tracking Progression from Aug 6 to Aug 31';
         badgeEl.innerText = 'Aug 6 - 31';
@@ -658,7 +670,6 @@
         });
 
       } else {
-        // JAN logic: Hide chart if an individual SE is selected
         if (selectedSE !== 'ALL') {
           containerEl.style.display = 'none';
           return;
