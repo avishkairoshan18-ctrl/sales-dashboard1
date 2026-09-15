@@ -197,8 +197,8 @@
       </div>
     </div>
 
-    <!-- DYNAMIC TREND CHART PANEL -->
-    <div class="chart-card" style="margin-bottom: 20px;">
+    <!-- DYNAMIC TREND CHART PANEL (Added ID to allow hiding) -->
+    <div id="trendChartContainer" class="chart-card" style="margin-bottom: 20px;">
       <div class="chart-header" style="align-items: flex-start; display: flex; justify-content: space-between;">
         <div>
           <div class="chart-title" id="trendChartTitle">Monthly Visited Hit Rate Trend (%)</div>
@@ -276,7 +276,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz0Pg9WAR6IRr7DPFWy83iDZHOxzP7Yp9VzrvSM4gEMQc_jRmmrIJ_rriBULSNldtE/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0I6d1W6zyUGhoLJoH0Vs-ZhYbHvK3uHqsf1nMISt-lfjUg4LSKPaSYhcEoG2PrKU/exec';
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 
@@ -373,7 +373,6 @@
               const active = Number(r.active || r.Active || 0);
               const visited = Number(r.visited || r.Visited || 0);
 
-              // Accurate math: Visited divided by Active multiplied by 100
               let rate = active > 0 ? (visited / active) * 100 : 0;
               if (rate > 100) rate = 100;
 
@@ -385,7 +384,6 @@
                 hitRate: rate
               };
             })
-            // Excludes the aggregate row 'EH' and table header 'SE' from individual lists
             .filter(r => r.se.toUpperCase() !== 'SE' && r.se.toUpperCase() !== 'EH' && r.se !== '');
 
           if (globalRepsData.length === 0) {
@@ -585,6 +583,8 @@
 
     function updateTrendChart() {
       const selectedMonth = document.getElementById('monthFilter').value;
+      const selectedSE = document.getElementById('seFilter').value;
+      const containerEl = document.getElementById('trendChartContainer');
       const titleEl = document.getElementById('trendChartTitle');
       const subtitleEl = document.getElementById('trendChartSubtitle');
       const badgeEl = document.getElementById('trendChartBadge');
@@ -593,6 +593,7 @@
       if (seTrendChartInstance) seTrendChartInstance.destroy();
 
       if (selectedMonth === 'AUG') {
+        containerEl.style.display = 'block'; // Always show for August
         titleEl.innerText = 'Monthly Visited Hit Rate Trend (%)';
         subtitleEl.innerText = 'Tracking Progression from Aug 6 to Aug 31';
         badgeEl.innerText = 'Aug 6 - 31';
@@ -636,7 +637,14 @@
         });
 
       } else {
-        // January: Standard single-metric distribution trend chart
+        // JAN logic: Hide chart if an individual SE is selected
+        if (selectedSE !== 'ALL') {
+          containerEl.style.display = 'none';
+          return;
+        } else {
+          containerEl.style.display = 'block';
+        }
+
         titleEl.innerText = 'January Hit Rate Distribution Trend by SE (%)';
         subtitleEl.style.display = 'none';
         badgeEl.style.display = 'none';
