@@ -285,16 +285,17 @@
       'SE': 'se123'
     };
 
+    // Kept "Mr." everywhere inside the actual dashboard
     const asmMapping = {
-      'HMD': 'Farzaan', 
-      'RSD': 'Farzaan', 
-      'FZN': 'Farzaan',
-      'RKZ': 'Hilmy',   
-      'RFD': 'Hilmy',   
-      'MZR': 'Hilmy',
-      'AMT': 'Sabir',   
-      'DNT': 'Sabir',
-      'EH':  'Sabir'
+      'HMD': 'Mr.Farzaan', 
+      'RSD': 'Mr.Farzaan', 
+      'FZN': 'Mr.Farzaan',
+      'RKZ': 'Mr.Hilmy',   
+      'RFD': 'Mr.Hilmy',   
+      'MZR': 'Mr.Hilmy',
+      'AMT': 'Mr.Sabir',   
+      'DNT': 'Mr.Sabir',
+      'EH':  'Mr.Sabir'
     };
 
     // MOCK DATA FOR AUGUST TIME PROGRESSION CHART
@@ -439,25 +440,25 @@
     function loadFallbackData(month) {
       if (month === 'JAN') {
         globalRepsData = [
-          { se: 'HMD', asm: 'Farzaan', active: 67, visited: 55, hitRate: 82.0 },
-          { se: 'RSD', asm: 'Farzaan', active: 54, visited: 41, hitRate: 76.0 },
-          { se: 'FZN', asm: 'Farzaan', active: 65, visited: 44, hitRate: 68.0 },
-          { se: 'RKZ', asm: 'Hilmy', active: 110, visited: 71, hitRate: 65.0 },
-          { se: 'RFD', asm: 'Hilmy', active: 101, visited: 95, hitRate: 94.0 },
-          { se: 'MZR', asm: 'Hilmy', active: 55, visited: 47, hitRate: 85.0 },
-          { se: 'AMT', asm: 'Sabir', active: 65, visited: 32, hitRate: 49.0 },
-          { se: 'DNT', asm: 'Sabir', active: 48, visited: 28, hitRate: 58.0 }
+          { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 55, hitRate: 82.0 },
+          { se: 'RSD', asm: 'Mr.Farzaan', active: 54, visited: 41, hitRate: 76.0 },
+          { se: 'FZN', asm: 'Mr.Farzaan', active: 65, visited: 44, hitRate: 68.0 },
+          { se: 'RKZ', asm: 'Mr.Hilmy', active: 110, visited: 71, hitRate: 65.0 },
+          { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 95, hitRate: 94.0 },
+          { se: 'MZR', asm: 'Mr.Hilmy', active: 55, visited: 47, hitRate: 85.0 },
+          { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 32, hitRate: 49.0 },
+          { se: 'DNT', asm: 'Mr.Sabir', active: 48, visited: 28, hitRate: 58.0 }
         ];
       } else {
         globalRepsData = [
-          { se: 'HMD', asm: 'Farzaan', active: 67, visited: 60, hitRate: 89.6 },
-          { se: 'RSD', asm: 'Farzaan', active: 56, visited: 42, hitRate: 75.0 },
-          { se: 'FZN', asm: 'Farzaan', active: 68, visited: 51, hitRate: 75.0 },
-          { se: 'RKZ', asm: 'Hilmy', active: 89, visited: 61, hitRate: 68.5 },
-          { se: 'RFD', asm: 'Hilmy', active: 101, visited: 87, hitRate: 86.1 },
-          { se: 'MZR', asm: 'Hilmy', active: 53, visited: 49, hitRate: 92.5 },
-          { se: 'AMT', asm: 'Sabir', active: 65, visited: 39, hitRate: 60.0 },
-          { se: 'DNT', asm: 'Sabir', active: 46, visited: 41, hitRate: 89.1 }
+          { se: 'HMD', asm: 'Mr.Farzaan', active: 67, visited: 60, hitRate: 89.6 },
+          { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 42, hitRate: 75.0 },
+          { se: 'FZN', asm: 'Mr.Farzaan', active: 68, visited: 51, hitRate: 75.0 },
+          { se: 'RKZ', asm: 'Mr.Hilmy', active: 89, visited: 61, hitRate: 68.5 },
+          { se: 'RFD', asm: 'Mr.Hilmy', active: 101, visited: 87, hitRate: 86.1 },
+          { se: 'MZR', asm: 'Mr.Hilmy', active: 53, visited: 49, hitRate: 92.5 },
+          { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 39, hitRate: 60.0 },
+          { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 41, hitRate: 89.1 }
         ];
       }
 
@@ -483,8 +484,9 @@
         asmFilter.disabled = true;
         seFilter.disabled = true;
       } else if (loggedInUser.role === 'ASM') {
+        // Allows user to just type "Sabir" to match "Mr.Sabir"
         const matchedASM = Object.values(asmMapping).find(a => a.toLowerCase().includes(loggedInUser.name.toLowerCase()));
-        const asmName = matchedASM || 'Sabir';
+        const asmName = matchedASM || 'Mr.Sabir';
 
         asmFilter.value = asmName;
         populateSeDropdown();
