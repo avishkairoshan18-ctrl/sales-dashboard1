@@ -167,11 +167,9 @@
       <div style="background: rgba(30, 41, 59, 0.5); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
         <p style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Select a Month to View</p>
         
-        <!-- Scalable Dropdown for Future Months -->
         <select id="welcomeMonthSelect" class="select-field" style="max-width: 300px; font-size: 1.1rem; padding: 14px; text-align: center; border-color: var(--accent-blue); font-weight: 700; cursor: pointer;">
           <option value="AUG">📅 August</option>
           <option value="JAN">📅 January</option>
-          <!-- Future Months Can Be Easily Added Here -->
         </select>
         
         <button class="btn-login" style="max-width: 300px; margin-top: 8px;" onclick="enterMainDashboard()">Enter Dashboard ➔</button>
@@ -188,9 +186,9 @@
       <div class="controls">
         <div class="status-badge" id="syncStatus">CONNECTING...</div>
         
-        <!-- MAIN DASHBOARD MONTH SELECTOR -->
+        <!-- MONTH SELECTOR -->
         <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
-          <option value="AUG">📅 August (Current)</option>
+          <option value="AUG" selected>📅 August (Current)</option>
           <option value="JAN">📅 January</option>
         </select>
 
@@ -376,15 +374,12 @@
 
       document.getElementById('loginScreen').style.display = 'none';
       
-      // DISPLAY WELCOME DASHBOARD MENU
       document.getElementById('welcomeName').innerText = username;
       document.getElementById('welcomeRole').innerText = finalRole === 'ADMIN' ? 'Administrator' : (finalRole === 'ASM' ? 'Area Manager' : 'Sales Executive');
       document.getElementById('welcomeScreen').style.display = 'block';
     }
 
-    // NEW SCALABLE LOGIN TRANSITION
     function enterMainDashboard() {
-      // Read the dropdown selection instead of a hardcoded button
       const monthCode = document.getElementById('welcomeMonthSelect').value;
       document.getElementById('monthFilter').value = monthCode;
       
@@ -671,6 +666,7 @@
     function updateTrendChart() {
       const selectedMonth = document.getElementById('monthFilter').value;
       const selectedSE = document.getElementById('seFilter').value;
+      const selectedASM = document.getElementById('asmFilter').value; // Added filter logic
       const containerEl = document.getElementById('trendChartContainer');
       const titleEl = document.getElementById('trendChartTitle');
       const subtitleEl = document.getElementById('trendChartSubtitle');
@@ -688,6 +684,20 @@
         subtitleEl.style.display = 'block';
         badgeEl.style.display = 'block';
         panelEl.style.display = 'flex';
+
+        // FILTER CHECKBOXES BASED ON ASM
+        const allLabels = document.querySelectorAll('#trendCheckboxPanel label');
+        allLabels.forEach(label => {
+          const cb = label.querySelector('.trend-cb');
+          const seCode = cb.value;
+          
+          if (selectedASM === 'ALL' || seCode === 'EH' || asmMapping[seCode] === selectedASM) {
+            label.style.display = 'flex';
+          } else {
+            label.style.display = 'none';
+            cb.checked = false; // ensure hidden lines do not render
+          }
+        });
 
         const checkedBoxes = Array.from(document.querySelectorAll('.trend-cb:checked')).map(cb => cb.value);
         
