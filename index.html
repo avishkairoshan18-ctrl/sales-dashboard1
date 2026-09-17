@@ -641,11 +641,30 @@
       updateTrendChart();
 
       if (window.Chart) {
+        // --- PIE CHART MODIFICATION (Rank Chart) ---
         if (rankChartInstance) rankChartInstance.destroy();
         rankChartInstance = new Chart(document.getElementById('rankChart'), {
-          type: 'bar',
-          data: { labels: sorted.map(d => d.se), datasets: [{ data: sorted.map(d => d.hitRate.toFixed(1)), backgroundColor: '#38bdf8' }] },
-          options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+          type: 'pie',
+          data: { 
+            labels: sorted.map(d => d.se), 
+            datasets: [{ 
+              data: sorted.map(d => d.hitRate.toFixed(1)), 
+              backgroundColor: ['#38bdf8', '#10b981', '#f59e0b', '#a855f7', '#ec4899', '#2dd4bf', '#f8fafc', '#e879f9', '#cbd5e1'],
+              borderWidth: 1,
+              borderColor: '#1e293b'
+            }] 
+          },
+          options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { 
+              legend: { 
+                display: true, 
+                position: 'right', 
+                labels: { color: '#8e9cb0', font: { size: 10 } } 
+              } 
+            } 
+          }
         });
 
         if (volumeChartInstance) volumeChartInstance.destroy();
@@ -666,7 +685,7 @@
     function updateTrendChart() {
       const selectedMonth = document.getElementById('monthFilter').value;
       const selectedSE = document.getElementById('seFilter').value;
-      const selectedASM = document.getElementById('asmFilter').value; // Added filter logic
+      const selectedASM = document.getElementById('asmFilter').value;
       const containerEl = document.getElementById('trendChartContainer');
       const titleEl = document.getElementById('trendChartTitle');
       const subtitleEl = document.getElementById('trendChartSubtitle');
@@ -685,7 +704,6 @@
         badgeEl.style.display = 'block';
         panelEl.style.display = 'flex';
 
-        // FILTER CHECKBOXES BASED ON ASM
         const allLabels = document.querySelectorAll('#trendCheckboxPanel label');
         allLabels.forEach(label => {
           const cb = label.querySelector('.trend-cb');
@@ -695,7 +713,7 @@
             label.style.display = 'flex';
           } else {
             label.style.display = 'none';
-            cb.checked = false; // ensure hidden lines do not render
+            cb.checked = false;
           }
         });
 
