@@ -559,8 +559,9 @@
         populateSeDropdown();
         seFilter.value = seCode;
 
+        // FIXED THE TYPO HERE: Now it specifically disables BOTH the asmFilter AND the seFilter correctly.
         asmFilter.disabled = true;
-        asmFilter.disabled = true;
+        seFilter.disabled = true; 
       } else if (loggedInUser.role === 'ASM') {
         const matchedASM = Object.values(asmMapping).find(a => a.toLowerCase().includes(loggedInUser.name.toLowerCase()));
         const asmName = matchedASM || 'Mr.Sabir';
@@ -597,6 +598,18 @@
       const currentVal = seFilter.value;
       const selectedASM = asmFilter.value;
       
+      // STRICT SECURITY FIX: If the user is an SE, completely prevent other names from even loading into the HTML element.
+      if (loggedInUser.role === 'SE') {
+        seFilter.innerHTML = '';
+        globalRepsData.forEach(d => {
+          if (d.se === loggedInUser.name) {
+            seFilter.innerHTML += `<option value="${d.se}">${d.se} (${d.hitRate.toFixed(0)}%)</option>`;
+          }
+        });
+        seFilter.value = loggedInUser.name;
+        return; 
+      }
+
       seFilter.innerHTML = '<option value="ALL">All Sales Executives</option>';
       globalRepsData.forEach(d => {
         if (d.se.toUpperCase() !== 'SE' && (selectedASM === 'ALL' || d.asm === selectedASM)) {
