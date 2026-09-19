@@ -559,7 +559,6 @@
         populateSeDropdown();
         seFilter.value = seCode;
 
-        // FIXED THE TYPO HERE: Now it specifically disables BOTH the asmFilter AND the seFilter correctly.
         asmFilter.disabled = true;
         seFilter.disabled = true; 
       } else if (loggedInUser.role === 'ASM') {
@@ -624,8 +623,24 @@
       }
     }
 
-    function onAsmChange() { populateSeDropdown(); renderUI(); }
-    function onSeChange() { renderUI(); }
+    function onAsmChange() { 
+      populateSeDropdown(); 
+      renderUI(); 
+    }
+    
+    // NEW FIX: Automatically tick the checkbox when an SE is selected from the dropdown
+    function onSeChange() { 
+      const selectedSE = document.getElementById('seFilter').value;
+      if (selectedSE !== 'ALL') {
+        const checkboxes = document.querySelectorAll('.trend-cb');
+        checkboxes.forEach(cb => {
+          if (cb.value === selectedSE) {
+            cb.checked = true;
+          }
+        });
+      }
+      renderUI(); 
+    }
 
     function renderUI() {
       const selectedASM = document.getElementById('asmFilter').value;
