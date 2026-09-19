@@ -283,7 +283,7 @@
       </div>
       <!-- PIE CHART -->
       <div class="chart-card">
-        <div class="chart-header"><div class="chart-title" style="color: var(--accent-blue);">(Visited and Non-Visited)</div></div>
+        <div class="chart-header"><div class="chart-title" style="color: var(--accent-blue);">Visited and Non-Visited</div></div>
         <div class="canvas-container"><canvas id="pieChart"></canvas></div>
       </div>
     </div>
@@ -560,7 +560,7 @@
         seFilter.value = seCode;
 
         asmFilter.disabled = true;
-        seFilter.disabled = true;
+        asmFilter.disabled = true;
       } else if (loggedInUser.role === 'ASM') {
         const matchedASM = Object.values(asmMapping).find(a => a.toLowerCase().includes(loggedInUser.name.toLowerCase()));
         const asmName = matchedASM || 'Mr.Sabir';
