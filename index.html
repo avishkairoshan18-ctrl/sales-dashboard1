@@ -774,7 +774,10 @@
           if (loggedInUser.role === 'SE') {
             if (seCode === loggedInUser.name) {
               label.style.display = 'flex';
-              cb.checked = true;
+              cb.checked = true; // Keep their own line locked on
+            } else if (seCode === 'EH') {
+              label.style.display = 'flex';
+              // Leave checked state as-is so they can toggle EH on and off
             } else {
               label.style.display = 'none';
               cb.checked = false;
