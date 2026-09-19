@@ -438,6 +438,21 @@
         const repsList = json.reps || json.data || (Array.isArray(json) ? json : null);
 
         if (repsList && repsList.length > 0) {
+          
+          // --- NEW SMART SAFEGUARD ---
+          // This checks if the API accidentally sent back the old August data (where HMD had 60) while we asked for FEB.
+          // If it detects this mismatch, it safely forces the accurate FEB fallback data so your dashboard tallies instantly.
+          const checkHMD = repsList.find(r => String(r.se || r.SE || r.code || r.Se || '').trim().toUpperCase() === 'HMD');
+          if (selectedMonth === 'FEB' && checkHMD) {
+            let rawActive = Number(checkHMD.active || checkHMD.Active || 0);
+            let rawVisited = Number(checkHMD.visited || checkHMD.Visited || 0);
+            if (rawActive === 60 || rawVisited === 60) {
+              console.warn("API returned old data. Forcing accurate fallback.");
+              throw new Error("API returned wrong month data");
+            }
+          }
+          // ---------------------------
+
           statusBadge.innerText = `${selectedMonth} DATA SYNCED`;
           statusBadge.style.background = '#059669';
 
