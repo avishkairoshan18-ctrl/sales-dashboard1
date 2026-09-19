@@ -628,17 +628,21 @@
       renderUI(); 
     }
     
-    // NEW FIX: Automatically tick the checkbox when an SE is selected from the dropdown
+    // NEW FIX: Automatically tick ONLY the selected SE and clear previous SE ticks
     function onSeChange() { 
       const selectedSE = document.getElementById('seFilter').value;
-      if (selectedSE !== 'ALL') {
-        const checkboxes = document.querySelectorAll('.trend-cb');
-        checkboxes.forEach(cb => {
-          if (cb.value === selectedSE) {
+      const checkboxes = document.querySelectorAll('.trend-cb');
+      
+      checkboxes.forEach(cb => {
+        if (cb.value !== 'EH') { // Preserve the Overall Team baseline
+          if (selectedSE !== 'ALL' && cb.value === selectedSE) {
             cb.checked = true;
+          } else {
+            cb.checked = false; // This perfectly clears previously ticked SEs
           }
-        });
-      }
+        }
+      });
+      
       renderUI(); 
     }
 
