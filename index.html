@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sales Executive Itinerary Dashboard</title>
+  
+  <!-- Chart.js and DataLabels Plugin -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  
   <style>
     :root {
       --bg-dark: #090d16;
@@ -118,7 +122,7 @@
 
     .chart-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
     .chart-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
-    .chart-title { font-size: 1.1rem; font-weight: 700; }
+    .chart-title { font-size: 1.1rem; font-weight: 700; color: var(--accent-blue); }
 
     .canvas-container { position: relative; height: 280px; width: 100%; }
 
@@ -226,7 +230,7 @@
     <div id="trendChartContainer" class="chart-card" style="margin-bottom: 20px;">
       <div class="chart-header" style="align-items: flex-start; display: flex; justify-content: space-between;">
         <div>
-          <div class="chart-title" id="trendChartTitle">Monthly Visited Hit Rate Trend (%)</div>
+          <div class="chart-title" id="trendChartTitle" style="color: var(--text-main);">Monthly Visited Hit Rate Trend (%)</div>
           <div id="trendChartSubtitle" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; display: none;">Tracking Progression from Aug 6 to Aug 31</div>
         </div>
         <div id="trendChartBadge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: none;">Aug 6 - 31</div>
@@ -268,21 +272,23 @@
       </div>
     </div>
 
-    <!-- CHARTS LAYOUT -->
+    <!-- NEW INTEGRATED CHARTS LAYOUT -->
     <div class="dashboard-layout">
+      <!-- BAR CHART -->
       <div class="chart-card">
-        <div class="chart-header"><div class="chart-title">Hit Rate by SE (%)</div></div>
-        <div class="canvas-container"><canvas id="rankChart"></canvas></div>
+        <div class="chart-header"><div class="chart-title" style="color: var(--accent-blue);">Bar Chart (Visited and Non-Visited)</div></div>
+        <div class="canvas-container"><canvas id="barChart"></canvas></div>
       </div>
+      <!-- PIE CHART -->
       <div class="chart-card">
-        <div class="chart-header"><div class="chart-title">Visited vs Remaining CX</div></div>
-        <div class="canvas-container"><canvas id="volumeChart"></canvas></div>
+        <div class="chart-header"><div class="chart-title" style="color: var(--accent-blue);">Pie Chart (Visited and Non-Visited)</div></div>
+        <div class="canvas-container"><canvas id="pieChart"></canvas></div>
       </div>
     </div>
 
     <!-- LEADERBOARD TABLE -->
     <div class="chart-card">
-      <div class="chart-header"><div class="chart-title">Sales Performance Table</div></div>
+      <div class="chart-header"><div class="chart-title" style="color: var(--text-main);">Sales Performance Table</div></div>
       <div style="overflow-x: auto;">
         <table class="leaderboard-table">
           <thead>
@@ -301,6 +307,9 @@
   </div>
 
   <script>
+    // Register the DataLabels plugin globally for the entire dashboard
+    Chart.register(ChartDataLabels);
+
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0I6d1W6zyUGhoLJoH0Vs-ZhYbHvK3uHqsf1nMISt-lfjUg4LSKPaSYhcEoG2PrKU/exec';
 
     // --- SECURE LOGIN PASSWORDS ---
@@ -340,7 +349,7 @@
 
     let globalRepsData = [];
     let loggedInUser = { role: 'ADMIN', name: '' };
-    let rankChartInstance = null, volumeChartInstance = null, seTrendChartInstance = null;
+    let barChartInstance = null, pieChartInstance = null, seTrendChartInstance = null;
     let currentTrendSorted = []; 
 
     function handleLogin(e) {
@@ -414,17 +423,13 @@
       try {
         const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}&t=${new Date().getTime()}`;
         
-        const res = await fetch(fetchUrl, {
-          redirect: 'follow'
-        });
-        
+        const res = await fetch(fetchUrl, { redirect: 'follow' });
         const textResponse = await res.text();
         
         let json;
         try {
           json = JSON.parse(textResponse);
         } catch (parseErr) {
-          console.error("API returned HTML instead of JSON.", textResponse.substring(0, 100));
           throw new Error("Failed to parse JSON response");
         }
         
@@ -468,9 +473,7 @@
             })
             .filter(r => r.se !== 'SE' && r.se !== 'EH' && r.se !== '');
 
-          if (globalRepsData.length === 0) {
-            throw new Error("No rep objects found");
-          }
+          if (globalRepsData.length === 0) throw new Error("No rep objects found");
 
           applyRolePermissions();
           renderUI();
@@ -478,7 +481,6 @@
         }
         throw new Error("Payload format incorrect");
       } catch (err) {
-        console.warn('Network sync notice:', err);
         statusBadge.innerText = 'OFFLINE MODE';
         statusBadge.style.background = '#f59e0b';
         loadFallbackData(selectedMonth);
@@ -509,7 +511,6 @@
           { se: 'DNT', asm: 'Mr.Sabir', active: 46, visited: 41, hitRate: 89.1 }
         ];
       }
-
       applyRolePermissions();
       renderUI();
     }
@@ -530,7 +531,7 @@
         seFilter.value = seCode;
 
         asmFilter.disabled = true;
-        seFilter.disabled = true;
+        asmFilter.disabled = true;
       } else if (loggedInUser.role === 'ASM') {
         const matchedASM = Object.values(asmMapping).find(a => a.toLowerCase().includes(loggedInUser.name.toLowerCase()));
         const asmName = matchedASM || 'Mr.Sabir';
@@ -581,14 +582,8 @@
       }
     }
 
-    function onAsmChange() {
-      populateSeDropdown();
-      renderUI();
-    }
-
-    function onSeChange() {
-      renderUI();
-    }
+    function onAsmChange() { populateSeDropdown(); renderUI(); }
+    function onSeChange() { renderUI(); }
 
     function renderUI() {
       const selectedASM = document.getElementById('asmFilter').value;
@@ -606,10 +601,11 @@
 
       const displayActive = Math.round(totalActive);
       const displayVisited = Math.round(totalVisited);
+      const displayRemaining = Math.max(0, displayActive - displayVisited);
 
       document.getElementById('kpiActive').innerText = displayActive;
       document.getElementById('kpiVisited').innerText = displayVisited;
-      document.getElementById('kpiRemaining').innerText = Math.max(0, displayActive - displayVisited) + " Remaining";
+      document.getElementById('kpiRemaining').innerText = displayRemaining + " Remaining";
       document.getElementById('kpiHitRate').innerText = (displayActive > 0 ? ((displayVisited / displayActive) * 100).toFixed(1) : 0) + "%";
 
       if (selectedSE !== 'ALL' && sorted.length) {
@@ -641,43 +637,80 @@
       updateTrendChart();
 
       if (window.Chart) {
-        // --- PIE CHART MODIFICATION (Rank Chart) ---
-        if (rankChartInstance) rankChartInstance.destroy();
-        rankChartInstance = new Chart(document.getElementById('rankChart'), {
-          type: 'pie',
-          data: { 
-            labels: sorted.map(d => d.se), 
-            datasets: [{ 
-              data: sorted.map(d => d.hitRate.toFixed(1)), 
-              backgroundColor: ['#38bdf8', '#10b981', '#f59e0b', '#a855f7', '#ec4899', '#2dd4bf', '#f8fafc', '#e879f9', '#cbd5e1'],
-              borderWidth: 1,
-              borderColor: '#1e293b'
-            }] 
+        // --- 1. INTEGRATED BAR CHART ---
+        if (barChartInstance) barChartInstance.destroy();
+        barChartInstance = new Chart(document.getElementById('barChart'), {
+          type: 'bar',
+          data: {
+            labels: ['Performance'], 
+            datasets: [
+              {
+                label: 'Visited',
+                data: [displayVisited],
+                backgroundColor: '#10b981',
+                borderRadius: 4,
+                barPercentage: 0.6,
+                categoryPercentage: 0.8
+              },
+              {
+                label: 'Remaining (Non-Visited)',
+                data: [displayRemaining],
+                backgroundColor: '#3b82f6',
+                borderRadius: 4,
+                barPercentage: 0.6,
+                categoryPercentage: 0.8
+              }
+            ]
           },
-          options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            plugins: { 
-              legend: { 
-                display: true, 
-                position: 'right', 
-                labels: { color: '#8e9cb0', font: { size: 10 } } 
-              } 
-            } 
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { beginAtZero: true, grid: { color: '#1e293b' }, ticks: { color: '#8e9cb0', font: { size: 10 } } },
+              x: { grid: { display: false }, ticks: { display: false } }
+            },
+            plugins: {
+              legend: { labels: { color: '#f8fafc', font: { size: 11 }, boxWidth: 12 } },
+              datalabels: { display: false } // Hide text labels on the bar chart
+            }
           }
         });
 
-        if (volumeChartInstance) volumeChartInstance.destroy();
-        volumeChartInstance = new Chart(document.getElementById('volumeChart'), {
-          type: 'bar',
+        // --- 2. INTEGRATED PIE CHART ---
+        if (pieChartInstance) pieChartInstance.destroy();
+        pieChartInstance = new Chart(document.getElementById('pieChart'), {
+          type: 'pie', 
           data: {
-            labels: sorted.map(d => d.se),
-            datasets: [
-              { label: 'Visited', data: sorted.map(d => Math.round(d.visited)), backgroundColor: '#10b981' },
-              { label: 'Remaining', data: sorted.map(d => Math.max(0, Math.round(d.active) - Math.round(d.visited))), backgroundColor: '#1e293b' }
-            ]
+            labels: ['Remaining (Non-Visited)', 'Visited'],
+            datasets: [{
+              data: [displayRemaining, displayVisited],
+              backgroundColor: ['#3b82f6', '#10b981'],
+              borderWidth: 0,
+              radius: ['55%', '100%'] // Shrunk the radius of the blue slice to look stepped
+            }]
           },
-          options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right',
+                labels: { color: '#f8fafc', padding: 20 }
+              },
+              datalabels: {
+                color: '#090d16',
+                font: { weight: 'bold', size: 14 },
+                textAlign: 'center',
+                // Smart formatter to automatically calculate live % values based on real data
+                formatter: function(value, context) {
+                  if (value === 0) return '';
+                  let total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                  let percentage = Math.round((value / total) * 100);
+                  return percentage > 0 ? percentage + '%' : '';
+                }
+              }
+            }
+          }
         });
       }
     }
@@ -743,7 +776,7 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: { legend: { display: false }, datalabels: { display: false } },
             scales: {
               y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e293b' } },
               x: { grid: { color: '#1e293b' } }
@@ -783,7 +816,7 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: { legend: { display: false }, datalabels: { display: false } },
             scales: {
               y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e293b' } },
               x: { grid: { color: '#1e293b' } }
