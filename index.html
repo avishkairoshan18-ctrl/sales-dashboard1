@@ -174,6 +174,7 @@
         <select id="welcomeMonthSelect" class="select-field" style="max-width: 300px; font-size: 1.1rem; padding: 14px; text-align: center; border-color: var(--accent-blue); font-weight: 700; cursor: pointer;">
           <option value="AUG">📅 August</option>
           <option value="JAN">📅 January</option>
+          <option value="FEB">📅 February</option>
         </select>
         
         <button class="btn-login" style="max-width: 300px; margin-top: 8px;" onclick="enterMainDashboard()">Enter Dashboard ➔</button>
@@ -194,6 +195,7 @@
         <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
           <option value="AUG" selected>📅 August (Current)</option>
           <option value="JAN">📅 January</option>
+          <option value="FEB">📅 February</option>
         </select>
 
         <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
@@ -272,7 +274,7 @@
       </div>
     </div>
 
-    <!-- NEW INTEGRATED CHARTS LAYOUT -->
+    <!-- INTEGRATED CHARTS LAYOUT -->
     <div class="dashboard-layout">
       <!-- BAR CHART -->
       <div class="chart-card">
@@ -412,7 +414,7 @@
     async function loadData() {
       const selectedMonth = document.getElementById('monthFilter').value;
       const statusBadge = document.getElementById('syncStatus');
-      const monthName = selectedMonth === 'AUG' ? 'August' : 'January';
+      const monthName = selectedMonth === 'AUG' ? 'August' : (selectedMonth === 'JAN' ? 'January' : 'February');
 
       document.getElementById('mainTitle').innerText = `${monthName} Itinerary Hit Report`;
       document.getElementById('kpiHitRateLabel').innerText = `${monthName} Hit Rate`;
@@ -441,7 +443,8 @@
 
           const trueTargets = {
             'AUG': { 'HMD': 67, 'RSD': 56, 'FZN': 68, 'RKZ': 89, 'RFD': 101, 'MZR': 53, 'AMT': 65, 'DNT': 46 },
-            'JAN': { 'HMD': 67, 'RSD': 54, 'FZN': 65, 'RKZ': 110, 'RFD': 101, 'MZR': 55, 'AMT': 65, 'DNT': 48 }
+            'JAN': { 'HMD': 67, 'RSD': 54, 'FZN': 65, 'RKZ': 110, 'RFD': 101, 'MZR': 55, 'AMT': 65, 'DNT': 48 },
+            'FEB': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 }
           };
 
           const isShifted = repsList.some(r => {
@@ -498,6 +501,17 @@
           { se: 'MZR', asm: 'Mr.Hilmy', active: 55, visited: 47, hitRate: 85.0 },
           { se: 'AMT', asm: 'Mr.Sabir', active: 65, visited: 32, hitRate: 49.0 },
           { se: 'DNT', asm: 'Mr.Sabir', active: 48, visited: 28, hitRate: 58.0 }
+        ];
+      } else if (month === 'FEB') {
+        globalRepsData = [
+          { se: 'HMD', asm: 'Mr.Farzaan', active: 69, visited: 42, hitRate: 60.9 },
+          { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 38, hitRate: 67.9 },
+          { se: 'FZN', asm: 'Mr.Farzaan', active: 64, visited: 29, hitRate: 45.3 },
+          { se: 'RKZ', asm: 'Mr.Hilmy', active: 92, visited: 27, hitRate: 29.3 },
+          { se: 'RFD', asm: 'Mr.Hilmy', active: 100, visited: 57, hitRate: 57.0 },
+          { se: 'MZR', asm: 'Mr.Hilmy', active: 51, visited: 47, hitRate: 92.2 },
+          { se: 'AMT', asm: 'Mr.Sabir', active: 66, visited: 29, hitRate: 43.9 },
+          { se: 'DNT', asm: 'Mr.Sabir', active: 49, visited: 32, hitRate: 65.3 }
         ];
       } else {
         globalRepsData = [
@@ -791,8 +805,10 @@
         } else {
           containerEl.style.display = 'block';
         }
-
-        titleEl.innerText = 'January Hit Rate Distribution Trend by SE (%)';
+        
+        const dynamicMonthTitle = selectedMonth === 'JAN' ? 'January' : 'February';
+        titleEl.innerText = `${dynamicMonthTitle} Hit Rate Distribution Trend by SE (%)`;
+        
         subtitleEl.style.display = 'none';
         badgeEl.style.display = 'none';
         panelEl.style.display = 'none';
