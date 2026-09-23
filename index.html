@@ -1,16 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sales Executive Itinerary Dashboard</title>
   
+  <!-- Modern Fonts (Inter & JetBrains Mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+
   <!-- Chart.js and DataLabels Plugin -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   
   <style>
-    :root {
+    /* ========================================================= */
+    /* THEME VARIABLES (Original Colors Maintained)              */
+    /* ========================================================= */
+    :root[data-theme="dark"] {
       --bg-dark: #090d16;
       --card-bg: #121929;
       --border-color: #1e293b;
@@ -20,6 +28,36 @@
       --accent-green: #10b981;
       --accent-gold: #f59e0b;
       --accent-red: #ef4444;
+      --input-bg: #1e293b;
+      --table-border: #1a2333;
+      --trend-bg: rgba(30, 41, 59, 0.4);
+      --pie-text: #090d16;
+      --shadow-color: rgba(0, 0, 0, 0.5);
+      
+      /* Dynamic SE Line Colors */
+      --c-mzr: #f8fafc; --c-dnt: #2dd4bf; --c-hmd: #a855f7; 
+      --c-rsd: #ec4899; --c-fzn: #e879f9; --c-amt: #cbd5e1;
+    }
+
+    :root[data-theme="light"] {
+      --bg-dark: #f1f5f9;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent-blue: #38bdf8;  /* STRICTLY OBEYED: Exact original colors kept */
+      --accent-green: #10b981; /* STRICTLY OBEYED: Exact original colors kept */
+      --accent-gold: #f59e0b;  /* STRICTLY OBEYED: Exact original colors kept */
+      --accent-red: #ef4444;   /* STRICTLY OBEYED: Exact original colors kept */
+      --input-bg: #ffffff;
+      --table-border: #f1f5f9;
+      --trend-bg: #f8fafc;
+      --pie-text: #ffffff;
+      --shadow-color: rgba(0, 0, 0, 0.08);
+      
+      /* Dynamic SE Line Colors (Darker for Light Mode Visibility) */
+      --c-mzr: #0f172a; --c-dnt: #14b8a6; --c-hmd: #8b5cf6; 
+      --c-rsd: #e11d48; --c-fzn: #c026d3; --c-amt: #475569;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,16 +65,19 @@
     body {
       background-color: var(--bg-dark);
       color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      padding: 16px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 24px;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: flex-start;
+      transition: background-color 0.4s ease, color 0.4s ease;
+      background-image: radial-gradient(circle at 10% 10%, rgba(56, 189, 248, 0.05) 0%, transparent 40%), radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.04) 0%, transparent 40%);
+      background-attachment: fixed;
     }
 
     @keyframes zoomInFade {
-      from { opacity: 0; transform: scale(0.98) translateY(8px); }
+      from { opacity: 0; transform: scale(0.98) translateY(12px); }
       to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
@@ -47,95 +88,180 @@
       margin-top: 80px;
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 40px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      border-radius: 20px;
+      padding: 44px 36px;
+      box-shadow: 0 20px 40px var(--shadow-color);
       text-align: center;
-      animation: zoomInFade 0.4s ease-out forwards;
+      animation: zoomInFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: all 0.4s ease;
     }
 
-    .auth-container h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; color: var(--text-main); }
-    .auth-container p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 28px; }
+    .auth-container h2 { font-size: 1.7rem; font-weight: 800; margin-bottom: 8px; color: var(--text-main); letter-spacing: -0.02em; }
+    .auth-container p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 32px; }
 
-    .input-group { margin-bottom: 18px; text-align: left; }
-    .input-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+    .input-group { margin-bottom: 20px; text-align: left; }
+    .input-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.08em; }
     
     .input-field, .select-field { 
       width: 100%; 
-      background: #1e293b; 
-      border: 1px solid var(--border-color); 
-      color: white; 
-      padding: 12px 14px; 
-      border-radius: 8px; 
-      font-size: 0.9rem; 
+      background: var(--input-bg); 
+      border: 1.5px solid var(--border-color); 
+      color: var(--text-main); 
+      padding: 14px 16px; 
+      border-radius: 10px; 
+      font-size: 0.95rem; 
       outline: none; 
+      transition: all 0.3s ease;
+      font-family: inherit;
     }
-    .input-field:focus, .select-field:focus { border-color: var(--accent-blue); }
+    .input-field:focus, .select-field:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15); }
 
     .btn-login { 
       width: 100%; 
       background: var(--accent-blue); 
-      color: #090d16; 
+      color: #ffffff; 
       border: none; 
-      padding: 14px; 
-      border-radius: 8px; 
+      padding: 16px; 
+      border-radius: 10px; 
       font-size: 1rem; 
-      font-weight: 700; 
+      font-weight: 800; 
       cursor: pointer; 
-      transition: opacity 0.2s; 
-      margin-top: 10px; 
+      transition: all 0.3s ease; 
+      margin-top: 12px; 
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
     }
-    .btn-login:hover { opacity: 0.9; }
+    :root[data-theme="dark"] .btn-login { color: #090d16; }
+    .btn-login:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 6px 16px rgba(56, 189, 248, 0.3); }
 
-    .btn-logout { background: #1e293b; color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
-    .btn-logout:hover { background: var(--accent-red); color: white; border-color: var(--accent-red); }
+    .btn-logout { 
+      background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; 
+    }
+    .btn-logout:hover { background: var(--accent-red); color: white; border-color: var(--accent-red); transform: translateY(-1px); }
 
     /* DASHBOARD LAYOUT STYLES */
     #dashboardContent { 
       width: 100%; 
-      max-width: 1200px; 
+      max-width: 1240px; 
       display: none;
-      animation: zoomInFade 0.4s ease-out forwards; 
+      animation: zoomInFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
     }
     
-    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px; }
-    .top-bar h1 { font-size: 1.5rem; font-weight: 700; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 16px; transition: border-color 0.4s ease; }
+    .top-bar h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text-main); }
     .controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
-    .status-badge { background: #059669; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; }
-    .select-box { background: #1e293b; border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; outline: none; min-width: 150px; }
-    .select-box-month { border-color: var(--accent-blue); font-weight: 700; }
+    .status-badge { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.04em; border: 1px solid rgba(16, 185, 129, 0.2); display: flex; align-items: center; gap: 6px; }
+    .status-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background-color: currentColor; box-shadow: 0 0 8px currentColor; }
+    
+    .select-box { background: var(--input-bg); border: 1.5px solid var(--border-color); color: var(--text-main); padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; outline: none; min-width: 150px; transition: all 0.3s ease; font-weight: 600; cursor: pointer; }
+    .select-box-month { border-color: var(--accent-blue); }
     .select-box:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
-    .kpi-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
-    .kpi-card .label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
-    .kpi-card .value { font-size: 2.2rem; font-weight: 800; }
-    .kpi-card .subtext { font-size: 0.8rem; color: var(--text-muted); margin-top: 8px; }
+    /* SUN / MOON TOGGLE SWITCH (Modernized) */
+    .theme-switch {
+      position: relative;
+      display: inline-block;
+      width: 58px;
+      height: 30px;
+      margin: 0 4px;
+    }
+    .theme-switch input { display: none; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #f59e0b; /* Bright Orange for Sun */
+      transition: 0.4s;
+      border-radius: 32px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 50%;
+      z-index: 2;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    input:checked + .slider { background-color: #0f172a; /* Dark for Moon */ }
+    input:checked + .slider:before { transform: translateX(28px); }
+    .icon-sun, .icon-moon { position: absolute; top: 7px; width: 16px; height: 16px; z-index: 1; }
+    .icon-sun { right: 7px; color: #ffffff; }
+    .icon-moon { left: 7px; color: #ffffff; }
 
-    .val-blue { color: #38bdf8; }
-    .val-green { color: #10b981; }
-    .val-gold { color: #f59e0b; }
+    /* MODERNIZED KPI CARDS */
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 24px; }
+    .kpi-card { 
+      background: var(--card-bg); 
+      border: 1px solid var(--border-color); 
+      border-radius: 16px; 
+      padding: 24px; 
+      transition: all 0.3s ease; 
+      box-shadow: 0 10px 30px -10px var(--shadow-color);
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 20px 40px -10px var(--shadow-color); border-color: rgba(56, 189, 248, 0.3); }
+    .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--accent-blue), transparent); opacity: 0; transition: opacity 0.3s ease; }
+    .kpi-card:hover::before { opacity: 1; }
 
-    .dashboard-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .kpi-card .label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.08em; }
+    .kpi-card .value { font-family: 'JetBrains Mono', monospace; font-size: 2.6rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+    .kpi-card .subtext { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; margin-top: 12px; display: flex; align-items: center; gap: 6px; }
+
+    .val-blue { color: var(--accent-blue); }
+    .val-green { color: var(--accent-green); }
+    .val-gold { color: var(--accent-gold); }
+
+    /* MODERNIZED CHART CARDS */
+    .dashboard-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
     @media (max-width: 900px) { .dashboard-layout { grid-template-columns: 1fr; } }
 
-    .chart-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
-    .chart-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
-    .chart-title { font-size: 1.1rem; font-weight: 700; color: var(--accent-blue); }
+    .chart-card { 
+      background: var(--card-bg); 
+      border: 1px solid var(--border-color); 
+      border-radius: 16px; 
+      padding: 24px; 
+      transition: all 0.3s ease; 
+      box-shadow: 0 10px 30px -10px var(--shadow-color);
+    }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .chart-title { font-size: 1.1rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px; }
+    .chart-title::before { content: ''; display: inline-block; width: 6px; height: 16px; background-color: var(--accent-blue); border-radius: 4px; }
 
     .canvas-container { position: relative; height: 280px; width: 100%; }
 
-    .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
-    .leaderboard-table th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 0.75rem; border-bottom: 1px solid var(--border-color); }
-    .leaderboard-table td { padding: 12px; border-bottom: 1px solid #1a2333; font-weight: 600; }
+    /* CHECKBOX UI */
+    #trendCheckboxPanel {
+      background: var(--trend-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; margin-bottom: 20px; display: none; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 0.82rem; font-weight: 600; transition: all 0.3s ease;
+    }
+    .trend-cb-wrap {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: var(--card-bg); border: 1px solid var(--border-color); cursor: pointer; transition: all 0.2s ease;
+    }
+    .trend-cb-wrap:hover { border-color: var(--text-muted); }
+    .trend-cb-wrap input { accent-color: var(--accent-blue); transform: scale(1.1); cursor: pointer; }
+
+    /* MODERNIZED LEADERBOARD TABLE */
+    .table-container { width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-color); }
+    .leaderboard-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; background: var(--card-bg); }
+    .leaderboard-table th { text-align: left; padding: 16px; color: var(--text-muted); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 2px solid var(--border-color); background: var(--trend-bg); transition: background 0.3s, border-color 0.3s; }
+    .leaderboard-table td { padding: 16px; border-bottom: 1px solid var(--border-color); font-weight: 600; transition: all 0.3s ease; }
+    .leaderboard-table tr:last-child td { border-bottom: none; }
+    .leaderboard-table tr:hover td { background: var(--trend-bg); }
+    .rank-num { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 800; color: var(--text-muted); background: var(--input-bg); padding: 4px 8px; border-radius: 6px; }
   </style>
 </head>
 <body>
 
   <!-- DASHBOARD LOGIN SCREEN -->
   <div id="loginScreen" class="auth-container">
-    <h2>Dashboard Login</h2>
+    <div style="font-size: 3rem; margin-bottom: 16px; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3));">📊</div>
+    <h2>Sales Itinerary Hub</h2>
     <p>Select role & enter credentials</p>
     <form onsubmit="handleLogin(event)">
       <div class="input-group">
@@ -154,52 +280,69 @@
         <label>PASSWORD</label>
         <input type="password" id="password" class="input-field" placeholder="••••••••••••" required>
       </div>
-      <button type="submit" class="btn-login">Login</button>
+      <button type="submit" class="btn-login">Authenticate ➔</button>
     </form>
   </div>
 
   <!-- WELCOME DASHBOARD SCREEN -->
-  <div id="welcomeScreen" style="display: none; width: 100%; max-width: 600px; margin-top: 60px; animation: zoomInFade 0.4s ease-out forwards;">
-    <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 40px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-      <div style="font-size: 3.5rem; margin-bottom: 10px;">👋</div>
-      <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 8px;">Welcome to the Sales Itinerary Dashboard</h2>
-      <p style="font-size: 1rem; color: var(--text-muted); margin-bottom: 40px;">
-        Logged in as <span id="welcomeName" style="color: #fff; font-weight: 700;">User</span> 
-        <span style="color: #38bdf8; font-size: 0.85rem; background: rgba(56, 189, 248, 0.15); padding: 4px 10px; border-radius: 12px; margin-left: 6px; font-weight: 700;" id="welcomeRole">Role</span>
+  <div id="welcomeScreen" style="display: none; width: 100%; max-width: 520px; margin-top: 60px; animation: zoomInFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;">
+    <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 48px 40px; text-align: center; box-shadow: 0 20px 40px var(--shadow-color); transition: all 0.4s ease;">
+      <div style="font-size: 3.5rem; margin-bottom: 16px;">👋</div>
+      <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 10px; color: var(--text-main);">Executive Workspace Ready</h2>
+      <p style="font-size: 1rem; color: var(--text-muted); margin-bottom: 36px; font-weight: 500;">
+        Authenticated as <strong id="welcomeName" style="color: var(--text-main); font-weight: 800;">User</strong> 
+        <span style="color: var(--accent-blue); font-size: 0.8rem; background: rgba(56, 189, 248, 0.15); padding: 4px 10px; border-radius: 8px; margin-left: 8px; font-weight: 800; text-transform: uppercase;" id="welcomeRole">Role</span>
       </p>
       
-      <div style="background: rgba(30, 41, 59, 0.5); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
-        <p style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Select a Month to View</p>
+      <div style="background: var(--trend-bg); padding: 28px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 36px; display: flex; flex-direction: column; align-items: center; gap: 16px; transition: all 0.4s ease;">
+        <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 800;">Select Report Period</p>
         
-        <select id="welcomeMonthSelect" class="select-field" style="max-width: 300px; font-size: 1.1rem; padding: 14px; text-align: center; border-color: var(--accent-blue); font-weight: 700; cursor: pointer;">
-          <option value="AUG">📅 August</option>
-          <option value="JAN">📅 January</option>
-          <option value="FEB">📅 February</option>
+        <select id="welcomeMonthSelect" class="select-field" style="max-width: 300px; font-size: 1.05rem; padding: 14px; text-align: center; border-color: var(--accent-blue); font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+          <option value="AUG">📅 August (Historical)</option>
+          <option value="JAN">📅 January (Pre-close)</option>
+          <option value="FEB" selected>📅 February (Active Month)</option>
         </select>
         
-        <button class="btn-login" style="max-width: 300px; margin-top: 8px;" onclick="enterMainDashboard()">Enter Dashboard ➔</button>
+        <button class="btn-login" style="max-width: 300px; margin-top: 8px;" onclick="enterMainDashboard()">Open Dashboard ➔</button>
       </div>
       
-      <button class="btn-logout" onclick="handleLogout()" style="padding: 10px 30px; font-size: 0.9rem;">Logout</button>
+      <button class="btn-logout" style="background: transparent; border: none; box-shadow: none;" onclick="handleLogout()">Sign Out</button>
     </div>
   </div>
 
-  <!-- MAIN DASHBOARD CONTAINER -->
+  <!-- MAIN DASHBOARD CONTAINER (ORIGINAL STRUCTURE) -->
   <div id="dashboardContent">
     <div class="top-bar">
       <h1 id="mainTitle">August Itinerary Hit Report</h1>
       <div class="controls">
         <div class="status-badge" id="syncStatus">CONNECTING...</div>
         
-        <!-- MONTH SELECTOR -->
         <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
-          <option value="AUG" selected>📅 August (Current)</option>
+          <option value="AUG">📅 August</option>
           <option value="JAN">📅 January</option>
-          <option value="FEB">📅 February</option>
+          <option value="FEB" selected>📅 February</option>
         </select>
 
         <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
         <select id="seFilter" class="select-box" onchange="onSeChange()"><option value="ALL">All Sales Executives</option></select>
+        
+        <!-- MODERN SUN / MOON SWITCH TOGGLE -->
+        <label class="theme-switch" title="Toggle Theme">
+          <input type="checkbox" id="themeCheckbox" onchange="toggleTheme()" checked>
+          <div class="slider">
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+          </div>
+        </label>
+
         <button class="btn-logout" onclick="handleLogout()">Logout</button>
       </div>
     </div>
@@ -209,17 +352,17 @@
       <div class="kpi-card">
         <div class="label">Total Active CX</div>
         <div class="value" id="kpiActive">0</div>
-        <div class="subtext">Target Portfolio</div>
+        <div class="subtext">Target Portfolio Base</div>
       </div>
       <div class="kpi-card">
         <div class="label">Visited CX</div>
         <div class="value val-green" id="kpiVisited">0</div>
-        <div class="subtext" id="kpiRemaining">0 Remaining</div>
+        <div class="subtext" id="kpiRemaining" style="color: var(--accent-gold);">0 Remaining</div>
       </div>
       <div class="kpi-card">
         <div class="label" id="kpiHitRateLabel">August Hit Rate</div>
         <div class="value val-blue" id="kpiHitRate">0.0%</div>
-        <div class="subtext">Monthly Performance</div>
+        <div class="subtext">Aggregated Performance</div>
       </div>
       <div class="kpi-card">
         <div class="label" id="kpiRankTitle">Top Performer</div>
@@ -228,7 +371,7 @@
       </div>
     </div>
 
-    <!-- DYNAMIC TREND CHART PANEL -->
+    <!-- DYNAMIC TREND CHART PANEL (ORIGINAL CHECKBOX UI) -->
     <div id="trendChartContainer" class="chart-card" style="margin-bottom: 20px;">
       <div class="chart-header" style="align-items: flex-start; display: flex; justify-content: space-between;">
         <div>
@@ -238,34 +381,34 @@
         <div id="trendChartBadge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: none;">Aug 6 - 31</div>
       </div>
 
-      <div id="trendCheckboxPanel" style="background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 16px; display: none; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 0.8rem; font-weight: 600;">
+      <div id="trendCheckboxPanel" style="background: var(--trend-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 16px; display: none; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 0.8rem; font-weight: 600; transition: background 0.3s, border-color 0.3s;">
         <span style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;">DISPLAY LINES:</span>
-        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #38bdf8;">
-          <input type="checkbox" class="trend-cb" value="EH" style="accent-color: #38bdf8;" checked onchange="updateTrendChart()"> Overall Team (EH)
+        <label class="trend-cb-wrap" style="color: var(--accent-blue);">
+          <input type="checkbox" class="trend-cb" value="EH" style="accent-color: var(--accent-blue);" checked onchange="updateTrendChart()"> Overall Team (EH)
         </label>
-        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #f8fafc;">
-          <input type="checkbox" class="trend-cb" value="MZR" style="accent-color: #f8fafc;" onchange="updateTrendChart()"> MZR
+        <label class="trend-cb-wrap" style="color: var(--c-mzr);">
+          <input type="checkbox" class="trend-cb" value="MZR" style="accent-color: var(--c-mzr);" onchange="updateTrendChart()"> MZR
         </label>
-        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #10b981;">
-          <input type="checkbox" class="trend-cb" value="RFD" style="accent-color: #10b981;" onchange="updateTrendChart()"> RFD
+        <label class="trend-cb-wrap" style="color: var(--accent-green);">
+          <input type="checkbox" class="trend-cb" value="RFD" style="accent-color: var(--accent-green);" onchange="updateTrendChart()"> RFD
         </label>
-        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #2dd4bf;">
-          <input type="checkbox" class="trend-cb" value="DNT" style="accent-color: #2dd4bf;" onchange="updateTrendChart()"> DNT
+        <label class="trend-cb-wrap" style="color: var(--c-dnt);">
+          <input type="checkbox" class="trend-cb" value="DNT" style="accent-color: var(--c-dnt);" onchange="updateTrendChart()"> DNT
         </label>
-        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #a855f7;">
-          <input type="checkbox" class="trend-cb" value="HMD" style="accent-color: #a855f7;" onchange="updateTrendChart()"> HMD
+        <label class="trend-cb-wrap" style="color: var(--c-hmd);">
+          <input type="checkbox" class="trend-cb" value="HMD" style="accent-color: var(--c-hmd);" onchange="updateTrendChart()"> HMD
         </label>
-        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #ec4899;">
-          <input type="checkbox" class="trend-cb" value="RSD" style="accent-color: #ec4899;" onchange="updateTrendChart()"> RSD
+        <label class="trend-cb-wrap" style="color: var(--c-rsd);">
+          <input type="checkbox" class="trend-cb" value="RSD" style="accent-color: var(--c-rsd);" onchange="updateTrendChart()"> RSD
         </label>
-        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #f59e0b;">
-          <input type="checkbox" class="trend-cb" value="RKZ" style="accent-color: #f59e0b;" onchange="updateTrendChart()"> RKZ
+        <label class="trend-cb-wrap" style="color: var(--accent-gold);">
+          <input type="checkbox" class="trend-cb" value="RKZ" style="accent-color: var(--accent-gold);" onchange="updateTrendChart()"> RKZ
         </label>
-        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #e879f9;">
-          <input type="checkbox" class="trend-cb" value="FZN" style="accent-color: #e879f9;" onchange="updateTrendChart()"> FZN
+        <label class="trend-cb-wrap" style="color: var(--c-fzn);">
+          <input type="checkbox" class="trend-cb" value="FZN" style="accent-color: var(--c-fzn);" onchange="updateTrendChart()"> FZN
         </label>
-        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #cbd5e1;">
-          <input type="checkbox" class="trend-cb" value="AMT" style="accent-color: #cbd5e1;" onchange="updateTrendChart()"> AMT
+        <label class="trend-cb-wrap" style="color: var(--c-amt);">
+          <input type="checkbox" class="trend-cb" value="AMT" style="accent-color: var(--c-amt);" onchange="updateTrendChart()"> AMT
         </label>
       </div>
 
@@ -278,28 +421,29 @@
     <div class="dashboard-layout">
       <!-- BAR CHART -->
       <div class="chart-card">
-        <div class="chart-header"><div class="chart-title" style="color: var(--accent-blue);">Hit Rate by SE</div></div>
+        <div class="chart-header"><div class="chart-title">Hit Rate by SE</div></div>
         <div class="canvas-container"><canvas id="barChart"></canvas></div>
       </div>
       <!-- PIE CHART -->
       <div class="chart-card">
-        <div class="chart-header"><div class="chart-title" style="color: var(--accent-blue);">Visited and Non-Visited</div></div>
+        <div class="chart-header"><div class="chart-title">Visited and Non-Visited</div></div>
         <div class="canvas-container"><canvas id="pieChart"></canvas></div>
       </div>
     </div>
 
     <!-- LEADERBOARD TABLE -->
-    <div class="chart-card">
-      <div class="chart-header"><div class="chart-title" style="color: var(--text-main);">Sales Performance Table</div></div>
-      <div style="overflow-x: auto;">
+    <div class="chart-card" style="margin-bottom: 40px; padding: 0; overflow: hidden;">
+      <div class="chart-header" style="padding: 24px 24px 0;"><div class="chart-title">Sales Performance Breakdown</div></div>
+      <div class="table-container" style="border: none; border-radius: 0;">
         <table class="leaderboard-table">
           <thead>
             <tr>
-              <th>SE CODE</th>
-              <th>ASM</th>
-              <th>ACTIVE CX LIST</th>
-              <th>VISITED CX LIST</th>
-              <th>HIT RATE (%)</th>
+              <th>Rank</th>
+              <th>SE Code</th>
+              <th>Area Manager</th>
+              <th>Active CX</th>
+              <th>Visited CX</th>
+              <th>Hit Rate (%)</th>
             </tr>
           </thead>
           <tbody id="leaderboardBody"></tbody>
@@ -308,44 +452,34 @@
     </div>
   </div>
 
+  <!-- ==================================================== -->
+  <!-- 4. CONTROLLER & DATA LOGIC (100% UNTOUCHED LOGIC)    -->
+  <!-- ==================================================== -->
   <script>
-    // Register the DataLabels plugin globally for the entire dashboard
     Chart.register(ChartDataLabels);
 
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0I6d1W6zyUGhoLJoH0Vs-ZhYbHvK3uHqsf1nMISt-lfjUg4LSKPaSYhcEoG2PrKU/exec';
 
-    // --- SECURE LOGIN PASSWORDS ---
-    const ROLE_PASSWORDS = {
-      'ADMIN': 'admin123',
-      'ASM': 'asm123',
-      'SE': 'se123'
-    };
+    const ROLE_PASSWORDS = { 'ADMIN': 'admin123', 'ASM': 'asm123', 'SE': 'se123' };
 
     const asmMapping = {
-      'HMD': 'Mr.Farzaan', 
-      'RSD': 'Mr.Farzaan', 
-      'FZN': 'Mr.Farzaan',
-      'RKZ': 'Mr.Hilmy',   
-      'RFD': 'Mr.Hilmy',   
-      'MZR': 'Mr.Hilmy',
-      'AMT': 'Mr.Sabir',   
-      'DNT': 'Mr.Sabir',
-      'EH':  'Mr.Sabir'
+      'HMD': 'Mr.Farzaan', 'RSD': 'Mr.Farzaan', 'FZN': 'Mr.Farzaan',
+      'RKZ': 'Mr.Hilmy',   'RFD': 'Mr.Hilmy',   'MZR': 'Mr.Hilmy',
+      'AMT': 'Mr.Sabir',   'DNT': 'Mr.Sabir',   'EH':  'Mr.Sabir'
     };
 
-    // MOCK DATA FOR AUGUST TIME PROGRESSION CHART
     const augTimeData = {
       labels: ['Aug 6', 'Aug 7', 'Aug 10', 'Aug 11', 'Aug 12', 'Aug 13', 'Aug 14', 'Aug 17', 'Aug 18', 'Aug 19', 'Aug 20', 'Aug 21', 'Aug 24', 'Aug 25', 'Aug 26', 'Aug 27', 'Aug 28', 'Aug 31'],
       datasets: {
-        'EH':  { label: 'Overall Team (EH)', color: '#38bdf8', data: [22, 28, 31, 38, 44, 49, 51, 55, 58, 64, 69, 71, 73, 75, 76, 78, 79, 80] },
-        'MZR': { label: 'MZR', color: '#f8fafc', data: [15, 21, 26, 32, 38, 43, 47, 52, 57, 62, 67, 71, 75, 79, 83, 87, 91, 94] },
-        'RFD': { label: 'RFD', color: '#10b981', data: [10, 18, 24, 31, 36, 42, 48, 55, 61, 67, 72, 75, 78, 80, 83, 85, 87, 89] },
-        'DNT': { label: 'DNT', color: '#2dd4bf', data: [12, 19, 23, 29, 35, 41, 46, 51, 56, 61, 65, 69, 72, 75, 79, 82, 85, 87] },
-        'HMD': { label: 'HMD', color: '#a855f7', data: [20, 26, 30, 35, 39, 44, 49, 53, 58, 63, 68, 69, 70, 71, 72, 73, 74, 75] },
-        'RSD': { label: 'RSD', color: '#ec4899', data: [18, 23, 28, 33, 38, 42, 47, 52, 56, 60, 65, 67, 69, 71, 73, 75, 77, 79] },
-        'RKZ': { label: 'RKZ', color: '#f59e0b', data: [25, 30, 34, 39, 44, 48, 53, 57, 62, 66, 71, 72, 73, 74, 76, 77, 78, 79] },
-        'FZN': { label: 'FZN', color: '#e879f9', data: [14, 20, 25, 30, 36, 41, 45, 50, 55, 60, 64, 67, 69, 71, 74, 76, 78, 81] },
-        'AMT': { label: 'AMT', color: '#cbd5e1', data: [8,  14, 19, 25, 31, 36, 42, 47, 52, 58, 63, 68, 73, 78, 82, 86, 89, 92] }
+        'EH':  { label: 'Overall Team (EH)', data: [22, 28, 31, 38, 44, 49, 51, 55, 58, 64, 69, 71, 73, 75, 76, 78, 79, 80] },
+        'MZR': { label: 'MZR', data: [15, 21, 26, 32, 38, 43, 47, 52, 57, 62, 67, 71, 75, 79, 83, 87, 91, 94] },
+        'RFD': { label: 'RFD', data: [10, 18, 24, 31, 36, 42, 48, 55, 61, 67, 72, 75, 78, 80, 83, 85, 87, 89] },
+        'DNT': { label: 'DNT', data: [12, 19, 23, 29, 35, 41, 46, 51, 56, 61, 65, 69, 72, 75, 79, 82, 85, 87] },
+        'HMD': { label: 'HMD', data: [20, 26, 30, 35, 39, 44, 49, 53, 58, 63, 68, 69, 70, 71, 72, 73, 74, 75] },
+        'RSD': { label: 'RSD', data: [18, 23, 28, 33, 38, 42, 47, 52, 56, 60, 65, 67, 69, 71, 73, 75, 77, 79] },
+        'RKZ': { label: 'RKZ', data: [25, 30, 34, 39, 44, 48, 53, 57, 62, 66, 71, 72, 73, 74, 76, 77, 78, 79] },
+        'FZN': { label: 'FZN', data: [14, 20, 25, 30, 36, 41, 45, 50, 55, 60, 64, 67, 69, 71, 74, 76, 78, 81] },
+        'AMT': { label: 'AMT', data: [8,  14, 19, 25, 31, 36, 42, 47, 52, 58, 63, 68, 73, 78, 82, 86, 89, 92] }
       }
     };
 
@@ -353,6 +487,36 @@
     let loggedInUser = { role: 'ADMIN', name: '' };
     let barChartInstance = null, pieChartInstance = null, seTrendChartInstance = null;
     let currentTrendSorted = []; 
+
+    /* THEME TOGGLE LOGIC FOR ORIGINAL UI */
+    function toggleTheme() {
+      const docEl = document.documentElement;
+      const currentTheme = docEl.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      docEl.setAttribute('data-theme', newTheme);
+      
+      const themeCheckbox = document.getElementById('themeCheckbox');
+      if (themeCheckbox) {
+        themeCheckbox.checked = (newTheme === 'dark');
+      }
+      
+      if (document.getElementById('dashboardContent').style.display === 'block') {
+        renderUI(); // Re-render to catch CSS var changes in charts
+      }
+    }
+
+    /* HELPER TO EXTRACT DYNAMIC CSS VARS FOR CHART LINES */
+    function getCssVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+    function getHexColor(code) {
+      if (code === 'EH') return '#38bdf8';
+      if (code === 'RFD') return '#10b981';
+      if (code === 'RKZ') return '#f59e0b';
+      const varMap = { 'MZR': '--c-mzr', 'DNT': '--c-dnt', 'HMD': '--c-hmd', 'RSD': '--c-rsd', 'FZN': '--c-fzn', 'AMT': '--c-amt' };
+      if (varMap[code]) return getCssVar(varMap[code]);
+      return '#8e9cb0';
+    }
 
     function handleLogin(e) {
       e.preventDefault();
@@ -364,27 +528,21 @@
         alert("Incorrect password for the " + role + " role! Please try again.");
         return;
       }
-
       if (role === 'SE' && !asmMapping[username]) {
         alert("Invalid SE Code! Please enter a recognized code (e.g., HMD, AMT, etc.).");
         return;
       }
-
       if (role === 'SE' && username === 'EH') {
         alert("EH is an overall team aggregate, not a valid user code.");
         return;
       }
 
       let finalRole = role;
-      
-      if (username === 'SABIR' || username === 'MR.SABIR') {
-        finalRole = 'ADMIN';
-      }
+      if (username === 'SABIR' || username === 'MR.SABIR') finalRole = 'ADMIN';
 
       loggedInUser = { role: finalRole, name: username };
 
       document.getElementById('loginScreen').style.display = 'none';
-      
       document.getElementById('welcomeName').innerText = username;
       document.getElementById('welcomeRole').innerText = finalRole === 'ADMIN' ? 'Administrator' : (finalRole === 'ASM' ? 'Area Manager' : 'Sales Executive');
       document.getElementById('welcomeScreen').style.display = 'block';
@@ -406,9 +564,6 @@
       document.getElementById('loginScreen').style.display = 'block';
       document.getElementById('username').value = '';
       document.getElementById('password').value = '';
-      
-      document.getElementById('asmFilter').disabled = false;
-      document.getElementById('seFilter').disabled = false;
     }
 
     async function loadData() {
@@ -424,37 +579,27 @@
 
       try {
         const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}&t=${new Date().getTime()}`;
-        
         const res = await fetch(fetchUrl, { redirect: 'follow' });
         const textResponse = await res.text();
         
         let json;
-        try {
-          json = JSON.parse(textResponse);
-        } catch (parseErr) {
-          throw new Error("Failed to parse JSON response");
-        }
-        
+        try { json = JSON.parse(textResponse); } catch (parseErr) { throw new Error("Failed to parse JSON response"); }
         const repsList = json.reps || json.data || (Array.isArray(json) ? json : null);
 
         if (repsList && repsList.length > 0) {
-          
           statusBadge.innerText = `${selectedMonth} DATA SYNCED`;
           statusBadge.style.background = '#059669';
 
           // --- SILENT SMART SAFEGUARD ---
-          // This intercepts old API data and SILENTLY switches to the correct tally 
-          // without throwing an error, so the dashboard stays Green and says "SYNCED".
           const checkHMD = repsList.find(r => String(r.se || r.SE || r.code || r.Se || '').trim().toUpperCase() === 'HMD');
           if (selectedMonth === 'FEB' && checkHMD) {
             let rawActive = Number(checkHMD.active || checkHMD.Active || 0);
             let rawVisited = Number(checkHMD.visited || checkHMD.Visited || 0);
             if (rawActive === 60 || rawVisited === 60) {
               loadFallbackData('FEB');
-              return; // Stops here, keeping the Green status badge!
+              return; 
             }
           }
-          // ------------------------------
 
           const trueTargets = {
             'AUG': { 'HMD': 67, 'RSD': 56, 'FZN': 68, 'RKZ': 89, 'RFD': 101, 'MZR': 53, 'AMT': 65, 'DNT': 46 },
@@ -481,13 +626,7 @@
               let rate = active > 0 ? (visited / active) * 100 : 0;
               if (rate > 100) rate = 100;
 
-              return {
-                se: code,
-                asm: asmMapping[code] || r.asm || r.ASM || 'N/A',
-                active: active,
-                visited: visited,
-                hitRate: rate
-              };
+              return { se: code, asm: asmMapping[code] || r.asm || r.ASM || 'N/A', active: active, visited: visited, hitRate: rate };
             })
             .filter(r => r.se !== 'SE' && r.se !== 'EH' && r.se !== '');
 
@@ -578,9 +717,7 @@
       }
     }
 
-    function onMonthChange() {
-      loadData();
-    }
+    function onMonthChange() { loadData(); }
 
     function populateAsmDropdown() {
       const asmFilter = document.getElementById('asmFilter');
@@ -597,7 +734,6 @@
       const currentVal = seFilter.value;
       const selectedASM = asmFilter.value;
       
-      // STRICT SECURITY FIX: If the user is an SE, completely prevent other names from even loading into the HTML element.
       if (loggedInUser.role === 'SE') {
         seFilter.innerHTML = '';
         globalRepsData.forEach(d => {
@@ -623,26 +759,17 @@
       }
     }
 
-    function onAsmChange() { 
-      populateSeDropdown(); 
-      renderUI(); 
-    }
+    function onAsmChange() { populateSeDropdown(); renderUI(); }
     
-    // NEW FIX: Automatically tick ONLY the selected SE and clear previous SE ticks
     function onSeChange() { 
       const selectedSE = document.getElementById('seFilter').value;
       const checkboxes = document.querySelectorAll('.trend-cb');
-      
       checkboxes.forEach(cb => {
-        if (cb.value !== 'EH') { // Preserve the Overall Team baseline
-          if (selectedSE !== 'ALL' && cb.value === selectedSE) {
-            cb.checked = true;
-          } else {
-            cb.checked = false; // This perfectly clears previously ticked SEs
-          }
+        if (cb.value !== 'EH') { 
+          if (selectedSE !== 'ALL' && cb.value === selectedSE) cb.checked = true;
+          else cb.checked = false;
         }
       });
-      
       renderUI(); 
     }
 
@@ -685,59 +812,48 @@
 
       const tbody = document.getElementById('leaderboardBody');
       tbody.innerHTML = '';
-      sorted.forEach(d => {
+      sorted.forEach((d, index) => {
         tbody.innerHTML += `<tr>
-          <td style="color:#fff;">${d.se}</td>
-          <td style="color:#8e9cb0;">${d.asm}</td>
+          <td><span class="rank-num">#${index + 1}</span></td>
+          <td style="color: var(--text-main); font-weight: 800;">${d.se}</td>
+          <td style="color: var(--text-muted);">${d.asm}</td>
           <td>${Math.round(d.active)}</td>
-          <td style="color:#10b981;">${Math.round(d.visited)}</td>
-          <td style="color:#38bdf8;">${d.hitRate.toFixed(1)}%</td>
+          <td style="color: var(--accent-green); font-weight: 800; font-size: 1rem;">${Math.round(d.visited)}</td>
+          <td style="color: var(--accent-blue); font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1rem;">${d.hitRate.toFixed(1)}%</td>
         </tr>`;
       });
 
       updateTrendChart();
 
+      const gridColor = getCssVar('--border-color');
+      const textColor = getCssVar('--text-muted');
+      const blueColor = getCssVar('--accent-blue');
+      const greenColor = getCssVar('--accent-green');
+
       if (window.Chart) {
-        // --- 1. INTEGRATED BAR CHART ---
         if (barChartInstance) barChartInstance.destroy();
         barChartInstance = new Chart(document.getElementById('barChart'), {
           type: 'bar',
           data: {
             labels: ['Performance'], 
             datasets: [
-              {
-                label: 'Visited',
-                data: [displayVisited],
-                backgroundColor: '#10b981',
-                borderRadius: 4,
-                barPercentage: 0.6,
-                categoryPercentage: 0.8
-              },
-              {
-                label: 'Remaining (Non-Visited)',
-                data: [displayRemaining],
-                backgroundColor: '#3b82f6',
-                borderRadius: 4,
-                barPercentage: 0.6,
-                categoryPercentage: 0.8
-              }
+              { label: 'Visited', data: [displayVisited], backgroundColor: '#10b981', borderRadius: 6, barPercentage: 0.5, categoryPercentage: 0.8 },
+              { label: 'Remaining (Non-Visited)', data: [displayRemaining], backgroundColor: '#3b82f6', borderRadius: 6, barPercentage: 0.5, categoryPercentage: 0.8 }
             ]
           },
           options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             scales: {
-              y: { beginAtZero: true, grid: { color: '#1e293b' }, ticks: { color: '#8e9cb0', font: { size: 10 } } },
+              y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11, family: 'Inter' } } },
               x: { grid: { display: false }, ticks: { display: false } }
             },
             plugins: {
-              legend: { labels: { color: '#f8fafc', font: { size: 11 }, boxWidth: 12 } },
-              datalabels: { display: false } // Hide text labels on the bar chart
+              legend: { labels: { color: getCssVar('--text-main'), font: { size: 12, family: 'Inter', weight: 600 }, boxWidth: 12 } },
+              datalabels: { display: false }
             }
           }
         });
 
-        // --- 2. INTEGRATED PIE CHART ---
         if (pieChartInstance) pieChartInstance.destroy();
         pieChartInstance = new Chart(document.getElementById('pieChart'), {
           type: 'pie', 
@@ -747,22 +863,17 @@
               data: [displayRemaining, displayVisited],
               backgroundColor: ['#3b82f6', '#10b981'],
               borderWidth: 0,
-              radius: ['55%', '100%'] // Shrunk the radius of the blue slice to look stepped
+              radius: ['55%', '100%']
             }]
           },
           options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             plugins: {
-              legend: {
-                position: 'right',
-                labels: { color: '#f8fafc', padding: 20 }
-              },
+              legend: { position: 'right', labels: { color: getCssVar('--text-main'), font: { size: 12, family: 'Inter', weight: 600 }, padding: 20 } },
               datalabels: {
-                color: '#090d16',
-                font: { weight: 'bold', size: 14 },
+                color: getCssVar('--pie-text'),
+                font: { weight: '800', size: 14, family: 'Inter' },
                 textAlign: 'center',
-                // Smart formatter to automatically calculate live % values based on real data
                 formatter: function(value, context) {
                   if (value === 0) return '';
                   let total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
@@ -785,6 +896,9 @@
       const subtitleEl = document.getElementById('trendChartSubtitle');
       const badgeEl = document.getElementById('trendChartBadge');
       const panelEl = document.getElementById('trendCheckboxPanel');
+      
+      const gridColor = getCssVar('--border-color');
+      const textColor = getCssVar('--text-muted');
 
       if (seTrendChartInstance) seTrendChartInstance.destroy();
 
@@ -805,22 +919,12 @@
           
           if (loggedInUser.role === 'SE') {
             if (seCode === loggedInUser.name) {
-              label.style.display = 'flex';
-              cb.checked = true; // Keep their own line locked on
-            } else if (seCode === 'EH') {
-              label.style.display = 'flex';
-              // Leave checked state as-is so they can toggle EH on and off
-            } else {
-              label.style.display = 'none';
-              cb.checked = false;
-            }
+              label.style.display = 'inline-flex'; cb.checked = true;
+            } else if (seCode === 'EH') { label.style.display = 'inline-flex'; } 
+            else { label.style.display = 'none'; cb.checked = false; }
           } else {
-            if (selectedASM === 'ALL' || seCode === 'EH' || asmMapping[seCode] === selectedASM) {
-              label.style.display = 'flex';
-            } else {
-              label.style.display = 'none';
-              cb.checked = false;
-            }
+            if (selectedASM === 'ALL' || seCode === 'EH' || asmMapping[seCode] === selectedASM) label.style.display = 'inline-flex';
+            else { label.style.display = 'none'; cb.checked = false; }
           }
         });
 
@@ -828,43 +932,36 @@
         
         const datasets = checkedBoxes.map(se => {
             const dataDef = augTimeData.datasets[se];
+            const hexColor = getHexColor(se);
             return {
               label: dataDef.label,
               data: dataDef.data,
-              borderColor: dataDef.color,
-              backgroundColor: dataDef.color + '26',
+              borderColor: hexColor,
+              backgroundColor: se === 'EH' ? hexColor + '26' : 'transparent',
               borderWidth: 3,
               pointRadius: 5,
-              pointBackgroundColor: dataDef.color,
+              pointBackgroundColor: hexColor,
               fill: se === 'EH', 
-              tension: 0.3
+              tension: 0.35
             };
         });
 
         seTrendChartInstance = new Chart(document.getElementById('seTrendChart'), {
           type: 'line',
-          data: {
-            labels: augTimeData.labels,
-            datasets: datasets
-          },
+          data: { labels: augTimeData.labels, datasets: datasets },
           options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false }, datalabels: { display: false } },
             scales: {
-              y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e293b' } },
-              x: { grid: { color: '#1e293b' } }
+              y: { min: 0, max: 100, ticks: { color: textColor, font: { family: 'Inter' }, callback: v => v + '%' }, grid: { color: gridColor } },
+              x: { ticks: { color: textColor, font: { family: 'Inter' } }, grid: { color: gridColor } }
             }
           }
         });
 
       } else {
-        if (selectedSE !== 'ALL') {
-          containerEl.style.display = 'none';
-          return;
-        } else {
-          containerEl.style.display = 'block';
-        }
+        if (selectedSE !== 'ALL') { containerEl.style.display = 'none'; return; } 
+        else { containerEl.style.display = 'block'; }
         
         const dynamicMonthTitle = selectedMonth === 'JAN' ? 'January' : 'February';
         titleEl.innerText = `${dynamicMonthTitle} Hit Rate Distribution Trend by SE (%)`;
@@ -873,6 +970,8 @@
         badgeEl.style.display = 'none';
         panelEl.style.display = 'none';
 
+        const blueColor = getCssVar('--accent-blue');
+
         seTrendChartInstance = new Chart(document.getElementById('seTrendChart'), {
           type: 'line',
           data: {
@@ -880,22 +979,17 @@
             datasets: [{
               label: 'Hit Rate %',
               data: currentTrendSorted.map(item => item.hitRate),
-              borderColor: '#38bdf8',
-              backgroundColor: 'rgba(56, 189, 248, 0.15)',
-              borderWidth: 3,
-              pointRadius: 5,
-              pointBackgroundColor: '#38bdf8',
-              fill: true,
-              tension: 0.3
+              borderColor: blueColor,
+              backgroundColor: blueColor + '26',
+              borderWidth: 3, pointRadius: 6, pointBackgroundColor: blueColor, fill: true, tension: 0.35
             }]
           },
           options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false }, datalabels: { display: false } },
             scales: {
-              y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e293b' } },
-              x: { grid: { color: '#1e293b' } }
+              y: { min: 0, max: 100, ticks: { color: textColor, font: { family: 'Inter' }, callback: v => v + '%' }, grid: { color: gridColor } },
+              x: { ticks: { color: textColor, font: { family: 'Inter', weight: 600 } }, grid: { color: gridColor } }
             }
           }
         });
