@@ -150,8 +150,9 @@
     .top-bar h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text-main); }
     .controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
-    .status-badge { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.04em; border: 1px solid rgba(16, 185, 129, 0.2); display: flex; align-items: center; gap: 6px; }
-    .status-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background-color: currentColor; box-shadow: 0 0 8px currentColor; }
+    /* FIXED: High Contrast White Text for the Sync Status Badge */
+    .status-badge { background: rgba(16, 185, 129, 0.15); color: #ffffff; padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.04em; border: 1px solid rgba(255, 255, 255, 0.2); display: flex; align-items: center; gap: 6px; }
+    .status-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background-color: #ffffff; box-shadow: 0 0 8px #ffffff; }
     
     .select-box { background: var(--input-bg); border: 1.5px solid var(--border-color); color: var(--text-main); padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; outline: none; min-width: 150px; transition: all 0.3s ease; font-weight: 600; cursor: pointer; }
     .select-box-month { border-color: var(--accent-blue); }
@@ -310,7 +311,7 @@
     </div>
   </div>
 
-  <!-- MAIN DASHBOARD CONTAINER (ORIGINAL STRUCTURE) -->
+  <!-- MAIN DASHBOARD CONTAINER -->
   <div id="dashboardContent">
     <div class="top-bar">
       <h1 id="mainTitle">August Itinerary Hit Report</h1>
@@ -371,7 +372,7 @@
       </div>
     </div>
 
-    <!-- DYNAMIC TREND CHART PANEL (ORIGINAL CHECKBOX UI) -->
+    <!-- DYNAMIC TREND CHART PANEL -->
     <div id="trendChartContainer" class="chart-card" style="margin-bottom: 20px;">
       <div class="chart-header" style="align-items: flex-start; display: flex; justify-content: space-between;">
         <div>
@@ -837,8 +838,8 @@
           data: {
             labels: ['Performance'], 
             datasets: [
-              { label: 'Visited', data: [displayVisited], backgroundColor: '#10b981', borderRadius: 6, barPercentage: 0.5, categoryPercentage: 0.8 },
-              { label: 'Remaining (Non-Visited)', data: [displayRemaining], backgroundColor: '#3b82f6', borderRadius: 6, barPercentage: 0.5, categoryPercentage: 0.8 }
+              { label: 'Visited', data: [displayVisited], backgroundColor: greenColor, borderRadius: 6, barPercentage: 0.5, categoryPercentage: 0.8 },
+              { label: 'Remaining (Non-Visited)', data: [displayRemaining], backgroundColor: blueColor, borderRadius: 6, barPercentage: 0.5, categoryPercentage: 0.8 }
             ]
           },
           options: {
@@ -861,7 +862,7 @@
             labels: ['Remaining (Non-Visited)', 'Visited'],
             datasets: [{
               data: [displayRemaining, displayVisited],
-              backgroundColor: ['#3b82f6', '#10b981'],
+              backgroundColor: [blueColor, greenColor],
               borderWidth: 0,
               radius: ['55%', '100%']
             }]
