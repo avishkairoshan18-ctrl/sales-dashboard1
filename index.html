@@ -116,28 +116,33 @@
       transition: all 0.4s cubic-bezier(0.25, 1, 0.3, 1);
     }
 
+    /* The glowing mixed-colors edge mask */
     .glass-panel::after {
       content: '';
       position: absolute;
       inset: 0;
       border-radius: inherit;
-      padding: 2.5px; 
+      padding: 2.5px; /* Thickness of the edge lighting */
       background: linear-gradient(115deg, #38bdf8, #a855f7, #ec4899, #10b981, #38bdf8);
       background-size: 300% 300%;
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
       animation: geminiEdgeFlow 4s ease-in-out infinite;
-      opacity: 0.15; 
+      opacity: 0.15; /* Subtle pulse when idle */
       transition: opacity 0.4s ease;
       pointer-events: none;
     }
 
-    .glass-panel:hover::after { opacity: 1; }
+    /* Activates bright edge lighting on hover */
+    .glass-panel:hover::after {
+      opacity: 1;
+    }
+
     .glass-panel:hover {
       transform: translateY(-4px) scale(1.01); 
       box-shadow: 0 24px 48px var(--shadow-color), inset 0 1px 1px var(--glass-inset);
-      border-color: transparent; 
+      border-color: transparent; /* Hides default border so gradient edge shines purely */
     }
 
     /* LOGIN SCREEN STYLES */
@@ -197,7 +202,7 @@
     .btn-login:hover { transform: translateY(-2px) scale(1.02); filter: brightness(1.1); box-shadow: 0 12px 24px rgba(56, 189, 248, 0.35); }
 
     .btn-logout { 
-      background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); padding: 12px 20px; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); padding: 10px 16px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     }
     .btn-logout:hover { background: var(--accent-red); color: white; border-color: var(--accent-red); transform: translateY(-1px); }
 
@@ -210,7 +215,7 @@
     }
     
     /* ========================================================= */
-    /* VERTICAL AND HORIZONTAL LAYOUT STRUCTURE                  */
+    /* TOP BAR - HORIZONTAL & VERTICAL BLENDED STRUCTURE         */
     /* ========================================================= */
     .top-bar { 
       display: flex; 
@@ -240,18 +245,20 @@
       flex-wrap: wrap;
     }
 
-    .nav-vertical {
+    /* HORIZONTAL DROPDOWNS */
+    .nav-filters {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      align-items: center;
       gap: 14px;
       width: 100%;
-      max-width: 320px; /* Restricts dropdown width so they look like nice vertical buttons */
+      flex-wrap: wrap;
     }
 
     .status-badge { background: rgba(16, 185, 129, 0.15); color: #ffffff; padding: 10px 18px; border-radius: 24px; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.04em; border: 1px solid rgba(255, 255, 255, 0.15); display: flex; align-items: center; gap: 6px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
     .status-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background-color: #ffffff; box-shadow: 0 0 8px #ffffff; }
     
-    .select-box { padding: 12px 16px; font-weight: 600; cursor: pointer; }
+    .select-box { padding: 12px 16px; min-width: 180px; font-weight: 600; cursor: pointer; border-radius: 12px; }
 
     /* SUN / MOON TOGGLE SWITCH */
     .theme-switch { position: relative; display: inline-block; width: 60px; height: 32px; margin: 0 4px; z-index: 10; }
@@ -320,7 +327,7 @@
       .theme-switch { margin: 8px auto; transform: scale(1.1); }
       .btn-logout { width: 100%; padding: 14px; }
       
-      .nav-vertical { max-width: 100%; }
+      .nav-filters { flex-direction: column; align-items: stretch; width: 100%; }
       .select-box { width: 100%; padding: 14px; font-size: 0.95rem; }
       
       /* Stack Cards Vertically */
@@ -402,7 +409,7 @@
   <!-- MAIN DASHBOARD CONTAINER -->
   <div id="dashboardContent">
     
-    <!-- TOP BAR (VERTICAL + HORIZONTAL STRUCTURE) -->
+    <!-- TOP BAR (HORIZONTAL STRUCTURE) -->
     <div class="top-bar glass-panel">
       
       <!-- HORIZONTAL BUTTONS / TOP ACTIONS -->
@@ -431,8 +438,8 @@
         </div>
       </div>
 
-      <!-- VERTICAL BUTTONS / FILTERS -->
-      <div class="nav-vertical">
+      <!-- HORIZONTAL DROPDOWNS / FILTERS -->
+      <div class="nav-filters">
         <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
           <option value="AUG">📅 August</option>
           <option value="JAN">📅 January</option>
@@ -469,7 +476,7 @@
       </div>
     </div>
 
-    <!-- DYNAMIC TREND CHART PANEL -->
+    <!-- DYNAMIC TREND CHART PANEL (ORIGINAL CHECKBOX UI) -->
     <div id="trendChartContainer" class="chart-card glass-panel" style="margin-bottom: 24px;">
       <div class="chart-header" style="align-items: flex-start; display: flex; justify-content: space-between;">
         <div>
