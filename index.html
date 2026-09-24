@@ -150,7 +150,6 @@
     .top-bar h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text-main); }
     .controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
-    /* FIXED: High Contrast White Text for the Sync Status Badge */
     .status-badge { background: rgba(16, 185, 129, 0.15); color: #ffffff; padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.04em; border: 1px solid rgba(255, 255, 255, 0.2); display: flex; align-items: center; gap: 6px; }
     .status-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background-color: #ffffff; box-shadow: 0 0 8px #ffffff; }
     
@@ -255,6 +254,44 @@
     .leaderboard-table tr:last-child td { border-bottom: none; }
     .leaderboard-table tr:hover td { background: var(--trend-bg); }
     .rank-num { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 800; color: var(--text-muted); background: var(--input-bg); padding: 4px 8px; border-radius: 6px; }
+
+    /* ========================================================= */
+    /* MOBILE OPTIMIZATION MEDIA QUERIES                         */
+    /* ========================================================= */
+    @media (max-width: 768px) {
+      body { padding: 12px; }
+      
+      .top-bar { 
+        flex-direction: column; 
+        align-items: stretch; 
+        text-align: center; 
+        gap: 16px; 
+      }
+      .top-bar h1 { font-size: 1.4rem; }
+      
+      .controls { 
+        flex-direction: column; 
+        align-items: stretch; 
+        width: 100%; 
+        gap: 12px; 
+      }
+      .status-badge { justify-content: center; width: 100%; padding: 10px; }
+      .select-box { width: 100%; padding: 12px; }
+      .theme-switch { margin: 8px auto; }
+      .btn-logout { width: 100%; padding: 14px; }
+      
+      .kpi-row { grid-template-columns: 1fr; }
+      .kpi-card .value { font-size: 2.2rem; } /* Scaled down slightly to prevent overflow */
+      
+      .chart-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .chart-title { font-size: 1rem; }
+      
+      .auth-container { padding: 32px 24px; }
+      #welcomeScreen > div { padding: 32px 20px !important; }
+      
+      .canvas-container { height: 260px; }
+      .leaderboard-table th, .leaderboard-table td { padding: 12px 8px; font-size: 0.8rem; }
+    }
   </style>
 </head>
 <body>
@@ -311,7 +348,7 @@
     </div>
   </div>
 
-  <!-- MAIN DASHBOARD CONTAINER -->
+  <!-- MAIN DASHBOARD CONTAINER (ORIGINAL STRUCTURE) -->
   <div id="dashboardContent">
     <div class="top-bar">
       <h1 id="mainTitle">August Itinerary Hit Report</h1>
@@ -372,7 +409,7 @@
       </div>
     </div>
 
-    <!-- DYNAMIC TREND CHART PANEL -->
+    <!-- DYNAMIC TREND CHART PANEL (ORIGINAL CHECKBOX UI) -->
     <div id="trendChartContainer" class="chart-card" style="margin-bottom: 20px;">
       <div class="chart-header" style="align-items: flex-start; display: flex; justify-content: space-between;">
         <div>
@@ -576,7 +613,6 @@
       document.getElementById('kpiHitRateLabel').innerText = `${monthName} Hit Rate`;
 
       statusBadge.innerText = 'CONNECTING...';
-      statusBadge.style.background = '#38bdf8';
 
       try {
         const fetchUrl = `${APPS_SCRIPT_URL}?month=${selectedMonth}&t=${new Date().getTime()}`;
@@ -589,7 +625,6 @@
 
         if (repsList && repsList.length > 0) {
           statusBadge.innerText = `${selectedMonth} DATA SYNCED`;
-          statusBadge.style.background = '#059669';
 
           // --- SILENT SMART SAFEGUARD ---
           const checkHMD = repsList.find(r => String(r.se || r.SE || r.code || r.Se || '').trim().toUpperCase() === 'HMD');
@@ -640,7 +675,6 @@
         throw new Error("Payload format incorrect");
       } catch (err) {
         statusBadge.innerText = 'OFFLINE MODE';
-        statusBadge.style.background = '#f59e0b';
         loadFallbackData(selectedMonth);
       }
     }
