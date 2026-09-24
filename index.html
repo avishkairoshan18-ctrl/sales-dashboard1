@@ -214,39 +214,33 @@
       animation: liquidSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
     }
     
-    /* VERTICAL TOP BAR ALIGNMENT */
+    /* HORIZONTAL TOP BAR ALIGNMENT */
     .top-bar { 
       display: flex; 
-      flex-direction: column; 
-      align-items: flex-start; 
+      justify-content: space-between; 
+      align-items: center; 
       margin-bottom: 24px; 
-      padding: 24px; 
+      padding: 16px 24px; 
       border-radius: 24px; 
+      flex-wrap: wrap; 
       gap: 16px; 
       transition: border-color 0.4s ease; 
     }
-    .top-bar h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 4px; }
+    .top-bar h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.03em; margin: 0; }
     .controls { 
       display: flex; 
-      flex-direction: column; 
-      align-items: stretch; 
-      width: 100%; 
       gap: 12px; 
-    }
-    .controls-row {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-top: 4px;
+      align-items: center; 
+      flex-wrap: wrap; 
     }
 
     .status-badge { background: rgba(16, 185, 129, 0.15); color: #ffffff; padding: 8px 16px; border-radius: 24px; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.04em; border: 1px solid rgba(255, 255, 255, 0.15); display: flex; align-items: center; gap: 6px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
     .status-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background-color: #ffffff; box-shadow: 0 0 8px #ffffff; }
     
-    .select-box { padding: 12px 16px; width: 100%; font-weight: 600; cursor: pointer; }
+    .select-box { padding: 10px 14px; min-width: 140px; font-weight: 600; cursor: pointer; }
 
     /* SUN / MOON TOGGLE SWITCH */
-    .theme-switch { position: relative; display: inline-block; width: 56px; height: 30px; margin: 0; z-index: 10; }
+    .theme-switch { position: relative; display: inline-block; width: 56px; height: 30px; margin: 0 4px; z-index: 10; }
     .theme-switch input { display: none; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #f59e0b; transition: 0.4s; border-radius: 32px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
     .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background-color: white; transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); border-radius: 50%; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
@@ -303,15 +297,14 @@
     @media (max-width: 768px) {
       body { padding: 12px; }
       
-      .top-bar { margin-bottom: 16px; padding: 20px; }
-      .top-bar h1 { font-size: 1.4rem; }
-      .controls { gap: 10px; }
-      .status-badge { align-self: stretch; justify-content: center; padding: 12px; font-size: 0.8rem; }
-      .select-box { padding: 14px; font-size: 0.95rem; }
+      .top-bar { flex-direction: column; align-items: stretch; text-align: center; gap: 12px; border-radius: 20px; padding: 16px; margin-bottom: 16px; }
+      .top-bar h1 { font-size: 1.4rem; margin-bottom: 4px; }
       
-      .controls-row { justify-content: space-between; margin-top: 8px; }
-      .btn-logout { flex: 1; padding: 12px; }
-      .theme-switch { transform: scale(1.05); margin-right: 8px; }
+      .controls { flex-direction: column; align-items: stretch; width: 100%; gap: 10px; }
+      .status-badge { justify-content: center; width: 100%; padding: 12px; font-size: 0.8rem; }
+      .select-box { width: 100%; padding: 14px; font-size: 0.95rem; }
+      .theme-switch { margin: 8px auto; transform: scale(1.1); }
+      .btn-logout { width: 100%; padding: 14px; }
       
       /* Stack Cards Vertically */
       .kpi-row { grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
@@ -321,7 +314,7 @@
       .kpi-card, .chart-card { padding: 16px; border-radius: 20px; }
       .kpi-card .value { font-size: 2.3rem; } 
       
-      .chart-header { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 12px; }
+      .chart-header { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 16px; }
       .chart-title { font-size: 1rem; }
       
       .canvas-container { height: 240px; } 
@@ -364,7 +357,7 @@
   </div>
 
   <!-- WELCOME DASHBOARD SCREEN -->
-  <div id="welcomeScreen" style="display: none; width: 100%; max-width: 520px; margin-top: 6vh; animation: liquidSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;">
+  <div id="welcomeScreen" style="display: none; width: 100%; max-width: 520px; margin-top: 6vh; animation: liquidSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;">
     <div class="glass-panel" style="padding: 48px 40px; text-align: center; border-radius: 24px;">
       <div style="font-size: 3.5rem; margin-bottom: 16px;">👋</div>
       <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 10px; color: var(--text-main);">Executive Workspace Ready</h2>
@@ -391,11 +384,13 @@
 
   <!-- MAIN DASHBOARD CONTAINER -->
   <div id="dashboardContent">
+    
+    <!-- TOP BAR (HORIZONTAL) -->
     <div class="top-bar glass-panel">
       <h1 id="mainTitle">August Itinerary Hit Report</h1>
-      <div class="status-badge" id="syncStatus" style="align-self: flex-start;">CONNECTING...</div>
-      
       <div class="controls">
+        <div class="status-badge" id="syncStatus">CONNECTING...</div>
+        
         <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
           <option value="AUG">📅 August</option>
           <option value="JAN">📅 January</option>
@@ -405,26 +400,24 @@
         <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
         <select id="seFilter" class="select-box" onchange="onSeChange()"><option value="ALL">All Sales Executives</option></select>
         
-        <div class="controls-row">
-          <!-- MODERN SUN / MOON SWITCH TOGGLE -->
-          <label class="theme-switch" title="Toggle Theme">
-            <input type="checkbox" id="themeCheckbox" onchange="toggleTheme()" checked>
-            <div class="slider">
-              <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-              </svg>
-              <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="5"/>
-                <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-              </svg>
-            </div>
-          </label>
+        <!-- MODERN SUN / MOON SWITCH TOGGLE -->
+        <label class="theme-switch" title="Toggle Theme">
+          <input type="checkbox" id="themeCheckbox" onchange="toggleTheme()" checked>
+          <div class="slider">
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+          </div>
+        </label>
 
-          <button class="btn-logout" onclick="handleLogout()">Logout</button>
-        </div>
+        <button class="btn-logout" onclick="handleLogout()">Logout</button>
       </div>
     </div>
 
