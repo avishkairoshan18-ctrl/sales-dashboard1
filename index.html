@@ -444,7 +444,8 @@
         <select id="welcomeMonthSelect" class="select-field" style="max-width: 300px; font-size: 1.05rem; text-align: center; border-color: var(--accent-blue); font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.1);">
           <option value="AUG">📅 August (Historical)</option>
           <option value="JAN">📅 January (Pre-close)</option>
-          <option value="FEB" selected>📅 February (Active Month)</option>
+          <option value="FEB">📅 February</option>
+          <option value="MARCH" selected>📅 March (Active Month)</option>
         </select>
         
         <button class="btn-login" style="max-width: 300px; margin-top: 8px;" onclick="enterMainDashboard()">Open Dashboard ➔</button>
@@ -467,7 +468,7 @@
       
       <!-- HORIZONTAL BUTTONS / TOP ACTIONS -->
       <div class="nav-horizontal">
-        <h1 id="mainTitle">August Itinerary Hit Report</h1>
+        <h1 id="mainTitle">March Itinerary Hit Report</h1>
         <div class="nav-horizontal-actions">
           
           <!-- ICON ONLY SYNC BADGE -->
@@ -506,7 +507,8 @@
         <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
           <option value="AUG">📅 August</option>
           <option value="JAN">📅 January</option>
-          <option value="FEB" selected>📅 February</option>
+          <option value="FEB">📅 February</option>
+          <option value="MARCH" selected>📅 March</option>
         </select>
 
         <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
@@ -528,7 +530,7 @@
         <div class="subtext" id="kpiRemaining" style="color: var(--accent-gold);">0 Remaining</div>
       </div>
       <div class="kpi-card glass-panel">
-        <div class="label" id="kpiHitRateLabel">August Hit Rate</div>
+        <div class="label" id="kpiHitRateLabel">Hit Rate</div>
         <div class="value val-blue" id="kpiHitRate">0.0%</div>
         <div class="subtext">Aggregated Performance</div>
       </div>
@@ -725,7 +727,7 @@
     async function loadData() {
       const selectedMonth = document.getElementById('monthFilter').value;
       const statusBadge = document.getElementById('syncStatus');
-      const monthName = selectedMonth === 'AUG' ? 'August' : (selectedMonth === 'JAN' ? 'January' : 'February');
+      const monthName = selectedMonth === 'AUG' ? 'August' : (selectedMonth === 'JAN' ? 'January' : (selectedMonth === 'FEB' ? 'February' : 'March'));
 
       document.getElementById('mainTitle').innerText = `${monthName} Itinerary Hit Report`;
       document.getElementById('kpiHitRateLabel').innerText = `${monthName} Hit Rate`;
@@ -760,7 +762,8 @@
           const trueTargets = {
             'AUG': { 'HMD': 67, 'RSD': 56, 'FZN': 68, 'RKZ': 89, 'RFD': 101, 'MZR': 53, 'AMT': 65, 'DNT': 46 },
             'JAN': { 'HMD': 67, 'RSD': 54, 'FZN': 65, 'RKZ': 110, 'RFD': 101, 'MZR': 55, 'AMT': 65, 'DNT': 48 },
-            'FEB': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 }
+            'FEB': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 },
+            'MARCH': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 }
           };
 
           const isShifted = repsList.some(r => { let v = Number(r.visited || r.Visited || 0); return v > 0 && v < 1 && v % 1 !== 0; });
@@ -818,6 +821,17 @@
           { se: 'MZR', asm: 'Mr.Hilmy', active: 51, visited: 47, hitRate: 92.2 },
           { se: 'AMT', asm: 'Mr.Sabir', active: 66, visited: 29, hitRate: 43.9 },
           { se: 'DNT', asm: 'Mr.Sabir', active: 49, visited: 32, hitRate: 65.3 }
+        ];
+      } else if (month === 'MARCH') {
+        globalRepsData = [
+          { se: 'HMD', asm: 'Mr.Farzaan', active: 69, visited: 45, hitRate: 65.2 },
+          { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 40, hitRate: 71.4 },
+          { se: 'FZN', asm: 'Mr.Farzaan', active: 64, visited: 33, hitRate: 51.5 },
+          { se: 'RKZ', asm: 'Mr.Hilmy', active: 92, visited: 30, hitRate: 32.6 },
+          { se: 'RFD', asm: 'Mr.Hilmy', active: 100, visited: 62, hitRate: 62.0 },
+          { se: 'MZR', asm: 'Mr.Hilmy', active: 51, visited: 49, hitRate: 96.0 },
+          { se: 'AMT', asm: 'Mr.Sabir', active: 66, visited: 35, hitRate: 53.0 },
+          { se: 'DNT', asm: 'Mr.Sabir', active: 49, visited: 36, hitRate: 73.4 }
         ];
       } else {
         globalRepsData = [
