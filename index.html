@@ -446,6 +446,7 @@
           <option value="JAN">📅 January</option>
           <option value="FEB">📅 February</option>
           <option value="MARCH" selected>📅 March</option>
+          <option value="APRIL">📅 April</option>
         </select>
         
         <button class="btn-login" style="max-width: 300px; margin-top: 8px;" onclick="enterMainDashboard()">Open Dashboard ➔</button>
@@ -509,6 +510,7 @@
           <option value="JAN">📅 January</option>
           <option value="FEB">📅 February</option>
           <option value="MARCH" selected>📅 March</option>
+          <option value="APRIL">📅 April</option>
         </select>
 
         <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
@@ -727,7 +729,13 @@
     async function loadData() {
       const selectedMonth = document.getElementById('monthFilter').value;
       const statusBadge = document.getElementById('syncStatus');
-      const monthName = selectedMonth === 'AUG' ? 'August' : (selectedMonth === 'JAN' ? 'January' : (selectedMonth === 'FEB' ? 'February' : 'March'));
+      
+      // FIX FOR APRIL LABEL
+      let monthName = 'August';
+      if (selectedMonth === 'JAN') monthName = 'January';
+      if (selectedMonth === 'FEB') monthName = 'February';
+      if (selectedMonth === 'MARCH') monthName = 'March';
+      if (selectedMonth === 'APRIL') monthName = 'April';
 
       document.getElementById('mainTitle').innerText = `${monthName} Itinerary Hit Report`;
       document.getElementById('kpiHitRateLabel').innerText = `${monthName} Hit Rate`;
@@ -763,7 +771,8 @@
             'AUG': { 'HMD': 67, 'RSD': 56, 'FZN': 68, 'RKZ': 89, 'RFD': 101, 'MZR': 53, 'AMT': 65, 'DNT': 46 },
             'JAN': { 'HMD': 67, 'RSD': 54, 'FZN': 65, 'RKZ': 110, 'RFD': 101, 'MZR': 55, 'AMT': 65, 'DNT': 48 },
             'FEB': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 },
-            'MARCH': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 }
+            'MARCH': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 },
+            'APRIL': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 }
           };
 
           const isShifted = repsList.some(r => { let v = Number(r.visited || r.Visited || 0); return v > 0 && v < 1 && v % 1 !== 0; });
@@ -832,6 +841,17 @@
           { se: 'MZR', asm: 'Mr.Hilmy', active: 51, visited: 49, hitRate: 96.0 },
           { se: 'AMT', asm: 'Mr.Sabir', active: 66, visited: 35, hitRate: 53.0 },
           { se: 'DNT', asm: 'Mr.Sabir', active: 49, visited: 36, hitRate: 73.4 }
+        ];
+      } else if (month === 'APRIL') {
+        globalRepsData = [
+          { se: 'HMD', asm: 'Mr.Farzaan', active: 69, visited: 48, hitRate: 69.5 },
+          { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 42, hitRate: 75.0 },
+          { se: 'FZN', asm: 'Mr.Farzaan', active: 64, visited: 36, hitRate: 56.2 },
+          { se: 'RKZ', asm: 'Mr.Hilmy', active: 92, visited: 35, hitRate: 38.0 },
+          { se: 'RFD', asm: 'Mr.Hilmy', active: 100, visited: 65, hitRate: 65.0 },
+          { se: 'MZR', asm: 'Mr.Hilmy', active: 51, visited: 50, hitRate: 98.0 },
+          { se: 'AMT', asm: 'Mr.Sabir', active: 66, visited: 38, hitRate: 57.5 },
+          { se: 'DNT', asm: 'Mr.Sabir', active: 49, visited: 40, hitRate: 81.6 }
         ];
       } else {
         globalRepsData = [
@@ -1127,7 +1147,7 @@
         if (selectedSE !== 'ALL') { containerEl.style.display = 'none'; return; } 
         else { containerEl.style.display = 'block'; }
         
-        const dynamicMonthTitle = selectedMonth === 'JAN' ? 'January' : 'February';
+        const dynamicMonthTitle = selectedMonth === 'JAN' ? 'January' : (selectedMonth === 'FEB' ? 'February' : 'March');
         titleEl.innerText = `${dynamicMonthTitle} Hit Rate Distribution Trend by SE (%)`;
         
         subtitleEl.style.display = 'none';
