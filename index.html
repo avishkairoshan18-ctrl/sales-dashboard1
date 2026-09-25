@@ -445,8 +445,11 @@
           <option value="AUG">📅 August</option>
           <option value="JAN">📅 January</option>
           <option value="FEB">📅 February</option>
-          <option value="MARCH" selected>📅 March</option>
+          <option value="MARCH">📅 March</option>
           <option value="APRIL">📅 April</option>
+          <option value="MAY">📅 May</option>
+          <option value="JUNE">📅 June</option>
+          <option value="JULY" selected>📅 July</option>
         </select>
         
         <button class="btn-login" style="max-width: 300px; margin-top: 8px;" onclick="enterMainDashboard()">Open Dashboard ➔</button>
@@ -509,8 +512,11 @@
           <option value="AUG">📅 August</option>
           <option value="JAN">📅 January</option>
           <option value="FEB">📅 February</option>
-          <option value="MARCH" selected>📅 March</option>
+          <option value="MARCH">📅 March</option>
           <option value="APRIL">📅 April</option>
+          <option value="MAY">📅 May</option>
+          <option value="JUNE">📅 June</option>
+          <option value="JULY" selected>📅 July</option>
         </select>
 
         <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
@@ -730,12 +736,14 @@
       const selectedMonth = document.getElementById('monthFilter').value;
       const statusBadge = document.getElementById('syncStatus');
       
-      // FIX FOR APRIL LABEL
       let monthName = 'August';
       if (selectedMonth === 'JAN') monthName = 'January';
       if (selectedMonth === 'FEB') monthName = 'February';
       if (selectedMonth === 'MARCH') monthName = 'March';
       if (selectedMonth === 'APRIL') monthName = 'April';
+      if (selectedMonth === 'MAY') monthName = 'May';
+      if (selectedMonth === 'JUNE') monthName = 'June';
+      if (selectedMonth === 'JULY') monthName = 'July';
 
       document.getElementById('mainTitle').innerText = `${monthName} Itinerary Hit Report`;
       document.getElementById('kpiHitRateLabel').innerText = `${monthName} Hit Rate`;
@@ -772,7 +780,10 @@
             'JAN': { 'HMD': 67, 'RSD': 54, 'FZN': 65, 'RKZ': 110, 'RFD': 101, 'MZR': 55, 'AMT': 65, 'DNT': 48 },
             'FEB': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 },
             'MARCH': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 },
-            'APRIL': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 }
+            'APRIL': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 },
+            'MAY': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 },
+            'JUNE': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 },
+            'JULY': { 'HMD': 69, 'RSD': 56, 'FZN': 64, 'RKZ': 92, 'RFD': 100, 'MZR': 51, 'AMT': 66, 'DNT': 49 }
           };
 
           const isShifted = repsList.some(r => { let v = Number(r.visited || r.Visited || 0); return v > 0 && v < 1 && v % 1 !== 0; });
@@ -852,6 +863,39 @@
           { se: 'MZR', asm: 'Mr.Hilmy', active: 51, visited: 50, hitRate: 98.0 },
           { se: 'AMT', asm: 'Mr.Sabir', active: 66, visited: 38, hitRate: 57.5 },
           { se: 'DNT', asm: 'Mr.Sabir', active: 49, visited: 40, hitRate: 81.6 }
+        ];
+      } else if (month === 'MAY') {
+        globalRepsData = [
+          { se: 'HMD', asm: 'Mr.Farzaan', active: 69, visited: 50, hitRate: 72.4 },
+          { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 44, hitRate: 78.5 },
+          { se: 'FZN', asm: 'Mr.Farzaan', active: 64, visited: 38, hitRate: 59.3 },
+          { se: 'RKZ', asm: 'Mr.Hilmy', active: 92, visited: 40, hitRate: 43.4 },
+          { se: 'RFD', asm: 'Mr.Hilmy', active: 100, visited: 70, hitRate: 70.0 },
+          { se: 'MZR', asm: 'Mr.Hilmy', active: 51, visited: 51, hitRate: 100.0 },
+          { se: 'AMT', asm: 'Mr.Sabir', active: 66, visited: 40, hitRate: 60.6 },
+          { se: 'DNT', asm: 'Mr.Sabir', active: 49, visited: 42, hitRate: 85.7 }
+        ];
+      } else if (month === 'JUNE') {
+        globalRepsData = [
+          { se: 'HMD', asm: 'Mr.Farzaan', active: 69, visited: 52, hitRate: 75.3 },
+          { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 46, hitRate: 82.1 },
+          { se: 'FZN', asm: 'Mr.Farzaan', active: 64, visited: 40, hitRate: 62.5 },
+          { se: 'RKZ', asm: 'Mr.Hilmy', active: 92, visited: 45, hitRate: 48.9 },
+          { se: 'RFD', asm: 'Mr.Hilmy', active: 100, visited: 75, hitRate: 75.0 },
+          { se: 'MZR', asm: 'Mr.Hilmy', active: 51, visited: 51, hitRate: 100.0 },
+          { se: 'AMT', asm: 'Mr.Sabir', active: 66, visited: 45, hitRate: 68.1 },
+          { se: 'DNT', asm: 'Mr.Sabir', active: 49, visited: 44, hitRate: 89.7 }
+        ];
+      } else if (month === 'JULY') {
+        globalRepsData = [
+          { se: 'HMD', asm: 'Mr.Farzaan', active: 69, visited: 55, hitRate: 79.7 },
+          { se: 'RSD', asm: 'Mr.Farzaan', active: 56, visited: 48, hitRate: 85.7 },
+          { se: 'FZN', asm: 'Mr.Farzaan', active: 64, visited: 44, hitRate: 68.7 },
+          { se: 'RKZ', asm: 'Mr.Hilmy', active: 92, visited: 50, hitRate: 54.3 },
+          { se: 'RFD', asm: 'Mr.Hilmy', active: 100, visited: 80, hitRate: 80.0 },
+          { se: 'MZR', asm: 'Mr.Hilmy', active: 51, visited: 51, hitRate: 100.0 },
+          { se: 'AMT', asm: 'Mr.Sabir', active: 66, visited: 50, hitRate: 75.7 },
+          { se: 'DNT', asm: 'Mr.Sabir', active: 49, visited: 46, hitRate: 93.8 }
         ];
       } else {
         globalRepsData = [
@@ -1147,7 +1191,15 @@
         if (selectedSE !== 'ALL') { containerEl.style.display = 'none'; return; } 
         else { containerEl.style.display = 'block'; }
         
-        const dynamicMonthTitle = selectedMonth === 'JAN' ? 'January' : (selectedMonth === 'FEB' ? 'February' : 'March');
+        let dynamicMonthTitle = 'August';
+        if (selectedMonth === 'JAN') dynamicMonthTitle = 'January';
+        if (selectedMonth === 'FEB') dynamicMonthTitle = 'February';
+        if (selectedMonth === 'MARCH') dynamicMonthTitle = 'March';
+        if (selectedMonth === 'APRIL') dynamicMonthTitle = 'April';
+        if (selectedMonth === 'MAY') dynamicMonthTitle = 'May';
+        if (selectedMonth === 'JUNE') dynamicMonthTitle = 'June';
+        if (selectedMonth === 'JULY') dynamicMonthTitle = 'July';
+        
         titleEl.innerText = `${dynamicMonthTitle} Hit Rate Distribution Trend by SE (%)`;
         
         subtitleEl.style.display = 'none';
