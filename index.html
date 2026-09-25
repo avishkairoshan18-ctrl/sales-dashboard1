@@ -362,18 +362,18 @@
       .nav-horizontal { flex-direction: column; align-items: stretch; text-align: center; gap: 16px; margin-bottom: 12px; }
       .nav-horizontal h1 { font-size: 1.5rem; }
       
-      /* Smart Flex for Mobile Actions: Icons side-by-side */
+      /* Smart Flex for Mobile Actions: Icons side-by-side, centered */
       .nav-horizontal-actions { 
         display: flex; 
         flex-direction: row;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
-        gap: 12px; 
+        gap: 20px; 
         width: 100%; 
       }
-      .status-badge { width: 44px; height: 44px; padding: 0; justify-content: center; }
-      .theme-switch { margin: 0; transform: scale(1.1); }
-      .btn-logout { flex: 1; padding: 12px; margin: 0; }
+      .status-badge { width: 44px; height: 44px; padding: 0; justify-content: center; flex-shrink: 0; }
+      .theme-switch { margin: 0; transform: scale(1.1); flex-shrink: 0; }
+      .btn-logout { width: 44px; height: 44px; padding: 0; margin: 0; justify-content: center; flex-shrink: 0; }
       
       .nav-vertical { flex-direction: column; gap: 10px; width: 100%; }
       .select-box { width: 100%; padding: 14px; font-size: 0.95rem; }
@@ -450,8 +450,8 @@
         <button class="btn-login" style="max-width: 300px; margin-top: 8px;" onclick="enterMainDashboard()">Open Dashboard ➔</button>
       </div>
       
-      <button class="btn-logout" style="background: transparent; border: none; box-shadow: none;" onclick="handleLogout()">
-        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <button class="btn-logout" style="background: transparent; border: none; box-shadow: none; width: auto; height: auto;" onclick="handleLogout()">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
           <line x1="12" y1="2" x2="12" y2="12"></line>
         </svg>
