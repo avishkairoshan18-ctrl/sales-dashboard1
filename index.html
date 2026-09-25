@@ -442,7 +442,6 @@
         <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 800;">Select Report Period</p>
         
         <select id="welcomeMonthSelect" class="select-field" style="max-width: 300px; font-size: 1.05rem; text-align: center; border-color: var(--accent-blue); font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.1);">
-          <option value="AUG">📅 August</option>
           <option value="JAN">📅 January</option>
           <option value="FEB">📅 February</option>
           <option value="MARCH">📅 March</option>
@@ -450,6 +449,7 @@
           <option value="MAY">📅 May</option>
           <option value="JUNE">📅 June</option>
           <option value="JULY" selected>📅 July</option>
+          <option value="AUG">📅 August</option>
         </select>
         
         <button class="btn-login" style="max-width: 300px; margin-top: 8px;" onclick="enterMainDashboard()">Open Dashboard ➔</button>
@@ -509,7 +509,6 @@
       <!-- HORIZONTAL DROPDOWNS / FILTERS -->
       <div class="nav-vertical">
         <select id="monthFilter" class="select-box select-box-month" onchange="onMonthChange()">
-          <option value="AUG">📅 August</option>
           <option value="JAN">📅 January</option>
           <option value="FEB">📅 February</option>
           <option value="MARCH">📅 March</option>
@@ -517,6 +516,7 @@
           <option value="MAY">📅 May</option>
           <option value="JUNE">📅 June</option>
           <option value="JULY" selected>📅 July</option>
+          <option value="AUG">📅 August</option>
         </select>
 
         <select id="asmFilter" class="select-box" onchange="onAsmChange()"><option value="ALL">All Area Managers (ASM)</option></select>
@@ -538,7 +538,7 @@
         <div class="subtext" id="kpiRemaining" style="color: var(--accent-gold);">0 Remaining</div>
       </div>
       <div class="kpi-card glass-panel">
-        <div class="label" id="kpiHitRateLabel">August Hit Rate</div>
+        <div class="label" id="kpiHitRateLabel">Hit Rate</div>
         <div class="value val-blue" id="kpiHitRate">0.0%</div>
         <div class="subtext">Aggregated Performance</div>
       </div>
