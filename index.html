@@ -351,6 +351,41 @@
     .rank-num { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); background: var(--input-bg); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); }
 
     /* ========================================================= */
+    /* AI CHATBOT STYLES                                         */
+    /* ========================================================= */
+    .chat-fab { 
+      position: fixed; bottom: 32px; right: 32px; width: 64px; height: 64px; border-radius: 50%; 
+      background: var(--card-bg); border: 1px solid var(--border-color); display: flex; 
+      align-items: center; justify-content: center; cursor: pointer; z-index: 1000; 
+      box-shadow: 0 16px 40px var(--shadow-color); transition: transform 0.3s ease; 
+      backdrop-filter: blur(24px); 
+    }
+    .chat-fab:hover { transform: scale(1.05); border-color: var(--accent-blue); }
+    .chat-fab svg { color: var(--accent-blue); width: 28px; height: 28px; }
+
+    .chat-window { 
+      position: fixed; bottom: 110px; right: 32px; width: 380px; height: 600px; 
+      max-height: 70vh; display: none; flex-direction: column; z-index: 1000; 
+      overflow: hidden; transform-origin: bottom right; 
+      animation: liquidSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+    }
+    
+    .chat-header { padding: 20px; border-bottom: 1px solid var(--table-border); display: flex; justify-content: space-between; align-items: center; background: rgba(15, 20, 31, 0.4); }
+    .chat-header h3 { font-size: 1.05rem; color: var(--text-main); font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0;}
+    .chat-header .status-dot { width: 10px; height: 10px; background: var(--accent-green); border-radius: 50%; box-shadow: 0 0 10px var(--accent-green); }
+    
+    .chat-body { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .chat-msg { padding: 14px 18px; border-radius: 18px; font-size: 0.9rem; font-weight: 500; line-height: 1.5; max-width: 85%; word-wrap: break-word; }
+    .msg-user { background: var(--accent-blue); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2); }
+    .msg-bot { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .msg-bot strong { color: var(--accent-blue); font-weight: 800; }
+    
+    .chat-input-area { padding: 16px; border-top: 1px solid var(--table-border); display: flex; gap: 10px; background: rgba(15, 20, 31, 0.6); }
+    .chat-input-area input { flex: 1; border-radius: 12px; }
+    .btn-send { background: var(--accent-blue); border: none; border-radius: 12px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: white; flex-shrink: 0; }
+    .btn-send:hover { transform: scale(1.05); filter: brightness(1.1); box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4); }
+
+    /* ========================================================= */
     /* EXTREME MOBILE OPTIMIZATION (COMPACT UI)                  */
     /* ========================================================= */
     @media (max-width: 768px) {
@@ -397,6 +432,10 @@
       /* Table scroll optimization */
       .table-container { border: 1px solid var(--border-color); }
       .leaderboard-table th, .leaderboard-table td { padding: 12px 10px; font-size: 0.8rem; }
+
+      /* Mobile Chatbot Adjustments */
+      .chat-window { width: calc(100% - 24px); right: 12px; bottom: 100px; height: 500px;}
+      .chat-fab { bottom: 20px; right: 20px; width: 56px; height: 56px; }
     }
   </style>
 </head>
@@ -627,6 +666,35 @@
           <tbody id="leaderboardBody"></tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- NEW AI CHATBOT WIDGET (LIQUID GLASS PROTOTYPE)          -->
+  <!-- ========================================================= -->
+  <div id="chatFab" class="chat-fab glass-panel" onclick="toggleChat()" title="Open Personal Assistant">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+  </div>
+
+  <div id="chatWindow" class="chat-window glass-panel">
+    <div class="chat-header">
+      <h3><div class="status-dot"></div> SE Personal Assistant</h3>
+      <button onclick="toggleChat()" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div id="chatBody" class="chat-body">
+      <div class="chat-msg msg-bot">Ayubowan! Vanakkam! 👋 I am your Gemini-powered assistant. I can help you record incidents, check your current hit rate, or give itinerary instructions. Type a message below!</div>
+    </div>
+    
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" class="input-field" placeholder="Ask in Singlish, Tamil, or English..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+      <button class="btn-send" onclick="sendChatMessage()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
     </div>
   </div>
 
@@ -1010,7 +1078,7 @@
       if (selectedSE !== 'ALL') filtered = filtered.filter(d => d.se === selectedSE);
 
       const sorted = filtered.slice().sort((a, b) => b.hitRate - a.hitRate);
-      currentTrendSorted = filtered.slice().sort((a, b) => a.hitRate - b.hitRate);
+      currentTrendSorted = filtered.slice().sort((a, b) => b.hitRate - a.hitRate); // FIXED: Keep ranked order globally
 
       let totalActive = 0, totalVisited = 0;
       filtered.forEach(d => { totalActive += Number(d.active) || 0; totalVisited += Number(d.visited) || 0; });
@@ -1207,14 +1275,17 @@
         panelEl.style.display = 'none';
 
         const blueColor = getCssVar('--accent-blue');
+        
+        // Reverse for the chart x-axis so it plots nicely, but keeps ranking intact
+        const chartData = [...currentTrendSorted].reverse();
 
         seTrendChartInstance = new Chart(document.getElementById('seTrendChart'), {
           type: 'line',
           data: {
-            labels: currentTrendSorted.map(item => item.se),
+            labels: chartData.map(item => item.se),
             datasets: [{
               label: 'Hit Rate %',
-              data: currentTrendSorted.map(item => item.hitRate),
+              data: chartData.map(item => item.hitRate),
               borderColor: blueColor,
               backgroundColor: blueColor + '26',
               borderWidth: 4, pointRadius: 7, pointBackgroundColor: blueColor, fill: true, tension: 0.4
@@ -1229,6 +1300,117 @@
             }
           }
         });
+      }
+    }
+
+    // =========================================================
+    // AI CHATBOT LOGIC (GEMINI API) - OPTIMIZED FOR ACCURACY
+    // =========================================================
+    function toggleChat() {
+      const chat = document.getElementById('chatWindow');
+      chat.style.display = chat.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    let chatHistory = [];
+
+    async function sendChatMessage() {
+      const inputEl = document.getElementById('chatInput');
+      const message = inputEl.value.trim();
+      const apiKey = 'AIzaSyAe_Iv34Fa-MSr7cejnrKWdzTkpZHel9Ec'; 
+      
+      if (!message) return;
+
+      appendMessage(message, 'user');
+      inputEl.value = '';
+
+      // Extract Top-Level Dashboard Context
+      const activeMonth = document.getElementById('monthFilter').value;
+      const kpiActive = document.getElementById('kpiActive').innerText;
+      const kpiVisited = document.getElementById('kpiVisited').innerText;
+      const kpiHitRate = document.getElementById('kpiHitRate').innerText;
+      const loggedInAs = loggedInUser.name || 'Executive';
+      
+      // EXTRACT LIVE LEADERBOARD DATA FOR ULTIMATE ACCURACY
+      let teamDataStr = "No specific team data currently available in view.";
+      if (typeof currentTrendSorted !== 'undefined' && currentTrendSorted.length > 0) {
+        teamDataStr = currentTrendSorted.map((se, index) => 
+          `Rank ${index + 1}: ${se.se} (ASM: ${se.asm}) - Active CX: ${Math.round(se.active)}, Visited CX: ${Math.round(se.visited)}, Hit Rate: ${se.hitRate.toFixed(1)}%`
+        ).join('\n');
+      }
+      
+      const systemInstruction = `You are a highly capable AI Personal Assistant built directly into a Sales Executive Itinerary Dashboard. 
+      Your users are Sri Lankan Area Managers (ASM) and Sales Executives (SE). 
+      Communicate concisely in the user's preferred language (Singlish, Tamil/Tanglish, or English). Keep answers extremely brief, professional, and friendly. Use bold text for numbers and names.
+      
+      --- LIVE DASHBOARD METRICS ---
+      User Logged In: ${loggedInAs}
+      Viewing Month: ${activeMonth}
+      Overall Active CX Target: ${kpiActive}
+      Overall Visited CX: ${kpiVisited}
+      Overall Hit Rate: ${kpiHitRate}
+      
+      --- LIVE TEAM LEADERBOARD (Ranked highest to lowest) ---
+      ${teamDataStr}
+      
+      --- STRICT RULES FOR ACCURACY ---
+      1. Base all answers strictly on the LIVE metrics and leaderboard data provided above. 
+      2. Do not invent, guess, or hallucinate stats. If a user asks about someone not in the data, state clearly that you cannot see them in the current dashboard view.
+      3. If they report an incident or issue, acknowledge it professionally and state you have recorded it in the system notes.`;
+
+      chatHistory.push({ role: "user", parts: [{ text: message }] });
+
+      const typingId = appendMessage('Typing...', 'bot', true);
+
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemInstruction }] },
+            contents: chatHistory,
+            generationConfig: { temperature: 0.3 } // Lowered temp for strictly factual data retrieval
+          })
+        });
+
+        const data = await response.json();
+        
+        if(data.error) throw new Error(data.error.message);
+
+        const botReply = data.candidates[0].content.parts[0].text;
+        chatHistory.push({ role: "model", parts: [{ text: botReply }] });
+        
+        updateMessage(typingId, botReply);
+
+      } catch (error) {
+        console.error(error);
+        updateMessage(typingId, "Sorry machan, I hit an error: " + error.message);
+        chatHistory.pop(); 
+      }
+    }
+
+    function appendMessage(text, sender, isTyping = false) {
+      const body = document.getElementById('chatBody');
+      const msgDiv = document.createElement('div');
+      const id = 'msg-' + Date.now();
+      msgDiv.id = id;
+      msgDiv.className = `chat-msg msg-${sender}`;
+      msgDiv.innerText = text;
+      if (isTyping) msgDiv.style.opacity = '0.5';
+      body.appendChild(msgDiv);
+      body.scrollTop = body.scrollHeight;
+      return id;
+    }
+
+    function updateMessage(id, text) {
+      const msgDiv = document.getElementById(id);
+      if(msgDiv) {
+        // Upgrade text formatter to handle bolding AND line breaks
+        let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        formattedText = formattedText.replace(/\n/g, '<br>');
+        
+        msgDiv.innerHTML = formattedText;
+        msgDiv.style.opacity = '1';
+        document.getElementById('chatBody').scrollTop = document.getElementById('chatBody').scrollHeight;
       }
     }
   </script>
