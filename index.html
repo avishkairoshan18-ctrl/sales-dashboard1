@@ -1369,6 +1369,7 @@
     let chatMemSE = null;
     let chatMemMonth = null;
     let chatMemLang = 'en';
+    let messageCounter = 0; // NEW: Guaranteed unique ID for every single message
 
     // STRICT LANGUAGE CLASSIFIER - NEVER MIX TAMIL AND SINHALA
     function detectChatLanguage(message) {
@@ -1669,8 +1670,8 @@
       const body = document.getElementById('chatBody');
       const msgDiv = document.createElement('div');
       
-      // Fixed: Adding random string to prevent ID collisions if executed in the exact same millisecond
-      const id = 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 10000); 
+      messageCounter++;
+      const id = 'msg-' + Date.now() + '-' + messageCounter; 
       msgDiv.id = id;
       
       msgDiv.className = `chat-msg msg-${sender}`;
