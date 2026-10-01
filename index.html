@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sales Executive Itinerary Dashboard</title>
   
+  <!-- SECURITY & DATA PROTECTION HEADERS -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://generativelanguage.googleapis.com; img-src 'self' data:;">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="no-referrer">
+
   <!-- Modern Fonts (Inter & JetBrains Mono) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -722,11 +727,22 @@
   <!-- 4. CONTROLLER & DATA LOGIC (100% UNTOUCHED LOGIC)    -->
   <!-- ==================================================== -->
   <script>
+    // =========================================================
+    // SECURITY & DATA PROTECTION PROTOCOLS
+    // =========================================================
+    if (window.top !== window.self) window.top.location = window.self.location; // Frame Busting
+    document.addEventListener('contextmenu', e => e.preventDefault()); // Disable Right-Click
+    document.addEventListener('dragstart', e => e.preventDefault()); // Disable Dragging
+    document.addEventListener('selectstart', e => { if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }); // Protect Data Selection
+    document.addEventListener('keydown', e => { 
+      if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) e.preventDefault(); 
+    }); // Disable F12 & Source Inspection
+
     Chart.register(ChartDataLabels);
 
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0I6d1W6zyUGhoLJoH0Vs-ZhYbHvK3uHqsf1nMISt-lfjUg4LSKPaSYhcEoG2PrKU/exec';
 
-    const ROLE_PASSWORDS = { 'ADMIN': 'admin123', 'ASM': 'asm123', 'SE': 'se123' };
+    const ROLE_PASSWORDS = { 'ADMIN': 'YWRtaW4xMjM=', 'ASM': 'YXNtMTIz', 'SE': 'c2UxMjM=' }; // Base64 encoded 'admin123', 'asm123', 'se123'
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 'RSD': 'Mr.Farzaan', 'FZN': 'Mr.Farzaan',
@@ -818,7 +834,7 @@
       const username = document.getElementById('username').value.trim().toUpperCase();
       const password = document.getElementById('password').value;
 
-      if (password !== ROLE_PASSWORDS[role]) { alert("Incorrect password for the " + role + " role! Please try again."); return; }
+      if (btoa(password) !== ROLE_PASSWORDS[role]) { alert("Incorrect password for the " + role + " role! Please try again."); return; }
       if (role === 'SE' && !asmMapping[username]) { alert("Invalid SE Code! Please enter a recognized code (e.g., HMD, AMT, etc.)."); return; }
       if (role === 'SE' && username === 'EH') { alert("EH is an overall team aggregate, not a valid user code."); return; }
 
@@ -1555,7 +1571,8 @@
 
     async function sendChatMessage() {
       const inputEl = document.getElementById('chatInput');
-      const message = inputEl.value.trim();
+      // Protect from XSS via chat input by replacing basic tags immediately
+      const message = inputEl.value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
       
       const apiKey = 'PASTE_YOUR_NEW_API_KEY_HERE'; 
       
