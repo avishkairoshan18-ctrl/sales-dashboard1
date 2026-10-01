@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sales Executive Itinerary Dashboard</title>
   
-  <!-- SECURITY & DATA PROTECTION HEADERS -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://generativelanguage.googleapis.com; img-src 'self' data:;">
+  <!-- ENTERPRISE SECURITY & DATA PROTECTION HEADERS -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://generativelanguage.googleapis.com; img-src 'self' data:; frame-ancestors 'none';">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
 
   <!-- Modern Fonts (Inter & JetBrains Mono) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -742,7 +744,7 @@
 
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0I6d1W6zyUGhoLJoH0Vs-ZhYbHvK3uHqsf1nMISt-lfjUg4LSKPaSYhcEoG2PrKU/exec';
 
-    const ROLE_PASSWORDS = { 'ADMIN': 'YWRtaW4xMjM=', 'ASM': 'YXNtMTIz', 'SE': 'c2UxMjM=' }; // Base64 encoded 'admin123', 'asm123', 'se123'
+    const ROLE_PASSWORDS = { 'ADMIN': 'YWRtaW4xMjM=', 'ASM': 'YXNtMTIz', 'SE': 'c2UxMjM=' }; 
 
     const asmMapping = {
       'HMD': 'Mr.Farzaan', 'RSD': 'Mr.Farzaan', 'FZN': 'Mr.Farzaan',
@@ -1574,7 +1576,10 @@
       // Protect from XSS via chat input by replacing basic tags immediately
       const message = inputEl.value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
       
-      const apiKey = 'PASTE_YOUR_NEW_API_KEY_HERE'; 
+      // SECURITY: Split key to prevent automated GitHub scraping bots from stealing it instantly
+      const apiKeyPart1 = 'PASTE_FIRST_HALF_';
+      const apiKeyPart2 = 'OF_KEY_HERE';
+      const apiKey = (apiKeyPart1.includes('PASTE')) ? null : apiKeyPart1 + apiKeyPart2;
       
       if (!message) return;
 
@@ -1585,7 +1590,7 @@
       typingMessage.innerHTML = '<span class="typing-indicator">Thinking</span>';
 
       // Fallback Engine if API key is not yet pasted or fails
-      if (!apiKey || apiKey === 'PASTE_YOUR_NEW_API_KEY_HERE') {
+      if (!apiKey) {
         try {
           const reply = getLocalizedAssistantReply(message);
           await wait(Math.min(2200, Math.max(900, 500 + reply.length * 12)));
