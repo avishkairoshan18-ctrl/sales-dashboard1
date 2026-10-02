@@ -865,11 +865,25 @@
     }
 
     function handleLogout() {
+      // 1. Hide dashboard and show login screen
       document.getElementById('dashboardContent').style.display = 'none';
       document.getElementById('welcomeScreen').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'block';
+      
+      // 2. Clear credentials
       document.getElementById('username').value = '';
       document.getElementById('password').value = '';
+
+      // 3. SECURE LOGOUT: Wipe AI memory and chat interface
+      chatHistory = []; 
+      chatMemSE = null;
+      chatMemMonth = null;
+      chatMemLang = 'en';
+      
+      document.getElementById('chatWindow').style.display = 'none'; // Close the chat widget
+      
+      // 4. Reset the chat screen back to the default greeting
+      document.getElementById('chatBody').innerHTML = '<div class="chat-msg msg-bot">Hello! 👋 I am your dashboard assistant. Ask me anything about customer visits, rankings, or monthly hit rates. How can I help you today?</div>';
     }
 
     async function loadData() {
