@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="app-version" content="1.0">
   <title>Sales Executive Itinerary Dashboard</title>
   
   <!-- ENTERPRISE SECURITY & DATA PROTECTION HEADERS -->
@@ -732,6 +733,9 @@
     // =========================================================
     // SECURITY & DATA PROTECTION PROTOCOLS
     // =========================================================
+    const APP_VERSION = '1.0'; 
+    console.log(`Sales Executive Itinerary Dashboard - Version ${APP_VERSION} Live`);
+    
     if (window.top !== window.self) window.top.location = window.self.location; // Frame Busting
     document.addEventListener('contextmenu', e => e.preventDefault()); // Disable Right-Click
     document.addEventListener('dragstart', e => e.preventDefault()); // Disable Dragging
@@ -1577,8 +1581,8 @@
       const message = inputEl.value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
       
       // SECURITY: Split key to prevent automated GitHub scraping bots from stealing it instantly
-      const apiKeyPart1 = 'PASTE_FIRST_HALF_';
-      const apiKeyPart2 = 'OF_KEY_HERE';
+      const apiKeyPart1 = 'AIzaSyAxUtHUJaKyZuU2k5';
+      const apiKeyPart2 = 'NBejC5ijpjsARxj-U';
       const apiKey = (apiKeyPart1.includes('PASTE')) ? null : apiKeyPart1 + apiKeyPart2;
       
       if (!message) return;
